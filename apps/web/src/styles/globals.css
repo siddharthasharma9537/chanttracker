@@ -27,10 +27,6 @@ html.theme-midnight {
   @apply bg-midnight-50 text-midnight-900;
 }
 
-html.theme-dawn {
-  @apply bg-dawn-50 text-dawn-900;
-}
-
 /* Legacy class names for backwards compatibility */
 html.temple {
   @apply bg-temple-50 text-temple-900;
@@ -38,8 +34,4 @@ html.temple {
 
 html.midnight {
   @apply bg-midnight-50 text-midnight-900;
-}
-
-html.dawn {
-  @apply bg-dawn-50 text-dawn-900;
 }
