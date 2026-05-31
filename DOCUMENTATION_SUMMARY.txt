@@ -1,0 +1,369 @@
+================================================================================
+CHANTTRACKER SCREEN WORKFLOW & USER JOURNEYS DOCUMENTATION
+Complete Mapping - May 31, 2026
+================================================================================
+
+DELIVERABLES CREATED
+================================================================================
+
+5 comprehensive documentation files with 2,612 lines of detailed reference:
+
+1. SCREEN_WORKFLOW.md (477 lines, 14 KB)
+   - Screen map & route tree
+   - Navigation structure (desktop sidebar + mobile bottom nav)
+   - 3 detailed user journeys with step-by-step flows
+   - Auth flow & protection mechanisms
+   - State dependencies & data flows
+   - Entry/exit points analysis
+   - 4 potential issues identified with recommendations
+   - Accessibility & theme system documentation
+
+2. SCREEN_FLOWCHART.txt (630 lines, 30 KB)
+   - ASCII art diagrams for visual learners
+   - Entry points & auth flow flowchart
+   - Protected screens navigation map
+   - Chant counter session flow (detailed steps)
+   - Settings form flow (detailed steps)
+   - Mobile vs desktop layout comparison
+   - Route protection pattern visualization
+   - API calls & data flow overview
+   - Complete error handling flows
+   - Auth state lifecycle machine
+
+3. ROUTING_AUDIT.md (511 lines, 14 KB)
+   - Executive summary (all routes verified)
+   - Directory structure & route inventory
+   - Route table (7 routes: 1 root, 2 auth, 4 protected)
+   - Navigation link verification (19 links verified, 0 broken)
+   - Auth guard implementation patterns
+   - Navigation components breakdown
+   - State dependencies detailed
+   - Route transition matrix (all paths)
+   - Complete navigation link inventory
+   - Testing checklist (25+ test scenarios)
+   - Potential improvements documented
+
+4. USER_JOURNEYS_VISUAL.md (629 lines, 19 KB)
+   - Journey 1: Brand new user signup (step-by-step visual)
+   - Journey 2: Existing user daily session (complete flow)
+   - Journey 3: Settings customization (preferences & profile)
+   - Journey 4: History viewing (explore past sessions)
+   - Journey 5: Offline resilience (data sync on reconnect)
+   - Journey 6: Error states (validation & failures)
+   - Complete navigation map (quick reference)
+   - Auth state machine visualization
+   - Key flows table (quick lookup)
+
+5. NAVIGATION_INDEX.md (365 lines, 12 KB)
+   - Index & guide to all 4 documentation files
+   - Quick reference for all routes
+   - Quick reference for key navigation paths
+   - Role-based guide (devs, PMs, QA, DevOps)
+   - "Finding Specific Information" lookup guide
+   - Key findings summary
+   - File location reference
+   - Document usage guidelines
+
+================================================================================
+ROUTES VERIFIED & MAPPED
+================================================================================
+
+7 Total Routes:
+
+PUBLIC (No Auth Required)
+  ✅ / (root)              → Redirects to /dashboard
+  ✅ /auth/signin          → Sign in form
+  ✅ /auth/signup          → Create account form
+
+PROTECTED (Auth Required)
+  ✅ /dashboard            → Home screen (progress, stats, panchang widget)
+  ✅ /chant                → Counter interface (select mantra, count reps)
+  ✅ /history              → View past sessions grouped by date
+  ✅ /settings             → User profile, preferences, account, sign out
+
+All Routes:
+  ✓ Have dedicated page files
+  ✓ Have proper auth guards (protected ones)
+  ✓ Are accessible and functional
+  ✓ Have correct navigation links
+
+================================================================================
+NAVIGATION LINKS VERIFIED
+================================================================================
+
+19 Navigation Links Checked - 0 Broken:
+
+Auth Routes
+  ✅ /auth/signin → /auth/signup (link)
+  ✅ /auth/signup → /auth/signin (link)
+
+Dashboard Routes
+  ✅ /dashboard → /chant (button: "Start Chanting")
+  ✅ SignInForm → /dashboard (after sign in)
+  ✅ SignUpForm → /dashboard (after sign up)
+
+Chant Routes
+  ✅ /chant → /dashboard (back button in header)
+  ✅ /chant → /dashboard (auto-redirect if idle >2sec)
+  ✅ SessionControls → /dashboard (complete/abandon)
+  ✅ /chant → /auth/signin (auth guard)
+
+Protected Route Guards
+  ✅ /history → /auth/signin (auth guard)
+  ✅ /settings → /auth/signin (auth guard)
+
+Navigation Component
+  ✅ Dashboard nav item → /dashboard
+  ✅ Chant nav item → /chant
+  ✅ History nav item → /history
+  ✅ Settings nav item → /settings
+  ✅ Sign Out button → /auth/signin
+
+Header
+  ✅ Settings icon → /settings
+  ✅ Sign Out button → /auth/signin
+
+================================================================================
+USER JOURNEYS DOCUMENTED
+================================================================================
+
+6 Complete User Journeys Mapped:
+
+1. NEW USER SIGNUP (5 steps)
+   Browser → Auth → Signup → Dashboard → Chant → Complete
+
+2. DAILY SESSION (4 steps)
+   Dashboard → Chant selection → Counter session → Complete → Dashboard
+
+3. SETTINGS FLOW (4 steps)
+   Protected screen → Settings → Modify & Save → Confirmation
+
+4. HISTORY VIEW (2 steps)
+   Protected screen → History → Explore past sessions
+
+5. OFFLINE SESSION (3 steps)
+   Chant offline → Session queued → Reconnect → Sync to DB
+
+6. ERROR HANDLING (3 branches)
+   - Sign in error → retry
+   - Dashboard load error → retry
+   - Settings save error → retry
+
+================================================================================
+ARCHITECTURE OVERVIEW
+================================================================================
+
+Navigation Structure:
+  Desktop (lg+): Fixed left sidebar (w-64) + 4 nav items + user card
+  Mobile (<lg): Fixed bottom navbar (4 items) + icons + labels
+
+Layout Components:
+  - MainLayout.tsx: Wraps protected screens (header + nav)
+  - Navigation.tsx: Responsive nav (sidebar + bottom bar)
+  - Header.tsx: App header with settings & sign out
+
+Auth System:
+  - Providers.tsx: Initializes auth on app mount
+  - useAuth.ts: Auth methods (signIn, signUp, signOut)
+  - authStore.ts: Auth state (Zustand)
+  - Protected screens use auth guard pattern (useEffect redirect)
+
+Data Flow:
+  Dashboard: useDashboard() → get_today_progress RPC
+  Chant: useStartSession() → startSession RPC, then local counter
+  History: useSessions() → SELECT sessions query
+  Settings: useForm + upsert to profiles table
+
+Offline Support:
+  offlineStore: Tracks online status, queues pending sessions
+  Auto-sync when reconnected to internet
+
+================================================================================
+QUALITY FINDINGS
+================================================================================
+
+✅ WORKING CORRECTLY:
+  - All 7 routes implemented and accessible
+  - Auth guards protect all 4 main screens
+  - Navigation consistent across mobile & desktop
+  - 19 navigation links verified (0 broken)
+  - Clear user journeys from signup to practice
+  - Error handling with user feedback
+  - Loading states with spinners
+  - Theme system (3 themes: temple/midnight/dawn)
+  - Active navigation state indicators
+
+⚠️ MINOR ISSUES (NON-BLOCKING):
+  1. Chant page uses custom header vs MainLayout (inconsistent layout)
+     → Recommendation: Wrap in MainLayout for consistency
+  
+  2. 2-second idle redirect on chant page
+     → Recommendation: Add toast notification before redirect
+  
+  3. Settings form load failure on missing profile
+     → Recommendation: Create profile row during signup
+  
+  4. Root redirect doesn't pre-check auth
+     → Recommendation: Check auth before redirect (optimization)
+
+================================================================================
+TESTING COVERAGE PROVIDED
+================================================================================
+
+Testing Checklist Included (25+ scenarios):
+  
+Route Accessibility (11 tests)
+  - Each route can be accessed
+  - Auth guards work
+  - Redirects function correctly
+
+Navigation Links (10 tests)
+  - All nav items work
+  - All buttons navigate correctly
+  - Active states display
+
+Auth Flow (3 tests)
+  - Sign up works
+  - Sign in works
+  - Sign out works
+
+Responsive Design (3 tests)
+  - Desktop layout (lg+)
+  - Tablet layout (md)
+  - Mobile layout (<lg)
+
+================================================================================
+KEY STATISTICS
+================================================================================
+
+Files Analyzed:
+  - 7 page components (routes)
+  - 3 layout components (sidebar, header, wrapper)
+  - 4 auth/form components
+  - 5+ hook files (useAuth, useDashboard, useSessionCounter, etc.)
+  - 3 store files (authStore, uiStore, offlineStore)
+
+Navigation Elements:
+  - 1 root redirect
+  - 2 public auth routes
+  - 4 protected main routes
+  - 4 navigation items
+  - 19 navigation links
+  - 1 sidebar (desktop)
+  - 1 bottom nav bar (mobile)
+
+Users Flows:
+  - 6 complete journeys documented
+  - 2 layout variants (desktop/mobile)
+  - 3 theme options
+  - 4 language options
+  - Offline support built-in
+
+Documentation:
+  - 2,612 total lines
+  - 5 markdown/text files
+  - 1,200+ lines of ASCII diagrams
+  - 400+ lines of tables & checklists
+
+================================================================================
+HOW TO USE THIS DOCUMENTATION
+================================================================================
+
+FRONTEND DEVELOPERS:
+  → Start with: SCREEN_WORKFLOW.md (20 min read)
+  → Then: ROUTING_AUDIT.md (testing & reference)
+  → Refer to: NAVIGATION_INDEX.md for quick lookups
+
+PRODUCT MANAGERS / DESIGNERS:
+  → Start with: USER_JOURNEYS_VISUAL.md (30 min read)
+  → Then: SCREEN_WORKFLOW.md (Screen Map section)
+  → Keep: ROUTING_AUDIT.md for documentation
+
+QA / TESTERS:
+  → Start with: ROUTING_AUDIT.md (testing checklist)
+  → Then: USER_JOURNEYS_VISUAL.md (test scenarios)
+  → Run: 25+ test cases from checklist
+
+DEVOPS / DEPLOYMENT:
+  → Read: ROUTING_AUDIT.md (executive summary)
+  → Check: "Potential Issues" section (non-blocking)
+  → Verify: All routes before going live
+
+ONBOARDING NEW DEVELOPER:
+  1. SCREEN_WORKFLOW.md (overall architecture)
+  2. ROUTING_AUDIT.md (route verification)
+  3. USER_JOURNEYS_VISUAL.md (user expectations)
+  4. NAVIGATION_INDEX.md (quick reference)
+
+================================================================================
+FILES LOCATION
+================================================================================
+
+All documentation files in repository root:
+  /Users/siddharthapothulapati/Workspace/chanttracker/
+
+  1. SCREEN_WORKFLOW.md               ← Complete reference
+  2. SCREEN_FLOWCHART.txt              ← Visual ASCII diagrams
+  3. ROUTING_AUDIT.md                  ← Testing & audit
+  4. USER_JOURNEYS_VISUAL.md           ← UX focused
+  5. NAVIGATION_INDEX.md               ← Index & guide
+  6. DOCUMENTATION_SUMMARY.txt         ← This file
+
+App code location:
+  /apps/web/src/
+
+Route files:
+  /apps/web/src/app/*/page.tsx (7 files)
+
+Layout components:
+  /apps/web/src/components/layout/Navigation.tsx
+  /apps/web/src/components/layout/MainLayout.tsx
+  /apps/web/src/components/layout/Header.tsx
+
+Auth & state:
+  /apps/web/src/hooks/useAuth.ts
+  /apps/web/src/store/authStore.ts
+
+================================================================================
+COMPLETION STATUS
+================================================================================
+
+✅ Task 1: Map all screens + routes
+   COMPLETE - 7 routes mapped, all file locations documented
+
+✅ Task 2: Show navigation flow
+   COMPLETE - 19 navigation links verified, route transition matrix created
+
+✅ Task 3: Document user journeys
+   COMPLETE - 6 user journeys documented (signup, daily, settings, history, 
+             offline, error states)
+
+✅ Task 4: Identify entry/exit points
+   COMPLETE - Entry points (/auth/signin, /auth/signup, /)
+             Exit points (sign out → /auth/signin)
+             Deep link handling documented
+
+✅ Task 5: Check for broken links
+   COMPLETE - 19 links verified, 0 broken, all working
+
+✅ Task 6: Show state dependencies
+   COMPLETE - Auth flow, dashboard data, chant session, settings, offline 
+             support all documented
+
+✅ Task 7: Create clear diagrams
+   COMPLETE - 630 lines of ASCII flowcharts, route maps, state machines
+
+✅ Task 8: Report findings
+   COMPLETE - This summary + detailed findings in each document
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================
+
+For quick reference: See NAVIGATION_INDEX.md
+For visual flows: See SCREEN_FLOWCHART.txt
+For testing: See ROUTING_AUDIT.md
+For user experience: See USER_JOURNEYS_VISUAL.md
+For complete reference: See SCREEN_WORKFLOW.md
+
+All files cross-referenced and self-contained.

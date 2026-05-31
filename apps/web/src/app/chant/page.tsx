@@ -50,31 +50,19 @@ export default function ChantPage() {
     }
   }, [isSignedIn, authLoading, router])
 
-  // Redirect to dashboard if idle and no active session
+  // Redirect to dashboard if idle after completing/abandoning a session
   useEffect(() => {
     if (
-      counterState.state === 'idle' &&
-      !selectedMantra &&
-      !authLoading &&
-      !isStarting
+      (counterState.state === 'completed' ||
+        counterState.state === 'abandoned') &&
+      !authLoading
     ) {
       const timer = setTimeout(() => {
-        if (
-          counterState.state === 'idle' &&
-          !selectedMantra
-        ) {
-          router.push('/dashboard')
-        }
-      }, 2000)
+        router.push('/dashboard')
+      }, 1000)
       return () => clearTimeout(timer)
     }
-  }, [
-    counterState.state,
-    selectedMantra,
-    authLoading,
-    isStarting,
-    router,
-  ])
+  }, [counterState.state, authLoading, router])
 
   const handleSelectMantra = async (mantraId: string, mantra: SelectedMantra) => {
     setSelectedMantra(mantra)
@@ -82,6 +70,9 @@ export default function ChantPage() {
 
     try {
       const session = await startSessionMutation.mutateAsync(mantraId)
+      if (!session?.id) {
+        throw new Error('Session creation failed: no session ID returned')
+      }
       start(session.id, mantraId, 108)
 
       // If offline, add to pending queue

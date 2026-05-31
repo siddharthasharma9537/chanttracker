@@ -81,7 +81,7 @@ export function MantrasDropdown({ onSelect, isLoading }: MantrasDropdownProps) {
     }
 
     fetchMantras()
-  }, [supabase])
+  }, [])
 
   const handleSelect = (mantra: Mantra) => {
     setSelectedMantra(mantra)

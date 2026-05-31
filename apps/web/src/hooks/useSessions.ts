@@ -67,6 +67,7 @@ export function useCompleteSession() {
 
 export function useStartSession() {
   const supabase = createClient()
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (mantraId: string) => {
@@ -84,6 +85,10 @@ export function useStartSession() {
 
       if (error) throw error
       return data
+    },
+    onSuccess: () => {
+      // Invalidate sessions query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
     },
   })
 }

@@ -104,6 +104,7 @@ export function useSessionCounter() {
   const reset = useCallback(() => {
     if (timerInterval) clearInterval(timerInterval)
     setState(initialState)
+    setTimerInterval(null)
   }, [timerInterval])
 
   return {
