@@ -9,5 +9,18 @@
       "Glob",
       "Grep"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/siddharthapothulapati/Workspace/chanttracker"
+          }
+        ]
+      }
+    ]
   }
 }

@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Sanskrit&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  @apply scroll-smooth;
+}
+
+body {
+  @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-50;
+}
+
+/* Theme colors */
+html.theme-temple {
+  @apply bg-temple-50 text-temple-900;
+}
+
+html.theme-midnight {
+  @apply bg-midnight-50 text-midnight-900;
+}
+
+html.theme-dawn {
+  @apply bg-dawn-50 text-dawn-900;
+}
+
+/* Legacy class names for backwards compatibility */
+html.temple {
+  @apply bg-temple-50 text-temple-900;
+}
+
+html.midnight {
+  @apply bg-midnight-50 text-midnight-900;
+}
+
+html.dawn {
+  @apply bg-dawn-50 text-dawn-900;
+}
