@@ -2,6 +2,9 @@ import type { Metadata } from 'next'
 import { Providers } from '@/providers/Providers'
 import '@/styles/globals.css'
 
+// Prevent static generation - app needs runtime env vars
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'ChantTracker',
   description: 'Hindu chant and japa tracking',
