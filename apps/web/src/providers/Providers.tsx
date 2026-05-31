@@ -21,8 +21,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     async function getSession() {
       try {
         const { data, error } = await supabase.auth.getUser()
-        if (error) throw error
-        setUser(data.user)
+        if (error && error.name !== 'AuthSessionMissingError') {
+          console.error('Auth init error:', error)
+        }
+        setUser(data?.user ?? null)
       } catch (err) {
         console.error('Auth init error:', err)
         setUser(null)

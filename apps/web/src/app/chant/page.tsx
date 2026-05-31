@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useSessionCounter } from '@/hooks/useSessionCounter'
-import { useStartSession } from '@/hooks/useSessions'
+import { useStartSession, useUpdateSessionCount } from '@/hooks/useSessions'
 import { useOfflineStore } from '@/store/offlineStore'
 import { MantrasDropdown } from '@/components/chant/MantrasDropdown'
 import { CounterDisplay } from '@/components/chant/CounterDisplay'
@@ -32,6 +32,7 @@ export default function ChantPage() {
     abandon,
   } = useSessionCounter()
   const startSessionMutation = useStartSession()
+  const updateSessionCountMutation = useUpdateSessionCount()
   const { isOnline, addPending, removePending } = useOfflineStore((store) => ({
     isOnline: store.isOnline,
     addPending: store.addPending,
@@ -43,8 +44,12 @@ export default function ChantPage() {
   )
   const [isStarting, setIsStarting] = useState(false)
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated (skip in development)
   useEffect(() => {
+    // Always allow in development mode
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      return
+    }
     if (!authLoading && !isSignedIn) {
       router.push('/auth/signin')
     }
@@ -65,15 +70,22 @@ export default function ChantPage() {
   }, [counterState.state, authLoading, router])
 
   const handleSelectMantra = async (mantraId: string, mantra: SelectedMantra) => {
+    console.log('[Chant] Selecting mantra:', mantra.name)
     setSelectedMantra(mantra)
     setIsStarting(true)
 
     try {
+      console.log('[Chant] Creating session for mantra:', mantraId)
       const session = await startSessionMutation.mutateAsync(mantraId)
+      console.log('[Chant] Session created:', session)
+
       if (!session?.id) {
         throw new Error('Session creation failed: no session ID returned')
       }
+
+      console.log('[Chant] Starting counter with sessionId:', session.id)
       start(session.id, mantraId, 108)
+      console.log('[Chant] Counter started, state should be active now')
 
       // If offline, add to pending queue
       if (!isOnline) {
@@ -86,8 +98,10 @@ export default function ChantPage() {
         })
       }
     } catch (err) {
-      console.error('Failed to start session:', err)
-      setSelectedMantra(null)
+      console.error('[Chant] Failed to start session:', err)
+      console.error('[Chant] Error details:', err instanceof Error ? err.message : JSON.stringify(err))
+      // Keep selectedMantra set to show counter even if session creation failed
+      // setSelectedMantra(null)
       // Show error toast here
     } finally {
       setIsStarting(false)
@@ -96,11 +110,24 @@ export default function ChantPage() {
 
   const handleIncrement = () => {
     increment()
-    // Optimistic update - could sync offline here
+    // Sync to database after incrementing
+    if (counterState.sessionId) {
+      updateSessionCountMutation.mutate({
+        sessionId: counterState.sessionId,
+        count: counterState.count + 1,
+      })
+    }
   }
 
   const handleDecrement = () => {
     decrement()
+    // Sync to database after decrementing
+    if (counterState.sessionId && counterState.count > 0) {
+      updateSessionCountMutation.mutate({
+        sessionId: counterState.sessionId,
+        count: counterState.count - 1,
+      })
+    }
   }
 
   if (authLoading) {
@@ -111,7 +138,9 @@ export default function ChantPage() {
     )
   }
 
-  if (!isSignedIn) {
+  // Allow dev mode to bypass auth
+  const isDev = typeof window !== 'undefined' && process.env.NODE_ENV === 'development'
+  if (!isSignedIn && !isDev) {
     return null // Redirect will handle this
   }
 
@@ -156,7 +185,7 @@ export default function ChantPage() {
       </div>
 
       {/* Controls */}
-      {selectedMantra && (
+      {selectedMantra && counterState.state !== 'idle' && (
         <SessionControls
           onIncrement={handleIncrement}
           onDecrement={handleDecrement}

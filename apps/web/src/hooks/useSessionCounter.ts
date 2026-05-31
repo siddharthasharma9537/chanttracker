@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 
 type SessionState = 'idle' | 'active' | 'paused' | 'completed' | 'abandoned'
 
@@ -26,19 +26,20 @@ const initialState: SessionCounterState = {
 
 export function useSessionCounter() {
   const [state, setState] = useState<SessionCounterState>(initialState)
-  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null)
+  const timerInterval = useRef<NodeJS.Timeout | null>(null)
 
   // Timer for duration tracking
   useEffect(() => {
-    if (state.state === 'active' && state.startTime) {
-      const interval = setInterval(() => {
+    if (state.state === 'active' && state.startTime && !timerInterval.current) {
+      timerInterval.current = setInterval(() => {
         setState((prev) => ({
           ...prev,
           durationSecs: Math.floor((Date.now() - prev.startTime!) / 1000),
         }))
       }, 1000)
-      setTimerInterval(interval)
-      return () => clearInterval(interval)
+    } else if (state.state !== 'active' && timerInterval.current) {
+      clearInterval(timerInterval.current)
+      timerInterval.current = null
     }
   }, [state.state, state.startTime])
 
@@ -102,10 +103,10 @@ export function useSessionCounter() {
   }, [])
 
   const reset = useCallback(() => {
-    if (timerInterval) clearInterval(timerInterval)
+    if (timerInterval.current) clearInterval(timerInterval.current)
+    timerInterval.current = null
     setState(initialState)
-    setTimerInterval(null)
-  }, [timerInterval])
+  }, [])
 
   return {
     state,

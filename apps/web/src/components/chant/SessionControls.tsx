@@ -87,7 +87,7 @@ export function SessionControls({
         {/* Increment button */}
         <button
           onClick={onIncrement}
-          disabled={!isActive || isLoading}
+          disabled={!isActive || isLoading || isIdle}
           className="w-32 h-32 rounded-full bg-gradient-to-br from-temple-500 to-temple-600 hover:from-temple-600 hover:to-temple-700 disabled:from-gray-400 disabled:to-gray-500 text-white shadow-lg hover:shadow-xl transition-all active:scale-95 flex items-center justify-center"
         >
           <Plus className="w-16 h-16" />

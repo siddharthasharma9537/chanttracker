@@ -53,12 +53,12 @@ export function MantrasDropdown({ onSelect, isLoading }: MantrasDropdownProps) {
   const [mantras, setMantras] = useState<Mantra[]>(DEMO_MANTRAS)
   const [isOpen, setIsOpen] = useState(false)
   const [selectedMantra, setSelectedMantra] = useState<Mantra | null>(null)
-  const [isLoadingMantras, setIsLoadingMantras] = useState(isLoading ?? false)
-  const supabase = createClient()
+  const [isLoadingMantras, setIsLoadingMantras] = useState(false)
 
   useEffect(() => {
     // Try to fetch today's mantras via RPC
     const fetchMantras = async () => {
+      const supabase = createClient()
       try {
         setIsLoadingMantras(true)
         const { data, error } = await (supabase.rpc as any)('get_panchang', {

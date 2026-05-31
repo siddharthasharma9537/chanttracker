@@ -15,6 +15,14 @@ export interface Session {
   mantra_id?: string
 }
 
+// Mantra display names mapping
+const MANTRA_DISPLAY_MAP: Record<string, { name: string; devanagari: string; color: string }> = {
+  'sun-1': { name: 'Surya Mantra', devanagari: 'सूर्य मंत्र', color: '#F59E0B' },
+  'moon-1': { name: 'Chandra Mantra', devanagari: 'चंद्र मंत्र', color: '#60A5FA' },
+  'gayatri-1': { name: 'Gayatri Mantra', devanagari: 'गायत्री मंत्र', color: '#EC4899' },
+  'om-1': { name: 'Om Chanting', devanagari: 'ॐ', color: '#8B5CF6' },
+}
+
 export function useSessions(limit = 50) {
   const supabase = createClient()
 
@@ -23,26 +31,52 @@ export function useSessions(limit = 50) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('chant_sessions')
-        .select(
-          `*,
-           mantras:mantra_id(name, devanagari, color)`
-        )
+        .select('*')
         .order('started_at', { ascending: false })
         .limit(limit)
 
       if (error) throw error
 
-      // Flatten mantra data
-      const sessions = (data || []).map((session: any) => ({
-        ...session,
-        mantra_name: session.mantras?.name,
-        mantra_devanagari: session.mantras?.devanagari,
-        mantra_color: session.mantras?.color,
-      }))
+      // Map mantra data from display map
+      const sessions = (data || []).map((session: any) => {
+        const mantraData = MANTRA_DISPLAY_MAP[session.mantra_id as string] || {
+          name: session.mantra_id || 'Unknown Mantra',
+          devanagari: '',
+          color: '#9CA3AF',
+        }
+        return {
+          ...session,
+          mantra_name: mantraData.name,
+          mantra_devanagari: mantraData.devanagari,
+          mantra_color: mantraData.color,
+        }
+      })
 
       return sessions as Session[]
     },
     staleTime: 1000 * 60, // 1 minute
+  })
+}
+
+export function useUpdateSessionCount() {
+  const supabase = createClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ sessionId, count }: { sessionId: string; count: number }) => {
+      const { data, error } = await (supabase
+        .from('chant_sessions') as any)
+        .update({ count })
+        .eq('id', sessionId)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
+    },
   })
 }
 
@@ -71,6 +105,7 @@ export function useStartSession() {
 
   return useMutation({
     mutationFn: async (mantraId: string) => {
+      console.log('[useSessions] Inserting session with mantraId:', mantraId)
       const { data, error } = await (supabase
         .from('chant_sessions') as any)
         .insert({
@@ -78,12 +113,15 @@ export function useStartSession() {
           count: 0,
           target: 108,
           session_status: 'active',
-          chant_date: new Date().toLocaleDateString('sv'),
         })
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('[useSessions] Insert error:', error)
+        throw error
+      }
+      console.log('[useSessions] Session inserted successfully:', data)
       return data
     },
     onSuccess: () => {
