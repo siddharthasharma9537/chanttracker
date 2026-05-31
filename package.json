@@ -1,0 +1,26 @@
+{
+  "name": "chanttracker",
+  "version": "1.0.0",
+  "description": "Hindu spiritual chant/japa tracking platform. Web + iOS + Android.",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "apps/ios",
+    "apps/android",
+    "packages/api"
+  ],
+  "scripts": {
+    "install:all": "pnpm install -r",
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "format": "pnpm -r format",
+    "supabase:migrate": "cd supabase && pnpm exec supabase migration up",
+    "supabase:seed": "cd supabase && pnpm exec supabase db seed",
+    "supabase:studio": "cd supabase && pnpm exec supabase start && open http://localhost:54323"
+  },
+  "devDependencies": {
+    "pnpm": "^8.0.0"
+  }
+}
