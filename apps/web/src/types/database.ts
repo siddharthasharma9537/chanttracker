@@ -966,3 +966,5 @@ export const Constants = {
     },
   },
 } as const
+
+export type { Database }
