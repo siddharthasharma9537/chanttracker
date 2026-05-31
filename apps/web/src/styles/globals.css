@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Sanskrit&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Sanskrit&family=Merriweather:wght@300;400;700;900&family=Poppins:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,10 +6,13 @@
 
 html {
   @apply scroll-smooth;
+  font-family: 'Merriweather', serif;
 }
 
 body {
-  @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-50;
+  @apply bg-temple-25 text-temple-900 dark:bg-temple-900 dark:text-temple-50;
+  background-image: linear-gradient(135deg, #fdf9f6 0%, #f3ebe0 50%, #ede2d6 100%);
+  background-attachment: fixed;
 }
 
 /* Theme colors */

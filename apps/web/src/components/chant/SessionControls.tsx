@@ -83,14 +83,17 @@ export function SessionControls({
       )}
 
       {/* Main controls */}
-      <div className="flex flex-col items-center gap-4 max-w-sm mx-auto">
+      <div className="flex flex-col items-center gap-6 max-w-sm mx-auto">
         {/* Increment button */}
         <button
           onClick={onIncrement}
           disabled={!isActive || isLoading || isIdle}
-          className="w-32 h-32 rounded-full bg-gradient-to-br from-temple-500 to-temple-600 hover:from-temple-600 hover:to-temple-700 disabled:from-gray-400 disabled:to-gray-500 text-white shadow-lg hover:shadow-xl transition-all active:scale-95 flex items-center justify-center"
+          className="w-40 h-40 rounded-full bg-gradient-to-br from-sacred-500 to-sacred-600 hover:from-sacred-600 hover:to-sacred-700 disabled:from-temple-300 disabled:to-temple-400 text-white shadow-2xl hover:shadow-3xl transition-all active:scale-95 flex items-center justify-center transform hover:scale-110"
+          style={{
+            boxShadow: '0 10px 30px rgba(249, 115, 22, 0.3)',
+          }}
         >
-          <Plus className="w-16 h-16" />
+          <Plus className="w-20 h-20" />
         </button>
 
         {/* Secondary controls */}
@@ -99,7 +102,7 @@ export function SessionControls({
           <button
             onClick={onDecrement}
             disabled={!isActive || count === 0 || isLoading}
-            className="px-6 py-3 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-800 font-medium transition min-h-[44px] flex items-center justify-center"
+            className="px-6 py-4 rounded-lg bg-temple-200 hover:bg-temple-300 disabled:bg-temple-100 text-temple-700 font-semibold transition min-h-[44px] flex items-center justify-center shadow-md hover:shadow-lg"
           >
             <Minus className="w-5 h-5" />
           </button>
@@ -108,7 +111,7 @@ export function SessionControls({
           <button
             onClick={isActive ? onPause : onResume}
             disabled={isIdle || isCompleted || isAbandoned || isLoading}
-            className="px-6 py-3 rounded-lg bg-yellow-100 hover:bg-yellow-200 disabled:bg-gray-100 text-yellow-800 font-medium transition min-h-[44px] flex items-center justify-center"
+            className="px-6 py-4 rounded-lg bg-amber-200 hover:bg-amber-300 disabled:bg-temple-100 text-amber-800 font-semibold transition min-h-[44px] flex items-center justify-center shadow-md hover:shadow-lg"
           >
             {isActive ? (
               <Pause className="w-5 h-5" />
@@ -121,7 +124,7 @@ export function SessionControls({
           <button
             onClick={() => setShowEndConfirm(true)}
             disabled={isIdle || isCompleted || isAbandoned || isLoading}
-            className="px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium transition min-h-[44px] flex items-center justify-center"
+            className="px-6 py-4 rounded-lg bg-green-500 hover:bg-green-600 disabled:bg-temple-200 text-white font-semibold transition min-h-[44px] flex items-center justify-center shadow-md hover:shadow-lg"
           >
             <Check className="w-5 h-5" />
           </button>
@@ -131,10 +134,10 @@ export function SessionControls({
         <button
           onClick={handleAbandon}
           disabled={isIdle || isCompleted || isAbandoned || isLoading}
-          className="px-6 py-3 rounded-lg bg-gray-300 hover:bg-gray-400 disabled:bg-gray-100 text-gray-800 font-medium transition min-h-[44px] flex items-center justify-center gap-2"
+          className="px-8 py-3 rounded-lg bg-red-500 hover:bg-red-600 disabled:bg-temple-200 text-white font-semibold transition flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
         >
           <X className="w-5 h-5" />
-          Abandon
+          Abandon Session
         </button>
       </div>
 

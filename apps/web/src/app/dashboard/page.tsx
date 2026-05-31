@@ -44,10 +44,10 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Hero Section */}
         <div className="mb-8 sm:mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+          <h2 className="text-4xl sm:text-5xl font-bold text-temple-900 mb-2" style={{ fontFamily: 'Merriweather, serif', fontWeight: 700 }}>
             Welcome back
           </h2>
-          <p className="text-gray-600">
+          <p className="text-temple-700 text-lg font-light">
             Track your spiritual practice and mantras
           </p>
         </div>
@@ -76,7 +76,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* Progress Ring - Full Width on Mobile/Tablet */}
           <div className="lg:col-span-2 order-1 lg:order-1">
-            <div className="bg-white rounded-lg p-6 sm:p-8 shadow-sm border border-temple-100">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-temple-200/50">
               {isLoading ? (
                 <div className="flex justify-center py-20">
                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-temple-100 border-t-temple-500" />
@@ -130,16 +130,16 @@ export default function DashboardPage() {
         </div>
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-temple-600 to-temple-700 rounded-lg p-8 text-center shadow-lg">
-          <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+        <div className="bg-gradient-to-r from-sacred-500 to-sacred-600 rounded-xl p-8 text-center shadow-xl">
+          <h3 className="text-3xl sm:text-4xl font-bold text-white mb-3" style={{ fontFamily: 'Merriweather, serif' }}>
             Ready to chant?
           </h3>
-          <p className="text-temple-100 mb-6 max-w-md mx-auto">
+          <p className="text-sacred-100 mb-8 max-w-md mx-auto text-lg font-light">
             Start a new chanting session and track your mantras in real-time
           </p>
           <button
             onClick={() => router.push('/chant')}
-            className="inline-flex items-center gap-2 bg-white text-temple-700 font-semibold px-6 sm:px-8 py-3 rounded-lg hover:bg-temple-50 transition-colors shadow-md"
+            className="inline-flex items-center gap-2 bg-white text-sacred-600 font-semibold px-8 py-4 rounded-lg hover:bg-sacred-50 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             Start Chanting
             <ChevronRight className="w-5 h-5" />
