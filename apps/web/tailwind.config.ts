@@ -42,7 +42,7 @@ const config: Config = {
       },
       fontFamily: {
         devanagari: ['Tiro Devanagari Sanskrit', 'serif'],
-        serif: ['Merriweather', 'serif'],
+        merriweather: ['Merriweather', 'serif'],
       },
       backgroundImage: {
         'parchment-gradient': 'linear-gradient(135deg, #fdf9f6 0%, #f3ebe0 50%, #ede2d6 100%)',
