@@ -145,12 +145,12 @@ export default function ChantPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <div className="border-b border-gray-200 px-4 py-4">
+      <div className="border-b border-white/20 px-4 py-4">
         <button
           onClick={() => router.push('/dashboard')}
-          className="inline-flex items-center gap-2 text-temple-600 hover:text-temple-700 font-medium"
+          className="inline-flex items-center gap-2 text-amber-500 hover:text-amber-400 font-medium"
         >
           <ChevronLeft className="w-5 h-5" />
           Dashboard
@@ -161,7 +161,7 @@ export default function ChantPage() {
       <div className="flex-1 flex flex-col overflow-y-auto">
         {/* Mantra Selector */}
         <div className="px-4 pt-6 pb-4 max-w-sm mx-auto w-full">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-white/90 mb-2">
             Today&apos;s Mantra
           </label>
           <MantrasDropdown
