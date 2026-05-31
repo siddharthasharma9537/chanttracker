@@ -1,9 +1,5 @@
 {
   "framework": "nextjs",
   "buildCommand": "cd apps/web && npm run build",
-  "outputDirectory": "apps/web/.next",
-  "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "@NEXT_PUBLIC_SUPABASE_URL",
-    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "@NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
-  }
+  "outputDirectory": "apps/web/.next"
 }
