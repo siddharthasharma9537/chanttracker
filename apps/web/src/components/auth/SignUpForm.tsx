@@ -51,7 +51,7 @@ export function SignUpForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium mb-1">
+        <label htmlFor="email" className="block text-sm font-medium mb-1 text-gray-900">
           Email
         </label>
         <input
@@ -59,7 +59,7 @@ export function SignUpForm() {
           type="email"
           placeholder="your@email.com"
           {...register('email')}
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white placeholder-gray-500 ${
             errors.email ? 'border-red-500' : 'border-gray-300'
           }`}
         />
@@ -69,7 +69,7 @@ export function SignUpForm() {
       </div>
 
       <div>
-        <label htmlFor="displayName" className="block text-sm font-medium mb-1">
+        <label htmlFor="displayName" className="block text-sm font-medium mb-1 text-gray-900">
           Display Name (optional)
         </label>
         <input
@@ -77,12 +77,12 @@ export function SignUpForm() {
           type="text"
           placeholder="Your name"
           {...register('displayName')}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white placeholder-gray-500"
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium mb-1">
+        <label htmlFor="password" className="block text-sm font-medium mb-1 text-gray-900">
           Password
         </label>
         <input
@@ -90,7 +90,7 @@ export function SignUpForm() {
           type="password"
           placeholder="••••••••"
           {...register('password')}
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white placeholder-gray-500 ${
             errors.password ? 'border-red-500' : 'border-gray-300'
           }`}
         />
@@ -99,7 +99,7 @@ export function SignUpForm() {
             {errors.password.message}
           </p>
         )}
-        <p className="text-gray-600 text-xs mt-2">
+        <p className="text-gray-600 text-xs mt-2 text-gray-600">
           At least 8 characters, 1 uppercase, 1 number
         </p>
       </div>

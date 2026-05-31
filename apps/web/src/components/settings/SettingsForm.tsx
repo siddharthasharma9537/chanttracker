@@ -265,7 +265,7 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
             type="text"
             placeholder="Your name"
             {...register('display_name')}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white placeholder-gray-500 ${
               errors.display_name ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -284,7 +284,7 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
             type="number"
             min="1"
             {...register('daily_goal', { valueAsNumber: true })}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white ${
               errors.daily_goal ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -325,7 +325,7 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
           <select
             id="preferred_language"
             {...register('preferred_language')}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white ${
               errors.preferred_language ? 'border-red-500' : 'border-gray-300'
             }`}
           >
@@ -347,7 +347,7 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
           <select
             id="timezone"
             {...register('timezone')}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white ${
               errors.timezone ? 'border-red-500' : 'border-gray-300'
             }`}
           >
