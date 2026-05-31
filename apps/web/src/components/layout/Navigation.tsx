@@ -28,7 +28,7 @@ export function Navigation() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 w-64 h-screen bg-white border-r border-temple-100 flex-col z-30 pt-20">
+      <aside className="hidden lg:flex fixed left-0 top-0 w-64 h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 flex-col z-30 pt-20">
         <nav className="flex-1 px-4 py-6">
           <ul className="space-y-2">
             {navItems.map((item) => {
@@ -41,8 +41,8 @@ export function Navigation() {
                     className={clsx(
                       'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
                       active
-                        ? 'bg-temple-100 text-temple-600 font-semibold'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-white/20 text-white font-semibold'
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
                     )}
                     aria-current={active ? 'page' : undefined}
                   >
@@ -56,15 +56,15 @@ export function Navigation() {
         </nav>
 
         {/* User Card at Bottom */}
-        <div className="border-t border-temple-100 p-4">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-temple-50">
-            <div className="w-10 h-10 bg-temple-200 rounded-full flex items-center justify-center text-xs font-semibold text-temple-900 flex-shrink-0">
-              U
+        <div className="border-t border-white/10 p-4">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
+              P
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs text-gray-600">Account</p>
-              <p className="text-sm font-medium text-gray-900 truncate">
-                user@example.com
+              <p className="text-xs text-white/60">Account</p>
+              <p className="text-sm font-medium text-white truncate">
+                account
               </p>
             </div>
           </div>
@@ -72,7 +72,7 @@ export function Navigation() {
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-temple-100 z-40 pb-safe">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-xl border-t border-white/20 z-40 pb-safe">
         <ul className="grid grid-cols-4 gap-0">
           {navItems.map((item) => {
             const Icon = item.icon
@@ -84,8 +84,8 @@ export function Navigation() {
                   className={clsx(
                     'w-full flex flex-col items-center justify-center py-3 px-1 transition-colors',
                     active
-                      ? 'text-temple-600'
-                      : 'text-gray-500 hover:text-gray-700'
+                      ? 'text-white'
+                      : 'text-white/60 hover:text-white'
                   )}
                   aria-current={active ? 'page' : undefined}
                   aria-label={item.label}
