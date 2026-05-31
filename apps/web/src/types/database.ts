@@ -1,4 +1,3 @@
-npm warn exec The following package was not found and will be installed: supabase@2.102.0
 export type Json =
   | string
   | number
@@ -966,5 +965,3 @@ export const Constants = {
     },
   },
 } as const
-
-export type { Database }
