@@ -26,7 +26,7 @@ export default function DashboardPage() {
     return (
       <MainLayout>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-temple-100 border-t-temple-500" />
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/20 border-t-sacred-500" />
         </div>
       </MainLayout>
     )
@@ -41,14 +41,14 @@ export default function DashboardPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12 sm:py-20">
         {/* Hero Section */}
-        <div className="mb-8 sm:mb-12">
-          <h2 className="text-4xl sm:text-5xl font-bold text-temple-900 mb-2" style={{ fontFamily: 'Merriweather, serif', fontWeight: 700 }}>
+        <div className="mb-16 sm:mb-24">
+          <h2 className="text-5xl sm:text-6xl font-bold text-white mb-4" style={{ fontFamily: 'Merriweather, serif' }}>
             Welcome back
           </h2>
-          <p className="text-temple-700 text-lg font-light">
-            Track your spiritual practice and mantras
+          <p className="text-xl text-white/70 font-light max-w-2xl">
+            Track your spiritual practice and mantras with intention
           </p>
         </div>
 
@@ -73,10 +73,10 @@ export default function DashboardPage() {
         )}
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
           {/* Progress Ring - Full Width on Mobile/Tablet */}
           <div className="lg:col-span-2 order-1 lg:order-1">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-lg border border-temple-200/50">
+            <div className="glassmorphic p-8 sm:p-12 h-full">
               {isLoading ? (
                 <div className="flex justify-center py-20">
                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-temple-100 border-t-temple-500" />
@@ -130,19 +130,19 @@ export default function DashboardPage() {
         </div>
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-sacred-500 to-sacred-600 rounded-xl p-8 text-center shadow-xl">
-          <h3 className="text-3xl sm:text-4xl font-bold text-white mb-3" style={{ fontFamily: 'Merriweather, serif' }}>
+        <div className="glassmorphic bg-gradient-to-r from-sacred-500/30 to-amber-500/30 p-12 sm:p-16 text-center border-2 border-sacred-400/40 backdrop-blur-2xl">
+          <h3 className="text-4xl sm:text-5xl font-bold text-white mb-6" style={{ fontFamily: 'Merriweather, serif' }}>
             Ready to chant?
           </h3>
-          <p className="text-sacred-100 mb-8 max-w-md mx-auto text-lg font-light">
-            Start a new chanting session and track your mantras in real-time
+          <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto font-light">
+            Start a new chanting session and deepen your spiritual practice
           </p>
           <button
             onClick={() => router.push('/chant')}
-            className="inline-flex items-center gap-2 bg-white text-sacred-600 font-semibold px-8 py-4 rounded-lg hover:bg-sacred-50 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="inline-flex items-center gap-3 bg-gradient-to-r from-sacred-500 to-amber-500 text-white font-bold px-10 py-4 rounded-xl hover:from-sacred-600 hover:to-amber-600 transition-all shadow-2xl hover:shadow-3xl transform hover:scale-110 text-lg"
           >
             Start Chanting
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-6 h-6" />
           </button>
         </div>
       </div>

@@ -11,10 +11,18 @@
   }
 
   body {
-    @apply bg-temple-25 text-temple-900;
-    background-image: linear-gradient(135deg, #fdf9f6 0%, #f3ebe0 50%, #ede2d6 100%);
+    @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white;
     background-attachment: fixed;
     min-height: 100vh;
+  }
+
+  /* Glassmorphic component base styles */
+  .glassmorphic {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl;
+  }
+
+  .glassmorphic-button {
+    @apply glassmorphic px-6 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/20 active:scale-95;
   }
 }
 

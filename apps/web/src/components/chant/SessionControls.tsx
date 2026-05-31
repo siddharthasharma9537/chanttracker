@@ -83,17 +83,17 @@ export function SessionControls({
       )}
 
       {/* Main controls */}
-      <div className="flex flex-col items-center gap-6 max-w-sm mx-auto">
+      <div className="flex flex-col items-center gap-8 max-w-sm mx-auto">
         {/* Increment button */}
         <button
           onClick={onIncrement}
           disabled={!isActive || isLoading || isIdle}
-          className="w-40 h-40 rounded-full bg-gradient-to-br from-sacred-500 to-sacred-600 hover:from-sacred-600 hover:to-sacred-700 disabled:from-temple-300 disabled:to-temple-400 text-white shadow-2xl hover:shadow-3xl transition-all active:scale-95 flex items-center justify-center transform hover:scale-110"
+          className="w-48 h-48 rounded-full bg-gradient-to-br from-sacred-500 via-amber-500 to-sacred-600 hover:from-sacred-600 hover:via-amber-600 hover:to-sacred-700 disabled:from-white/10 disabled:to-white/20 text-white shadow-2xl hover:shadow-3xl transition-all active:scale-95 flex items-center justify-center transform hover:scale-115 border-2 border-white/20"
           style={{
-            boxShadow: '0 10px 30px rgba(249, 115, 22, 0.3)',
+            boxShadow: '0 15px 40px rgba(249, 115, 22, 0.5)',
           }}
         >
-          <Plus className="w-20 h-20" />
+          <Plus className="w-24 h-24" />
         </button>
 
         {/* Secondary controls */}
@@ -102,21 +102,21 @@ export function SessionControls({
           <button
             onClick={onDecrement}
             disabled={!isActive || count === 0 || isLoading}
-            className="px-6 py-4 rounded-lg bg-temple-200 hover:bg-temple-300 disabled:bg-temple-100 text-temple-700 font-semibold transition min-h-[44px] flex items-center justify-center shadow-md hover:shadow-lg"
+            className="glassmorphic px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 disabled:bg-white/5 text-white font-semibold transition min-h-[48px] flex items-center justify-center shadow-lg hover:shadow-xl border-2 border-white/30 hover:border-white/50"
           >
-            <Minus className="w-5 h-5" />
+            <Minus className="w-6 h-6" />
           </button>
 
           {/* Pause/Resume */}
           <button
             onClick={isActive ? onPause : onResume}
             disabled={isIdle || isCompleted || isAbandoned || isLoading}
-            className="px-6 py-4 rounded-lg bg-amber-200 hover:bg-amber-300 disabled:bg-temple-100 text-amber-800 font-semibold transition min-h-[44px] flex items-center justify-center shadow-md hover:shadow-lg"
+            className="glassmorphic px-6 py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 disabled:bg-white/5 text-white font-semibold transition min-h-[48px] flex items-center justify-center shadow-lg hover:shadow-xl border-2 border-amber-400/40 hover:border-amber-400/60"
           >
             {isActive ? (
-              <Pause className="w-5 h-5" />
+              <Pause className="w-6 h-6" />
             ) : (
-              <Play className="w-5 h-5" />
+              <Play className="w-6 h-6" />
             )}
           </button>
 
@@ -124,9 +124,9 @@ export function SessionControls({
           <button
             onClick={() => setShowEndConfirm(true)}
             disabled={isIdle || isCompleted || isAbandoned || isLoading}
-            className="px-6 py-4 rounded-lg bg-green-500 hover:bg-green-600 disabled:bg-temple-200 text-white font-semibold transition min-h-[44px] flex items-center justify-center shadow-md hover:shadow-lg"
+            className="glassmorphic px-6 py-3 rounded-xl bg-green-500/20 hover:bg-green-500/30 disabled:bg-white/5 text-white font-semibold transition min-h-[48px] flex items-center justify-center shadow-lg hover:shadow-xl border-2 border-green-400/40 hover:border-green-400/60"
           >
-            <Check className="w-5 h-5" />
+            <Check className="w-6 h-6" />
           </button>
         </div>
 
@@ -134,7 +134,7 @@ export function SessionControls({
         <button
           onClick={handleAbandon}
           disabled={isIdle || isCompleted || isAbandoned || isLoading}
-          className="px-8 py-3 rounded-lg bg-red-500 hover:bg-red-600 disabled:bg-temple-200 text-white font-semibold transition flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+          className="glassmorphic px-8 py-4 rounded-xl bg-red-500/20 hover:bg-red-500/30 disabled:bg-white/5 text-white font-semibold transition flex items-center justify-center gap-2 shadow-lg hover:shadow-xl border-2 border-red-400/40 hover:border-red-400/60"
         >
           <X className="w-5 h-5" />
           Abandon Session
