@@ -242,9 +242,30 @@ export function MantrasDropdown({ onSelect, isLoading }: MantrasDropdownProps) {
         if (error) {
           console.warn('Failed to fetch panchang, using demo mantras:', error)
           setMantras(DEMO_MANTRAS)
-        } else if (data && Array.isArray(data)) {
-          // Parse RPC response if it contains mantra recommendations
-          setMantras(data.length > 0 ? data : DEMO_MANTRAS)
+        } else if (data && Array.isArray(data) && data.length > 0) {
+          // Enrich RPC data with deity fields from DEMO_MANTRAS
+          const enrichedMantras = data.map(rpcMantra => {
+            const demoMantra = DEMO_MANTRAS.find(m => m.id === rpcMantra.id)
+            if (demoMantra) {
+              return {
+                ...rpcMantra,
+                adhidevata_te: rpcMantra.adhidevata_te || demoMantra.adhidevata_te,
+                adhidevata_devanagari: rpcMantra.adhidevata_devanagari || demoMantra.adhidevata_devanagari,
+                adhidevata_mantra_te: rpcMantra.adhidevata_mantra_te || demoMantra.adhidevata_mantra_te,
+                adhidevata_mantra_devanagari: rpcMantra.adhidevata_mantra_devanagari || demoMantra.adhidevata_mantra_devanagari,
+                pratyadhidevata_te: rpcMantra.pratyadhidevata_te || demoMantra.pratyadhidevata_te,
+                pratyadhidevata_devanagari: rpcMantra.pratyadhidevata_devanagari || demoMantra.pratyadhidevata_devanagari,
+                pratyadhidevata_mantra_te: rpcMantra.pratyadhidevata_mantra_te || demoMantra.pratyadhidevata_mantra_te,
+                pratyadhidevata_mantra_devanagari: rpcMantra.pratyadhidevata_mantra_devanagari || demoMantra.pratyadhidevata_mantra_devanagari,
+                mantra_te: rpcMantra.mantra_te || demoMantra.mantra_te,
+                mantra_devanagari: rpcMantra.mantra_devanagari || demoMantra.mantra_devanagari,
+              }
+            }
+            return rpcMantra
+          })
+          setMantras(enrichedMantras)
+        } else {
+          setMantras(DEMO_MANTRAS)
         }
       } catch (err) {
         console.warn('Error fetching mantras:', err)
@@ -269,12 +290,12 @@ export function MantrasDropdown({ onSelect, isLoading }: MantrasDropdownProps) {
         <button
           onClick={() => setIsOpen(!isOpen)}
           disabled={isLoading || isLoadingMantras}
-          className="w-full flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-white/10 hover:bg-white/20 disabled:bg-white/5 border-2 border-white/30 hover:border-white/50 disabled:border-white/20 rounded-xl font-semibold text-white transition shadow-lg hover:shadow-xl disabled:shadow-none"
+          className="w-full flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-white/8 hover:bg-white/12 disabled:bg-white/5 border border-white/20 hover:border-white/30 disabled:border-white/15 rounded-xl font-semibold text-white transition shadow-md hover:shadow-lg disabled:shadow-none"
         >
           <div className="text-left">
             {selectedMantra ? (
               <>
-                <p className="text-sm sm:text-base text-white/80">Selected:</p>
+                <p className="text-sm sm:text-base text-white/70">Selected:</p>
                 <p className="text-base sm:text-lg text-white font-bold">{selectedMantra.name_te || selectedMantra.name}</p>
                 {selectedMantra.name_te && (
                   <p className="text-xs sm:text-sm text-white/60">{selectedMantra.name}</p>
@@ -285,17 +306,17 @@ export function MantrasDropdown({ onSelect, isLoading }: MantrasDropdownProps) {
             )}
           </div>
           <ChevronDown
-            className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            className={`w-5 h-5 transition-transform text-sacred-400 ${isOpen ? 'rotate-180' : ''}`}
           />
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-sm border-2 border-white/30 rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white/8 backdrop-blur-lg border border-white/20 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
             {mantras.map((mantra) => (
               <button
                 key={mantra.id}
                 onClick={() => handleSelect(mantra)}
-                className="w-full text-left px-4 sm:px-6 py-3 sm:py-4 hover:bg-white/10 transition border-b border-white/10 last:border-b-0"
+                className="w-full text-left px-4 sm:px-6 py-3 sm:py-4 hover:bg-white/12 transition border-b border-white/10 last:border-b-0"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -304,7 +325,7 @@ export function MantrasDropdown({ onSelect, isLoading }: MantrasDropdownProps) {
                   </div>
                   {mantra.color && (
                     <div
-                      className="w-4 h-4 rounded-full flex-shrink-0"
+                      className="w-4 h-4 rounded-full flex-shrink-0 shadow-md"
                       style={{ backgroundColor: mantra.color }}
                     />
                   )}

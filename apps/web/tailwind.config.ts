@@ -20,7 +20,7 @@ const config: Config = {
           800: '#8b5922',
           900: '#2d1a0a',
         },
-        // Spiritual orange (deity/sacred significance)
+        // Spiritual orange (deity/sacred significance) - PRIMARY ACCENT
         'sacred': {
           50: '#fff7ed',
           100: '#ffedd5',
@@ -41,12 +41,25 @@ const config: Config = {
         },
       },
       fontFamily: {
-        devanagari: ['Tiro Devanagari Sanskrit', 'serif'],
+        devanagari: ['Noto Sans Devanagari', 'Tiro Devanagari Sanskrit', 'serif'],
+        telugu: ['Noto Sans Telugu', 'system-ui', 'sans-serif'],
         merriweather: ['Merriweather', 'serif'],
+        // Script families for proper rendering of Indian scripts
+        'sanskrit': ['Tiro Devanagari Sanskrit', 'serif'],
+        'devanagari-serif': ['Tiro Devanagari Sanskrit', 'serif'],
       },
       backgroundImage: {
         'parchment-gradient': 'linear-gradient(135deg, #fdf9f6 0%, #f3ebe0 50%, #ede2d6 100%)',
         'temple-radial': 'radial-gradient(circle at center, #faf8f3 0%, #ede2d6 100%)',
+      },
+      backdropBlur: {
+        'xs': '2px',
+        'sm': '4px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '16px',
+        '2xl': '20px',
+        '3xl': '24px',
       },
     },
   },

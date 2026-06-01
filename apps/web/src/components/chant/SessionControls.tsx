@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Pause, Play, Plus, Minus, Check, X, AlertCircle } from 'lucide-react'
+import { Pause, Play, Minus, Check, X, AlertCircle } from 'lucide-react'
+import { RudrakshaBead } from './RudrakshaBead'
 import { useCompleteSession } from '@/hooks/useSessions'
 import { useOfflineStore } from '@/store/offlineStore'
 
@@ -17,7 +18,9 @@ interface SessionControlsProps {
   sessionId: string | null
   count: number
   target: number
+  durationSecs: number
   isLoading?: boolean
+  mantraColor?: string
 }
 
 export function SessionControls({
@@ -31,7 +34,9 @@ export function SessionControls({
   sessionId,
   count,
   target,
+  durationSecs,
   isLoading,
+  mantraColor = '#f97316',
 }: SessionControlsProps) {
   const router = useRouter()
   const [showEndConfirm, setShowEndConfirm] = useState(false)
@@ -43,10 +48,37 @@ export function SessionControls({
   const completeSessionMutation = useCompleteSession()
 
   const hasPending = pendingSessions.length > 0
+  const isIdle = state === 'idle'
+  const isActive = state === 'active'
+  const isCompleted = state === 'completed'
+  const isAbandoned = state === 'abandoned'
+  const isDone = count >= target
+
+  const timeString = useMemo(() => {
+    const m = Math.floor(durationSecs / 60)
+    const s = durationSecs % 60
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  }, [durationSecs])
+
+  const statusLabel = isDone && isActive ? 'Complete!' : {
+    idle: 'No session',
+    active: 'Chanting',
+    paused: 'Paused',
+    completed: 'Completed',
+    abandoned: 'Abandoned',
+  }[state]
+
+  const statusTone =
+    isDone && isActive
+      ? 'text-green-400'
+      : state === 'active'
+        ? 'text-amber-400'
+        : state === 'paused'
+          ? 'text-yellow-400'
+          : 'text-white/50'
 
   const handleComplete = async () => {
     if (!sessionId) return
-
     try {
       setIsSubmitting(true)
       onComplete()
@@ -54,7 +86,6 @@ export function SessionControls({
       router.push('/dashboard')
     } catch (err) {
       console.error('Failed to complete session:', err)
-      // Show error toast here
     } finally {
       setIsSubmitting(false)
       setShowEndConfirm(false)
@@ -66,102 +97,140 @@ export function SessionControls({
     router.push('/dashboard')
   }
 
-  const isIdle = state === 'idle'
-  const isActive = state === 'active'
-  const isPaused = state === 'paused'
-  const isCompleted = state === 'completed'
-  const isAbandoned = state === 'abandoned'
+  // Progress ring geometry
+  const R = 46
+  const C = 2 * Math.PI * R
+  const progress = target > 0 ? Math.min(count / target, 1) : 0
+
+  const secondaryBtn =
+    'flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl border transition active:scale-95 disabled:opacity-40 disabled:active:scale-100'
 
   return (
-    <div className="space-y-4 pb-8">
-      {/* Offline badge */}
+    <div className="w-full">
+      {/* Offline strip */}
       {!isOnline && hasPending && (
-        <div className="mx-auto max-w-sm bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 text-yellow-600" />
-          <span className="text-sm text-yellow-800">Offline — pending sync</span>
+        <div className="flex items-center justify-center gap-2 bg-yellow-500/15 py-1 text-xs text-yellow-200">
+          <AlertCircle className="h-3.5 w-3.5" />
+          Offline — changes will sync
         </div>
       )}
 
-      {/* Main controls */}
-      <div className="flex flex-col items-center gap-8 max-w-sm mx-auto">
-        {/* Increment button */}
-        <button
-          onClick={onIncrement}
-          disabled={!isActive || isLoading || isIdle}
-          className="w-48 h-48 rounded-full bg-gradient-to-br from-sacred-500 via-amber-500 to-sacred-600 hover:from-sacred-600 hover:via-amber-600 hover:to-sacred-700 disabled:from-white/10 disabled:to-white/20 text-white shadow-2xl hover:shadow-3xl transition-all active:scale-95 flex items-center justify-center transform hover:scale-115 border-2 border-white/20"
-          style={{
-            boxShadow: '0 15px 40px rgba(249, 115, 22, 0.5)',
-          }}
-        >
-          <Plus className="w-24 h-24" />
-        </button>
+      <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2 px-3 py-2.5 sm:gap-4 sm:px-6 sm:py-3">
+        {/* Left: timer + status */}
+        <div className="flex min-w-[58px] flex-col items-start leading-tight sm:min-w-[80px]">
+          <span className="font-mono text-base font-semibold tabular-nums text-white/85 sm:text-lg">
+            {timeString}
+          </span>
+          <span className={`flex items-center gap-1 text-[11px] font-semibold sm:text-xs ${statusTone}`}>
+            <span className="h-1.5 w-1.5 rounded-full bg-current" />
+            {statusLabel}
+          </span>
+        </div>
 
-        {/* Secondary controls */}
-        <div className="flex gap-4 justify-center w-full">
-          {/* Decrement */}
+        {/* Center: decrement · bead(with ring) · pause */}
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={onDecrement}
             disabled={!isActive || count === 0 || isLoading}
-            className="glassmorphic px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 disabled:bg-white/5 text-white font-semibold transition min-h-[48px] flex items-center justify-center shadow-lg hover:shadow-xl border-2 border-white/30 hover:border-white/50"
+            className={`${secondaryBtn} border-white/15 bg-white/5 text-white hover:bg-white/10`}
+            title="Decrement"
           >
-            <Minus className="w-6 h-6" />
+            <Minus className="h-5 w-5" />
           </button>
 
-          {/* Pause/Resume */}
+          {/* Bead wrapped in progress ring */}
+          <div className="relative h-[88px] w-[88px] shrink-0">
+            <svg
+              className="absolute inset-0 -rotate-90"
+              viewBox="0 0 100 100"
+              aria-hidden
+            >
+              <circle
+                cx="50"
+                cy="50"
+                r={R}
+                fill="none"
+                stroke="rgba(255,255,255,0.12)"
+                strokeWidth="4"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r={R}
+                fill="none"
+                stroke={mantraColor}
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray={C}
+                strokeDashoffset={C * (1 - progress)}
+                className="transition-[stroke-dashoffset] duration-500"
+                style={{ filter: `drop-shadow(0 0 4px ${mantraColor}80)` }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <RudrakshaBead
+                onClick={onIncrement}
+                disabled={isLoading || isIdle}
+                color={mantraColor}
+                isActive={isActive}
+                size="medium"
+              />
+            </div>
+          </div>
+
           <button
             onClick={isActive ? onPause : onResume}
             disabled={isIdle || isCompleted || isAbandoned || isLoading}
-            className="glassmorphic px-6 py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 disabled:bg-white/5 text-white font-semibold transition min-h-[48px] flex items-center justify-center shadow-lg hover:shadow-xl border-2 border-amber-400/40 hover:border-amber-400/60"
+            className={`${secondaryBtn} border-sacred-400/30 bg-sacred-500/15 text-sacred-300 hover:bg-sacred-500/25`}
+            title={isActive ? 'Pause' : 'Resume'}
           >
-            {isActive ? (
-              <Pause className="w-6 h-6" />
-            ) : (
-              <Play className="w-6 h-6" />
-            )}
-          </button>
-
-          {/* Complete/End Session */}
-          <button
-            onClick={() => setShowEndConfirm(true)}
-            disabled={isIdle || isCompleted || isAbandoned || isLoading}
-            className="glassmorphic px-6 py-3 rounded-xl bg-green-500/20 hover:bg-green-500/30 disabled:bg-white/5 text-white font-semibold transition min-h-[48px] flex items-center justify-center shadow-lg hover:shadow-xl border-2 border-green-400/40 hover:border-green-400/60"
-          >
-            <Check className="w-6 h-6" />
+            {isActive ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
           </button>
         </div>
 
-        {/* Abandon button */}
-        <button
-          onClick={handleAbandon}
-          disabled={isIdle || isCompleted || isAbandoned || isLoading}
-          className="glassmorphic px-8 py-4 rounded-xl bg-red-500/20 hover:bg-red-500/30 disabled:bg-white/5 text-white font-semibold transition flex items-center justify-center gap-2 shadow-lg hover:shadow-xl border-2 border-red-400/40 hover:border-red-400/60"
-        >
-          <X className="w-5 h-5" />
-          Abandon Session
-        </button>
+        {/* Right: complete + abandon */}
+        <div className="flex min-w-[58px] items-center justify-end gap-2 sm:min-w-[80px]">
+          <button
+            onClick={() => setShowEndConfirm(true)}
+            disabled={isIdle || isCompleted || isAbandoned || isLoading}
+            className={`${secondaryBtn} border-green-400/30 bg-green-500/15 text-green-300 hover:bg-green-500/25`}
+            title="Complete session"
+          >
+            <Check className="h-5 w-5" />
+          </button>
+          <button
+            onClick={handleAbandon}
+            disabled={isIdle || isCompleted || isAbandoned || isLoading}
+            className={`${secondaryBtn} border-red-400/30 bg-red-500/15 text-red-300 hover:bg-red-500/25`}
+            title="Abandon session"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       {/* End confirmation dialog */}
       {showEndConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="w-full bg-white rounded-t-2xl p-6 space-y-4 max-w-sm mx-auto">
-            <h3 className="text-lg font-bold text-gray-900">End session?</h3>
-            <p className="text-sm text-gray-600">
-              You&apos;ve completed <strong>{count}</strong> out of{' '}
-              <strong>{target}</strong> chants. This will save your progress.
+        <div className="fixed inset-0 z-50 flex items-end bg-black/50">
+          <div className="mx-auto w-full max-w-sm space-y-5 rounded-t-3xl border-t border-white/20 bg-gradient-to-br from-slate-800 to-slate-900 p-6 sm:p-8">
+            <h3 className="text-lg font-bold text-white sm:text-xl">End session?</h3>
+            <p className="text-sm text-white/80 sm:text-base">
+              You&apos;ve completed{' '}
+              <span className="font-semibold text-sacred-400">{count}</span> out of{' '}
+              <span className="font-semibold text-sacred-400">{target}</span> chants.
+              This will save your progress.
             </p>
-
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setShowEndConfirm(false)}
-                className="flex-1 px-4 py-3 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium transition"
+                className="flex-1 rounded-lg border border-white/20 bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20"
               >
                 Continue
               </button>
               <button
                 onClick={handleComplete}
                 disabled={isSubmitting}
-                className="flex-1 px-4 py-3 rounded-lg bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium transition"
+                className="flex-1 rounded-lg border border-green-500/50 bg-green-600/80 px-4 py-3 font-medium text-white transition hover:bg-green-600 disabled:opacity-50"
               >
                 {isSubmitting ? 'Saving...' : 'Save & Exit'}
               </button>

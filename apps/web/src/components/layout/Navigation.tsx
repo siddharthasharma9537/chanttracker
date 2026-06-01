@@ -72,7 +72,7 @@ export function Navigation() {
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-xl border-t border-white/20 z-40 pb-safe">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/5 backdrop-blur-xl border-t border-white/15 z-40 pb-safe">
         <ul className="grid grid-cols-4 gap-0">
           {navItems.map((item) => {
             const Icon = item.icon
@@ -84,8 +84,8 @@ export function Navigation() {
                   className={clsx(
                     'w-full flex flex-col items-center justify-center py-3 px-1 transition-colors',
                     active
-                      ? 'text-white'
-                      : 'text-white/60 hover:text-white'
+                      ? 'text-sacred-500'
+                      : 'text-white/60 hover:text-sacred-400'
                   )}
                   aria-current={active ? 'page' : undefined}
                   aria-label={item.label}

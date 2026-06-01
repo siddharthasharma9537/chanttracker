@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Sanskrit&family=Merriweather:wght@300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Sanskrit&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Merriweather:wght@300;400;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,18 +11,43 @@
   }
 
   body {
-    @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white;
+    @apply bg-gradient-to-br from-slate-900 via-slate-900 to-slate-900 text-white;
     background-attachment: fixed;
     min-height: 100vh;
   }
 
-  /* Glassmorphic component base styles */
+  /* Glassmorphic card base styles - spiritual aesthetic */
   .glassmorphic {
-    @apply bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl;
+    @apply bg-white/5 backdrop-blur-lg border border-white/15 rounded-2xl shadow-lg;
   }
 
+  .glassmorphic-elevated {
+    @apply bg-white/8 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl;
+  }
+
+  /* Glassmorphic button base styles */
   .glassmorphic-button {
-    @apply glassmorphic px-6 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/20 active:scale-95;
+    @apply glassmorphic px-6 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-md hover:shadow-lg;
+  }
+
+  /* Sacred orange accent button */
+  .sacred-button {
+    @apply bg-sacred-500/20 border border-sacred-400/50 text-white font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:bg-sacred-500/30 hover:border-sacred-400/70 hover:shadow-lg hover:shadow-sacred-500/20 active:scale-95;
+  }
+
+  /* Sacred orange glow effect */
+  .sacred-glow {
+    @apply shadow-lg shadow-sacred-500/20;
+  }
+
+  /* Text highlight with sacred orange */
+  .text-sacred-accent {
+    @apply text-sacred-500;
+  }
+
+  /* Border accent with sacred orange */
+  .border-sacred-accent {
+    @apply border-sacred-500/40;
   }
 }
 
@@ -42,4 +67,29 @@ html.temple {
 
 html.midnight {
   @apply bg-midnight-50 text-midnight-900;
+}
+
+/* Dark theme form inputs */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  @apply text-white;
+}
+
+input[type="text"]::placeholder,
+input[type="number"]::placeholder,
+textarea::placeholder {
+  @apply text-white/50;
+}
+
+select option {
+  @apply bg-slate-800 text-white;
+}
+
+/* Checkbox and radio styling for dark theme */
+input[type="checkbox"],
+input[type="radio"] {
+  @apply accent-sacred-500;
 }

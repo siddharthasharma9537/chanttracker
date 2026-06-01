@@ -225,7 +225,7 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-4 border-white/30 border-t-amber-400"></div>
       </div>
     )
   }
@@ -233,18 +233,18 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-w-2xl">
       {successMessage && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+        <div className="glassmorphic border-green-500/50 bg-green-500/10 text-green-200 px-4 py-3 rounded-lg">
           {successMessage}
         </div>
       )}
 
       {errorMessage && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex justify-between items-center">
+        <div className="glassmorphic border-red-500/50 bg-red-500/10 text-red-200 px-4 py-3 rounded-lg flex justify-between items-center">
           <span>{errorMessage}</span>
           <button
             type="button"
             onClick={handleRetry}
-            className="text-red-700 hover:text-red-800 font-medium text-sm"
+            className="text-red-300 hover:text-red-200 font-medium text-sm"
           >
             Retry
           </button>
@@ -252,54 +252,54 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
       )}
 
       {/* Profile Section */}
-      <section className="space-y-4 pb-6 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Profile</h2>
+      <section className="glassmorphic space-y-4 p-6 pb-6 border-b border-white/10">
+        <h2 className="text-lg font-semibold text-white">Profile</h2>
 
         <div>
-          <label htmlFor="display_name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="display_name" className="block text-sm font-medium text-white/90 mb-1">
             Display Name
           </label>
-          <p className="text-xs text-gray-500 mb-2">How your name appears in the app</p>
+          <p className="text-xs text-white/60 mb-2">How your name appears in the app</p>
           <input
             id="display_name"
             type="text"
             placeholder="Your name"
             {...register('display_name')}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white placeholder-gray-500 ${
-              errors.display_name ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sacred-500 text-white bg-white/10 placeholder-white/50 ${
+              errors.display_name ? 'border-red-500/50' : 'border-white/20'
             }`}
           />
           {errors.display_name && (
-            <p className="text-red-500 text-sm mt-1">{errors.display_name.message}</p>
+            <p className="text-red-400 text-sm mt-1">{errors.display_name.message}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="daily_goal" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="daily_goal" className="block text-sm font-medium text-white/90 mb-1">
             Daily Goal
           </label>
-          <p className="text-xs text-gray-500 mb-2">Target chant count per day</p>
+          <p className="text-xs text-white/60 mb-2">Target chant count per day</p>
           <input
             id="daily_goal"
             type="number"
             min="1"
             {...register('daily_goal', { valueAsNumber: true })}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white ${
-              errors.daily_goal ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sacred-500 text-white bg-white/10 placeholder-white/50 ${
+              errors.daily_goal ? 'border-red-500/50' : 'border-white/20'
             }`}
           />
           {errors.daily_goal && (
-            <p className="text-red-500 text-sm mt-1">{errors.daily_goal.message}</p>
+            <p className="text-red-400 text-sm mt-1">{errors.daily_goal.message}</p>
           )}
         </div>
       </section>
 
       {/* Preferences Section */}
-      <section className="space-y-4 pb-6 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Preferences</h2>
+      <section className="glassmorphic space-y-4 p-6 pb-6 border-b border-white/10">
+        <h2 className="text-lg font-semibold text-white">Preferences</h2>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">Theme</label>
+          <label className="block text-sm font-medium text-white/90 mb-3">Theme</label>
           <div className="space-y-2">
             {['temple', 'midnight', 'dawn'].map((themeOption) => (
               <label key={themeOption} className="flex items-center cursor-pointer">
@@ -307,26 +307,26 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
                   type="radio"
                   value={themeOption}
                   {...register('theme')}
-                  className="w-4 h-4 text-orange-600 focus:ring-2 focus:ring-orange-500"
+                  className="w-4 h-4 text-sacred-500 focus:ring-2 focus:ring-sacred-400"
                 />
-                <span className="ml-3 text-sm text-gray-700 capitalize">{themeOption}</span>
+                <span className="ml-3 text-sm text-white/80 capitalize">{themeOption}</span>
               </label>
             ))}
           </div>
           {errors.theme && (
-            <p className="text-red-500 text-sm mt-1">{errors.theme.message}</p>
+            <p className="text-red-400 text-sm mt-1">{errors.theme.message}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="preferred_language" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="preferred_language" className="block text-sm font-medium text-white/90 mb-1">
             Language
           </label>
           <select
             id="preferred_language"
             {...register('preferred_language')}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white ${
-              errors.preferred_language ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sacred-500 text-white bg-white/10 ${
+              errors.preferred_language ? 'border-red-500/50' : 'border-white/20'
             }`}
           >
             {LANGUAGES.map((lang) => (
@@ -336,19 +336,19 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
             ))}
           </select>
           {errors.preferred_language && (
-            <p className="text-red-500 text-sm mt-1">{errors.preferred_language.message}</p>
+            <p className="text-red-400 text-sm mt-1">{errors.preferred_language.message}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="timezone" className="block text-sm font-medium text-white/90 mb-1">
             Timezone
           </label>
           <select
             id="timezone"
             {...register('timezone')}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white ${
-              errors.timezone ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sacred-500 text-white bg-white/10 ${
+              errors.timezone ? 'border-red-500/50' : 'border-white/20'
             }`}
           >
             {TIMEZONES.map((tz) => (
@@ -358,44 +358,44 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
             ))}
           </select>
           {errors.timezone && (
-            <p className="text-red-500 text-sm mt-1">{errors.timezone.message}</p>
+            <p className="text-red-400 text-sm mt-1">{errors.timezone.message}</p>
           )}
         </div>
 
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
             <div>
-              <label className="text-sm font-medium text-gray-700">Haptics</label>
-              <p className="text-xs text-gray-500">Vibration feedback</p>
+              <label className="text-sm font-medium text-white/90">Haptics</label>
+              <p className="text-xs text-white/60">Vibration feedback</p>
             </div>
             <input
               type="checkbox"
               {...register('haptics_enabled')}
-              className="w-5 h-5 text-orange-600 rounded focus:ring-2 focus:ring-orange-500"
+              className="w-5 h-5 text-sacred-500 rounded focus:ring-2 focus:ring-sacred-400"
             />
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
             <div>
-              <label className="text-sm font-medium text-gray-700">Chant Sound</label>
-              <p className="text-xs text-gray-500">Sound effects during chanting</p>
+              <label className="text-sm font-medium text-white/90">Chant Sound</label>
+              <p className="text-xs text-white/60">Sound effects during chanting</p>
             </div>
             <input
               type="checkbox"
               {...register('chant_sound_enabled')}
-              className="w-5 h-5 text-orange-600 rounded focus:ring-2 focus:ring-orange-500"
+              className="w-5 h-5 text-sacred-500 rounded focus:ring-2 focus:ring-sacred-400"
             />
           </div>
         </div>
       </section>
 
       {/* Account Section */}
-      <section className="space-y-4 pb-6 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Account</h2>
+      <section className="glassmorphic space-y-4 p-6 pb-6 border-b border-white/10">
+        <h2 className="text-lg font-semibold text-white">Account</h2>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <div className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-700">
+          <label className="block text-sm font-medium text-white/90 mb-1">Email</label>
+          <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white/80">
             {user?.email || 'Not available'}
           </div>
         </div>
@@ -403,7 +403,7 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
         <button
           type="button"
           onClick={handleSignOut}
-          className="w-full px-4 py-2 border border-red-500 text-red-700 rounded-lg hover:bg-red-50 transition font-medium"
+          className="w-full px-4 py-2 border border-red-500/50 text-red-300 rounded-lg hover:bg-red-500/10 transition font-medium"
         >
           Sign Out
         </button>
@@ -414,7 +414,7 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
         <button
           type="submit"
           disabled={isSaving}
-          className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-medium py-2 rounded-lg transition"
+          className="w-full bg-sacred-500 hover:bg-sacred-600 disabled:bg-white/20 text-white font-medium py-3 rounded-lg transition-all shadow-lg shadow-sacred-500/50 hover:shadow-sacred-500/70"
         >
           {isSaving ? 'Saving Changes...' : 'Save Changes'}
         </button>
