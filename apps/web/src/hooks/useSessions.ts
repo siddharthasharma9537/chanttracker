@@ -276,9 +276,11 @@ export function useCompleteSession() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (sessionId: string) => {
+    mutationFn: async ({ sessionId, count, durationSeconds }: { sessionId: string; count: number; durationSeconds: number }) => {
       const { data, error } = await (supabase.rpc as any)('complete_chant_session', {
-        session_id: sessionId,
+        p_session_id: sessionId,
+        p_count: count,
+        p_duration_secs: durationSeconds,
       })
       if (error) throw error
       return data
@@ -302,8 +304,8 @@ export function useStartSession() {
         .insert({
           mantra_id: mantraId,
           count: 0,
-          target: 108,
           session_status: 'active',
+          started_at: new Date().toISOString(),
         })
         .select()
         .single()

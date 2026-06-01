@@ -20,16 +20,24 @@ export const me      = async () => (await supabase.auth.getUser()).data.user
 
 /* ─────────────────────── DASHBOARD ────────────────────────── */
 // Unified dashboard: today's progress + streak + panchang + active anushthanas
-// Returns: { done, target, pct, streak, total, active_anushthanas, weekday, tithi, weekday_lord }
+// Returns: { done, target, pct, streak, total }
 export const getDashboard = () => supabase.rpc('get_today_progress')
 
-// Panchang (public — no auth needed) matches GitHub's GET /api/v1/panchang
-export const getPanchang = (date = null, lat = 23.1765, lon = 75.7885) =>
-  supabase.rpc('panchang', { p_date: date ?? new Date().toISOString().slice(0, 10), p_lat: lat, p_lon: lon })
+// Panchang (public — no auth needed) returns { tithi, nakshatra, weekday_lord, mantra_name }
+export const getPanchang = (date = null) =>
+  supabase.rpc('panchang', { for_date: date ?? new Date().toISOString().slice(0, 10) })
 
-// Weekly chart (7-day history for the stats sparkline)
-export const getWeeklyChart = (uid) =>
-  supabase.from('v_weekly_chart').select('*').eq('user_id', uid).order('chant_date')
+// Weekly chart (7-day history for the stats sparkline) returns { date, day_of_week, total_count }
+export const getWeeklyChart = () =>
+  supabase.from('v_weekly_chart').select('*').order('date')
+
+// User lifetime stats returns { lifetime_count, active_days, avg_daily }
+export const getUserStats = () =>
+  supabase.from('v_user_stats').select('*').single()
+
+// Top mantra returns { id, name, name_te, total_count }
+export const getTopMantra = () =>
+  supabase.from('v_top_mantra').select('*').single()
 
 /* ─────────────────────────── PROFILE ──────────────────────── */
 export const getProfile   = (uid) => supabase.from('profiles').select('*').eq('id', uid).single()
@@ -53,9 +61,9 @@ export const getNavagraha = () =>
     *, children:mantras!parent_graha_id(*)
   `).eq('mantra_type', 'graha').eq('is_active', true).order('accent_color')
 
-// Today's recommended mantras (matches GitHub's GET /mantras/today)
+// Today's recommended mantras — fetches mantras for current weekday (0=Mon..6=Sun)
 export const getMantrasForToday = () => {
-  const dow = ((new Date().getDay() + 6) % 7) // 0=Mon..6=Sun
+  const dow = ((new Date().getDay() + 6) % 7) // JS getDay() returns 0=Sun, convert to 0=Mon
   return supabase.rpc('mantras_for_weekday', { p_dow: dow })
 }
 
@@ -77,12 +85,12 @@ export const startSession = (uid, mantraId, sankalpId = null, anushthanaId = nul
     started_at: new Date().toISOString(),
   }).select().single()
 
-export const completeSession = (sessionId, count, durationSecs, japasPerMin, voiceAccuracy = null) =>
-  supabase.from('chant_sessions').update({
-    count, duration_seconds: durationSecs, japas_per_min: japasPerMin,
-    voice_accuracy: voiceAccuracy, session_status: 'completed',
-    ended_at: new Date().toISOString(),
-  }).eq('id', sessionId).select().single()
+export const completeSession = (sessionId, count, durationSecs) =>
+  supabase.rpc('complete_chant_session', {
+    p_session_id: sessionId,
+    p_count: count,
+    p_duration_secs: durationSecs,
+  })
 
 export const abandonSession = (sessionId) =>
   supabase.from('chant_sessions').update({ session_status: 'abandoned', ended_at: new Date().toISOString() })
@@ -144,9 +152,10 @@ export const listAnushthanas = (uid, status = null) => {
 }
 
 // Mark today complete — fires trigger that detects breaks + completes the vow
-export const markAnushthanaDay = (uid, anushthanaId, achievedCount) =>
+export const markAnushthanaDay = (anushthanaId, achievedCount) =>
   supabase.rpc('mark_anushthana_day', {
-    p_user: uid, p_anushthana: anushthanaId, p_achieved: achievedCount,
+    p_anushthana_id: anushthanaId,
+    p_achieved_count: achievedCount,
   })
 
 export const abandonAnushthana = (anushthanaId) =>
@@ -171,6 +180,3 @@ export const dailyHistory = (uid, date) =>
   supabase.from('chant_sessions')
     .select('*, mantras(devanagari,transliteration,accent_color)')
     .eq('user_id', uid).eq('chant_date', date).order('started_at')
-
-export const userStats = (uid) => supabase.from('v_user_stats').select('*').eq('user_id', uid).single()
-export const topMantra = (uid) => supabase.from('v_top_mantra').select('*').eq('user_id', uid).single()

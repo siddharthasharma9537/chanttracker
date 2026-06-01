@@ -15,7 +15,7 @@ export function useDashboard() {
   return useQuery({
     queryKey: ['dashboard'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('demo_progress')
+      const { data, error } = await supabase.rpc('get_today_progress')
       if (error) throw error
       return data as DashboardData
     },
