@@ -115,7 +115,7 @@ export function CounterDisplay({
       {hasDeities && (
         <div className="flex min-h-0 min-w-0 flex-col rounded-xl border border-white/10 bg-white/[0.04] p-2.5 sm:p-4 lg:col-start-1 lg:row-start-1">
           <span className="shrink-0 truncate text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-amber-300/80">
-            ✨ Adhidevata{adhidevata_te ? ` · ${adhidevata_te}` : ''}
+            ✨ {adhidevata_te || 'Presiding Deity'}
           </span>
           <div className="mt-1 min-h-0 flex-1">
             {adhiText ? (
@@ -140,8 +140,7 @@ export function CounterDisplay({
       {hasDeities && (
         <div className="flex min-h-0 min-w-0 flex-col rounded-xl border border-white/10 bg-white/[0.04] p-2.5 sm:p-4 lg:col-start-3 lg:row-start-1">
           <span className="shrink-0 truncate text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-sky-300/80">
-            ⚔️ Pratyadhidevata
-            {pratyadhidevata_te ? ` · ${pratyadhidevata_te}` : ''}
+            ⚔️ {pratyadhidevata_te || 'Counter-Deity'}
           </span>
           <div className="mt-1 min-h-0 flex-1">
             {pratyaText ? (
