@@ -82,7 +82,11 @@ export function SessionControls({
     try {
       setIsSubmitting(true)
       onComplete()
-      await completeSessionMutation.mutateAsync(sessionId)
+      await completeSessionMutation.mutateAsync({
+        sessionId,
+        count,
+        durationSeconds: durationSecs,
+      })
       router.push('/dashboard')
     } catch (err) {
       console.error('Failed to complete session:', err)
