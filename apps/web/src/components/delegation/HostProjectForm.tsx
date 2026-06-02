@@ -55,6 +55,7 @@ export function HostProjectForm() {
     formState: { errors },
   } = useForm<HostProjectFormData>({
     resolver: zodResolver(hostProjectSchema),
+    mode: 'onChange',
     defaultValues: {
       clientName: '',
       selectedGrahas: [],
@@ -199,10 +200,11 @@ export function HostProjectForm() {
                   <label className="block text-sm text-gray-300 mb-2">Priest Name</label>
                   <input
                     type="text"
+                    autoComplete="off"
                     placeholder="Enter priest name"
                     {...register(`priestAssignments.${index}.priestName`)}
                     style={{ color: '#000000' }}
-                    className={`w-full px-4 py-2 border rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                    className={`w-full px-4 py-2 border rounded-lg bg-white text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
                       errors.priestAssignments?.[index]?.priestName
                         ? 'border-red-500'
                         : 'border-gray-300'
