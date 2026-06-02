@@ -176,7 +176,7 @@ export function AssignPriestModal({
                 </button>
               </div>
               <p className="text-xs text-gray-600">
-                Share this code with the priest. They'll enter it in the Assigned Priest form.
+                Share this code with the priest. They&apos;ll enter it in the Assigned Priest form.
               </p>
             </div>
           ) : null}
