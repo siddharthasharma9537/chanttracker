@@ -23,26 +23,69 @@ const hostNavItems: NavItem[] = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
+const assignedPriestNavItems: NavItem[] = [
+  { href: '/delegation/assigned', label: 'Assigned', icon: Briefcase },
+  { href: '/settings', label: 'Settings', icon: Settings },
+]
+
+const clientNavItems: NavItem[] = [
+  { href: '/view', label: 'Projects', icon: Briefcase },
+  { href: '/settings', label: 'Settings', icon: Settings },
+]
+
+type ModeType = 'personal' | 'host' | 'assigned' | 'client'
+
 export function Navigation() {
   const pathname = usePathname()
   const router = useRouter()
 
-  // Determine if we're in delegation mode
-  const isDelegationPath = pathname.startsWith('/delegation')
+  // Determine current mode based on pathname
+  const getCurrentMode = (): ModeType => {
+    if (pathname.startsWith('/delegation/assigned')) {
+      return 'assigned'
+    } else if (pathname.startsWith('/delegation')) {
+      return 'host'
+    } else if (pathname.startsWith('/view')) {
+      return 'client'
+    }
+    return 'personal'
+  }
 
-  // Select nav items based on current path
-  const navItems = isDelegationPath ? hostNavItems : personalNavItems
+  const currentMode = getCurrentMode()
+
+  // Select nav items based on current mode
+  const navItems = {
+    personal: personalNavItems,
+    host: hostNavItems,
+    assigned: assignedPriestNavItems,
+    client: clientNavItems,
+  }[currentMode]
+
+  const modeLabels = {
+    personal: 'Personal',
+    host: 'Host',
+    assigned: 'Assigned Priest',
+    client: 'Client',
+  }
 
   const isActive = (href: string) => {
     return pathname === href || pathname.startsWith(href + '/')
   }
 
   const handleSwitchMode = () => {
-    if (isDelegationPath) {
-      router.push('/dashboard')
-    } else {
-      router.push('/delegation/projects')
+    const modeSequence: ModeType[] = ['personal', 'host', 'assigned', 'client']
+    const currentIndex = modeSequence.indexOf(currentMode)
+    const nextIndex = (currentIndex + 1) % modeSequence.length
+    const nextMode = modeSequence[nextIndex]
+
+    const routes = {
+      personal: '/dashboard',
+      host: '/delegation/projects',
+      assigned: '/delegation/assigned',
+      client: '/view',
     }
+
+    router.push(routes[nextMode])
   }
 
   return (
@@ -53,7 +96,7 @@ export function Navigation() {
           {/* Section Indicator */}
           <div className="mb-6 px-4 py-2 rounded-lg bg-white/5 border border-white/10">
             <p className="text-xs font-semibold text-white/60 uppercase tracking-wider">
-              {isDelegationPath ? 'Host' : 'Personal'}
+              {modeLabels[currentMode]}
             </p>
           </div>
 
@@ -87,7 +130,7 @@ export function Navigation() {
             <button
               onClick={handleSwitchMode}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors text-sm"
-              title={`Switch to ${isDelegationPath ? 'Personal' : 'Host'} mode`}
+              title={`Switch mode`}
             >
               <LogOut className="w-5 h-5 flex-shrink-0 rotate-180" />
               <span>Switch Mode</span>
@@ -146,8 +189,8 @@ export function Navigation() {
             <button
               onClick={handleSwitchMode}
               className="w-full flex flex-col items-center justify-center py-3 px-1 transition-colors text-white/60 hover:text-sacred-400"
-              aria-label={`Switch to ${isDelegationPath ? 'Personal' : 'Host'} mode`}
-              title={`Switch to ${isDelegationPath ? 'Personal' : 'Host'} mode`}
+              aria-label="Switch mode"
+              title="Switch mode"
             >
               <LogOut className="w-6 h-6 mb-1 rotate-180" />
               <span className="text-xs font-medium">Switch</span>
