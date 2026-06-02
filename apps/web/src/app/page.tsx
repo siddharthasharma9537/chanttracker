@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { Header } from '@/components/layout/Header'
-import { Users, User } from 'lucide-react'
+import { Users, User, Wand2, Eye } from 'lucide-react'
 
 export default function HomePage() {
   const router = useRouter()
@@ -36,6 +36,14 @@ export default function HomePage() {
     router.push('/delegation/projects')
   }
 
+  const handleAssignedPriestClick = () => {
+    router.push('/delegation/assigned')
+  }
+
+  const handleClientClick = () => {
+    router.push('/view')
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-slate-900 to-slate-900">
       {/* Header */}
@@ -54,8 +62,8 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Two Button Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+          {/* Four Button Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-2">
             {/* Personal Button */}
             <button
               onClick={handlePersonalClick}
@@ -119,11 +127,75 @@ export default function HomePage() {
               {/* Hover highlight effect */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-white/10 to-transparent pointer-events-none" />
             </button>
+
+            {/* Assigned Priest Button */}
+            <button
+              onClick={handleAssignedPriestClick}
+              className="group relative h-64 sm:h-72 md:h-80 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-sacred-500/20 active:scale-95"
+            >
+              {/* Background with gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-temple-500 via-temple-600 to-slate-800 opacity-80 group-hover:opacity-90 transition-opacity" />
+
+              {/* Glassmorphic overlay */}
+              <div className="absolute inset-0 bg-white/5 backdrop-blur-md border border-white/20" />
+
+              {/* Content */}
+              <div className="relative h-full flex flex-col items-center justify-center px-6 text-center space-y-4">
+                <div className="p-4 rounded-full bg-white/10 group-hover:bg-white/15 transition-colors">
+                  <Wand2 className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                    Assigned Priest
+                  </h2>
+                  <div className="text-white/80 text-sm sm:text-base leading-relaxed space-y-1">
+                    <div>Log assigned sessions</div>
+                    <div>Track project progress</div>
+                    <div>View project history</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hover highlight effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-white/10 to-transparent pointer-events-none" />
+            </button>
+
+            {/* Client Button */}
+            <button
+              onClick={handleClientClick}
+              className="group relative h-64 sm:h-72 md:h-80 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-sacred-500/20 active:scale-95"
+            >
+              {/* Background with gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 via-emerald-600 to-slate-800 opacity-80 group-hover:opacity-90 transition-opacity" />
+
+              {/* Glassmorphic overlay */}
+              <div className="absolute inset-0 bg-white/5 backdrop-blur-md border border-white/20" />
+
+              {/* Content */}
+              <div className="relative h-full flex flex-col items-center justify-center px-6 text-center space-y-4">
+                <div className="p-4 rounded-full bg-white/10 group-hover:bg-white/15 transition-colors">
+                  <Eye className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                    Client
+                  </h2>
+                  <div className="text-white/80 text-sm sm:text-base leading-relaxed space-y-1">
+                    <div>View project progress</div>
+                    <div>Real-time updates</div>
+                    <div>Client-only access</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hover highlight effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-white/10 to-transparent pointer-events-none" />
+            </button>
           </div>
 
           {/* Optional: Quick Info */}
           <div className="mt-12 sm:mt-16 text-center text-white/50 text-sm">
-            <p>You can switch between Personal and Host modes anytime</p>
+            <p>Choose your role to get started</p>
           </div>
         </div>
       </main>

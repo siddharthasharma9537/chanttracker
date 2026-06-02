@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useProjectsList } from '@/hooks/useDelegation'
 import { MainLayout } from '@/components/layout/MainLayout'
-import { Plus, Calendar, Users, Zap } from 'lucide-react'
+import { AssignPriestModal } from '@/components/delegation/AssignPriestModal'
+import { Plus, Calendar, Users, Zap, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { clsx } from 'clsx'
 
@@ -26,6 +27,7 @@ export default function ProjectsListPage() {
   const { isSignedIn, isLoading: authLoading } = useAuth()
   const { data: projects, isLoading: projectsLoading } = useProjectsList()
   const [filterMode, setFilterMode] = useState<'all' | 'host' | 'priest'>('all')
+  const [selectedProjectForAssign, setSelectedProjectForAssign] = useState<string | null>(null)
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -140,16 +142,15 @@ export default function ProjectsListPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projectList.map((project) => (
-              <button
+              <div
                 key={project.id}
-                onClick={() => router.push(`/delegation/projects/${project.id}`)}
-                className="group relative glassmorphic rounded-2xl p-6 text-left hover:bg-white/10 transition-all duration-300 hover:shadow-xl hover:shadow-sacred-500/10 active:scale-95 overflow-hidden"
+                className="group relative glassmorphic rounded-2xl p-6 text-left overflow-hidden flex flex-col"
               >
                 {/* Background accent */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-sacred-500/10 via-transparent to-transparent pointer-events-none" />
 
                 {/* Content */}
-                <div className="relative z-10">
+                <div className="relative z-10 flex-1">
                   {/* Header */}
                   <div className="mb-4">
                     <h3 className="text-lg sm:text-xl font-bold text-white mb-1 line-clamp-2">
@@ -197,12 +198,32 @@ export default function ProjectsListPage() {
 
                   {/* Status Badge */}
                   {project.status && (
-                    <div className="inline-block px-3 py-1 rounded-full bg-sacred-500/20 border border-sacred-400/40 text-xs font-medium text-sacred-300">
+                    <div className="inline-block px-3 py-1 rounded-full bg-sacred-500/20 border border-sacred-400/40 text-xs font-medium text-sacred-300 mb-4">
                       {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                     </div>
                   )}
                 </div>
-              </button>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => router.push(`/delegation/projects/${project.id}`)}
+                    className="flex-1 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-colors text-sm"
+                  >
+                    View Details
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelectedProjectForAssign(project.id)
+                    }}
+                    className="px-3 py-2 bg-temple-500/20 hover:bg-temple-500/30 text-temple-300 rounded-lg font-medium transition-colors text-sm flex items-center gap-1"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Assign
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         )}
@@ -212,6 +233,18 @@ export default function ProjectsListPage() {
           <p>Click on any project to view details and manage assignments</p>
         </div>
       </div>
+
+      {/* Assign Priest Modal */}
+      {selectedProjectForAssign && (
+        <AssignPriestModal
+          isOpen={!!selectedProjectForAssign}
+          projectId={selectedProjectForAssign}
+          onClose={() => setSelectedProjectForAssign(null)}
+          onSuccess={() => {
+            setSelectedProjectForAssign(null)
+          }}
+        />
+      )}
     </MainLayout>
   )
 }

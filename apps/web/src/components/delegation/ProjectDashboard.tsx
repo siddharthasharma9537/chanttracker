@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useDelegationProject } from '@/hooks/useDelegationProject'
 import { GrahaProgressCard } from './GrahaProgressCard'
 import { PriestContributionsModal } from './PriestContributionsModal'
-import { AlertCircle, RefreshCw, Plus } from 'lucide-react'
+import { AssignPriestModal } from './AssignPriestModal'
+import { AlertCircle, RefreshCw, Plus, UserPlus } from 'lucide-react'
 
 interface ProjectDashboardProps {
   projectId: string
@@ -25,6 +26,7 @@ export function ProjectDashboard({
     name: string
   } | null>(null)
   const [showContributionsModal, setShowContributionsModal] = useState(false)
+  const [showAssignModal, setShowAssignModal] = useState(false)
 
   const {
     data: projectData,
@@ -258,17 +260,24 @@ export function ProjectDashboard({
 
         {/* Action Buttons */}
         {projectData.graha_breakdown && projectData.graha_breakdown.length > 0 && (
-          <div className="flex gap-3 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+            <button
+              onClick={() => setShowAssignModal(true)}
+              className="px-4 py-3 bg-temple-500 hover:bg-temple-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <UserPlus className="w-4 h-4" />
+              Assign Priest
+            </button>
             <button
               onClick={() => onNavigateToAssignPriests?.()}
-              className="flex-1 px-4 py-3 bg-temple-500 hover:bg-temple-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              className="px-4 py-3 bg-sacred-500 hover:bg-sacred-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
             >
               <Plus className="w-4 h-4" />
-              Assign More Priests
+              Manage Grahas
             </button>
             <button
               onClick={() => onNavigateToHistory?.()}
-              className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-medium transition-colors"
+              className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-medium transition-colors"
             >
               View History
             </button>
@@ -299,6 +308,14 @@ export function ProjectDashboard({
           }}
         />
       )}
+
+      {/* Assign Priest Modal */}
+      <AssignPriestModal
+        isOpen={showAssignModal}
+        projectId={projectId}
+        onClose={() => setShowAssignModal(false)}
+        onSuccess={() => refetch()}
+      />
     </div>
   )
 }
