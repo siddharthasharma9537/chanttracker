@@ -61,7 +61,7 @@ export function useCreateProject() {
           p_host_priest_id: user.id,
           p_client_name: formData.clientName,
           p_description: `Hosted by ${formData.hostPriestName}`,
-          p_graha_ids: formData.selectedGrahas.map(id => parseInt(id, 10)),
+          p_graha_ids: formData.selectedGrahas,
         } as any
       ) as any
 
@@ -79,7 +79,7 @@ export function useCreateProject() {
           .map((pa) => ({
             priest_id: user.id, // In the form context, we'll handle actual priest selection
             priest_name: pa.priestName,
-            assigned_graha_ids: pa.assignedGrahas.map(id => parseInt(id, 10)),
+            assigned_graha_ids: pa.assignedGrahas,
           }))
 
         if (priestAssignmentsJsonb.length > 0) {
