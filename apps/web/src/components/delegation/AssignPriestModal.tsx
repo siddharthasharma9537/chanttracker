@@ -66,7 +66,7 @@ export function AssignPriestModal({
           priest_email: email.toLowerCase(),
           priest_mobile: mobile.replace(/\D/g, ''),
           assignment_code: assignmentCode,
-        })
+        } as any)
 
       if (insertError) throw insertError
     },
