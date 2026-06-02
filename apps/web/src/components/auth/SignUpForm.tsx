@@ -77,6 +77,7 @@ export function SignUpForm() {
           type="text"
           placeholder="Your name"
           {...register('displayName')}
+          style={{ color: '#111827' }}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white placeholder-gray-500"
         />
       </div>
