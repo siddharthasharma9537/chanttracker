@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "web",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--workspace=apps/web"],
+      "name": "Next.js Dev Server",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["-r", "dev"],
       "port": 3000,
       "autoPort": true
     }
