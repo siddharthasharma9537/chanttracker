@@ -154,7 +154,7 @@ CREATE POLICY "Users can view own streaks" ON streaks FOR SELECT
 CREATE TABLE IF NOT EXISTS user_achievements (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  achievement_id integer NOT NULL REFERENCES achievements(id),
+  achievement_id integer NOT NULL,  -- REFERENCES achievements(id) - added in later migration
   unlocked_at timestamp with time zone DEFAULT now(),
   UNIQUE(user_id, achievement_id)
 );
