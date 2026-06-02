@@ -50,15 +50,8 @@ ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "host_priest_sees_own_projects" ON projects FOR SELECT
   USING (auth.uid() = host_priest_id);
 
--- Assigned priests can see projects they're assigned to (via priest_assignments)
-CREATE POLICY "assigned_priests_see_project" ON projects FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM priest_assignments
-      WHERE priest_assignments.project_id = projects.id
-        AND priest_assignments.priest_id = auth.uid()
-    )
-  );
+-- NOTE: Policy "assigned_priests_see_project" is created in migration 20260602000001
+-- after priest_assignments table is created
 
 -- Host priest can insert, update, delete their own projects
 CREATE POLICY "host_priest_manages_own_projects" ON projects FOR INSERT
