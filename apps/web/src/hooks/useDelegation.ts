@@ -12,17 +12,17 @@ import {
 
 export function useGrahas() {
   // Mock grahas data for development/testing
-  // TODO: Replace with actual database query once grahas table is seeded
+  // Uses actual database IDs to ensure compatibility with RPC calls
   const mockGrahas: Graha[] = [
-    { id: '1', name: 'Surya', position: 0, day_of_week: 0, color: '#F59E0B', created_at: new Date().toISOString() },
-    { id: '2', name: 'Chandra', position: 1, day_of_week: 1, color: '#F3F4F6', created_at: new Date().toISOString() },
-    { id: '3', name: 'Mangal', position: 2, day_of_week: 2, color: '#DC2626', created_at: new Date().toISOString() },
-    { id: '4', name: 'Budha', position: 3, day_of_week: 3, color: '#10B981', created_at: new Date().toISOString() },
-    { id: '5', name: 'Brihaspati', position: 4, day_of_week: 4, color: '#FBBF24', created_at: new Date().toISOString() },
-    { id: '6', name: 'Shukra', position: 5, day_of_week: 5, color: '#F9FAFB', created_at: new Date().toISOString() },
-    { id: '7', name: 'Shani', position: 6, day_of_week: 6, color: '#1F2937', created_at: new Date().toISOString() },
-    { id: '8', name: 'Rahu', position: 7, day_of_week: null, color: '#6B7280', created_at: new Date().toISOString() },
-    { id: '9', name: 'Ketu', position: 8, day_of_week: null, color: '#FB923C', created_at: new Date().toISOString() },
+    { id: '20', name: 'Surya', position: 0, day_of_week: 0, color: '#F59E0B', created_at: new Date().toISOString() },
+    { id: '21', name: 'Chandra', position: 1, day_of_week: 1, color: '#F3F4F6', created_at: new Date().toISOString() },
+    { id: '22', name: 'Mangal', position: 2, day_of_week: 2, color: '#DC2626', created_at: new Date().toISOString() },
+    { id: '23', name: 'Budha', position: 3, day_of_week: 3, color: '#10B981', created_at: new Date().toISOString() },
+    { id: '24', name: 'Brihaspati', position: 4, day_of_week: 4, color: '#FBBF24', created_at: new Date().toISOString() },
+    { id: '25', name: 'Shukra', position: 5, day_of_week: 5, color: '#F9FAFB', created_at: new Date().toISOString() },
+    { id: '26', name: 'Shani', position: 6, day_of_week: 6, color: '#1F2937', created_at: new Date().toISOString() },
+    { id: '27', name: 'Rahu', position: 7, day_of_week: null, color: '#6B7280', created_at: new Date().toISOString() },
+    { id: '28', name: 'Ketu', position: 8, day_of_week: null, color: '#FB923C', created_at: new Date().toISOString() },
   ]
 
   return useQuery({
@@ -61,7 +61,7 @@ export function useCreateProject() {
           p_host_priest_id: user.id,
           p_client_name: formData.clientName,
           p_description: `Hosted by ${formData.hostPriestName}`,
-          p_graha_ids: formData.selectedGrahas,
+          p_graha_ids: formData.selectedGrahas.map(id => parseInt(id, 10)),
         } as any
       ) as any
 
@@ -79,7 +79,7 @@ export function useCreateProject() {
           .map((pa) => ({
             priest_id: user.id, // In the form context, we'll handle actual priest selection
             priest_name: pa.priestName,
-            assigned_graha_ids: pa.assignedGrahas,
+            assigned_graha_ids: pa.assignedGrahas.map(id => parseInt(id, 10)),
           }))
 
         if (priestAssignmentsJsonb.length > 0) {
