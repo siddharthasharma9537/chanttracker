@@ -122,7 +122,7 @@ export function AssignPriestModal({
                 setError('')
               }}
               placeholder="priest@example.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-temple-500 focus:border-transparent"
+              className="w-full px-4 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-temple-500 focus:border-transparent"
               disabled={!!assignmentCode}
             />
           </div>
@@ -142,7 +142,7 @@ export function AssignPriestModal({
                 setError('')
               }}
               placeholder="+1 (555) 123-4567"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-temple-500 focus:border-transparent"
+              className="w-full px-4 py-2 bg-white text-gray-900 border border-gray-300 rounded-lg placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-temple-500 focus:border-transparent"
               disabled={!!assignmentCode}
             />
           </div>
