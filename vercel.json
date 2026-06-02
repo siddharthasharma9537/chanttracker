@@ -1,6 +1,4 @@
 {
-  "buildCommand": "pnpm --filter @chanttracker/web build",
-  "installCommand": "pnpm install --recursive",
-  "devCommand": "pnpm --filter @chanttracker/web dev",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "outputDirectory": "apps/web/.next"
 }
