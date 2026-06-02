@@ -237,6 +237,27 @@ export const getProjectStatus = (projectId) =>
     p_project_id: projectId,
   })
 
+/**
+ * getProjectByCode(projectCode)
+ * Client-facing: Lookup project by human-readable code and return full status
+ * Used for client progress tracking: /track/PROJ8K2X
+ * @param {string} projectCode - The 8-character project code (e.g., "PROJ8K2X")
+ * @returns {Promise} Full project status with grahas breakdown
+ */
+export const getProjectByCode = async (projectCode) => {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('project_code', projectCode)
+    .single()
+
+  if (error) throw error
+  if (!data) throw new Error(`Project with code ${projectCode} not found`)
+
+  // Now get the full status
+  return getProjectStatus(data.id)
+}
+
 /* ───────────────────── PRIEST DASHBOARD ───────────────────── */
 
 /**
