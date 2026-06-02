@@ -84,9 +84,33 @@ export function AssignPriestModal({
   })
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(assignmentCode)
+    // Try modern clipboard API first
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(assignmentCode).catch(() => {
+        // Fallback to execCommand if clipboard API fails
+        fallbackCopy(assignmentCode)
+      })
+    } else {
+      // Fallback for older browsers
+      fallbackCopy(assignmentCode)
+    }
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const fallbackCopy = (text: string) => {
+    const textarea = document.createElement('textarea')
+    textarea.value = text
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.select()
+    try {
+      document.execCommand('copy')
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err)
+    }
+    document.body.removeChild(textarea)
   }
 
   if (!isOpen) return null
