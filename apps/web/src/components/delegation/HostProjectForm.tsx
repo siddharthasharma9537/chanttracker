@@ -129,6 +129,12 @@ export function HostProjectForm() {
     }
   }
 
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('📝 Form submit handler called - preventing default')
+    await handleSubmit(onSubmit)()
+  }
+
   const isLoading = grahsLoading || isSubmitting || createProjectMutation.isPending
 
   if (!user) {
@@ -136,7 +142,7 @@ export function HostProjectForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-2xl text-white">
+    <form onSubmit={handleFormSubmit} className="space-y-6 max-w-2xl text-white">
       {formError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
           {formError}
