@@ -67,7 +67,7 @@ export function AssignedPriestDashboard({
       const { data: grahas } = await supabase
         .from('project_grahas')
         .select('graha_id, graha_name, completed_count, total_target')
-        .eq('project_id', projectId)
+        .eq('project_id', projectId) as { data: ProjectGraha[] | null; error: any }
 
       // Match assignments with progress
       const result = assignments.map((assignment: any) => {
