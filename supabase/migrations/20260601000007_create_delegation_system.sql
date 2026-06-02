@@ -6,6 +6,11 @@
 -- ============================================================================
 -- 1. USER ROLES TABLE: Distinguish priests from regular users
 -- ============================================================================
+
+
+-- ============================================================================
+-- TABLES SECTION
+-- ============================================================================
 CREATE TABLE IF NOT EXISTS user_roles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -18,17 +23,6 @@ CREATE TABLE IF NOT EXISTS user_roles (
 ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
 
 -- Any user can view roles (needed for public displays like project priest lists)
-CREATE POLICY "anyone_can_view_roles" ON user_roles FOR SELECT USING (true);
-
--- Users can only update their own role (admin/main priest would update in app logic)
-CREATE POLICY "users_can_view_own_role" ON user_roles FOR SELECT USING (auth.uid() = user_id);
-
-CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
-CREATE INDEX idx_user_roles_role ON user_roles(role);
-
--- ============================================================================
--- 2. PROJECTS TABLE: Main Priest creates project for a client
--- ============================================================================
 CREATE TABLE IF NOT EXISTS projects (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
@@ -47,6 +41,65 @@ CREATE TABLE IF NOT EXISTS projects (
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 
 -- Host priest can see their own projects
+CREATE TABLE IF NOT EXISTS project_grahas (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  graha_id uuid NOT NULL REFERENCES grahas(id) ON DELETE CASCADE,
+  target_count integer NOT NULL DEFAULT 6000,
+  completed_count integer NOT NULL DEFAULT 0,
+  notes text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  UNIQUE(project_id, graha_id)
+);
+
+ALTER TABLE project_grahas ENABLE ROW LEVEL SECURITY;
+
+-- Host priest and assigned priests can see project grahas
+CREATE TABLE IF NOT EXISTS priest_assignments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  priest_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  assigned_grahas uuid[] DEFAULT ARRAY[]::uuid[],  -- Array of project_graha IDs
+  assignment_notes text,
+  assigned_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  UNIQUE(project_id, priest_id)
+);
+
+ALTER TABLE priest_assignments ENABLE ROW LEVEL SECURITY;
+
+-- Priests can see their own assignments
+CREATE TABLE IF NOT EXISTS delegation_sessions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  project_graha_id uuid NOT NULL REFERENCES project_grahas(id) ON DELETE CASCADE,
+  graha_id uuid NOT NULL REFERENCES grahas(id) ON DELETE CASCADE,
+  count integer NOT NULL DEFAULT 0,
+  duration_seconds integer,
+  assignment_type text NOT NULL CHECK (assignment_type IN ('ASSIGNED', 'VOLUNTEER')),
+  session_status text NOT NULL DEFAULT 'active' CHECK (session_status IN ('active', 'completed', 'abandoned')),
+  started_at timestamp with time zone DEFAULT now(),
+  ended_at timestamp with time zone,
+  notes text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now()
+);
+
+ALTER TABLE delegation_sessions ENABLE ROW LEVEL SECURITY;
+
+-- Priests can see their own sessions
+
+
+-- ============================================================================
+-- RLS POLICIES SECTION
+-- ============================================================================
+CREATE POLICY "anyone_can_view_roles" ON user_roles FOR SELECT USING (true);
+
+-- Users can only update their own role (admin/main priest would update in app logic)
+CREATE POLICY "users_can_view_own_role" ON user_roles FOR SELECT USING (auth.uid() = user_id);
+
 CREATE POLICY "host_priest_sees_own_projects" ON projects FOR SELECT
   USING (auth.uid() = host_priest_id);
 
@@ -63,28 +116,6 @@ CREATE POLICY "host_priest_updates_own_projects" ON projects FOR UPDATE
 CREATE POLICY "host_priest_deletes_own_projects" ON projects FOR DELETE
   USING (auth.uid() = host_priest_id);
 
-CREATE INDEX idx_projects_host_priest_id ON projects(host_priest_id);
-CREATE INDEX idx_projects_status ON projects(status);
-CREATE INDEX idx_projects_created_at ON projects(created_at);
-
--- ============================================================================
--- 3. PROJECT_GRAHAS TABLE: Maps grahas to projects with targets
--- ============================================================================
-CREATE TABLE IF NOT EXISTS project_grahas (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  graha_id uuid NOT NULL REFERENCES grahas(id) ON DELETE CASCADE,
-  target_count integer NOT NULL DEFAULT 6000,
-  completed_count integer NOT NULL DEFAULT 0,
-  notes text,
-  created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now(),
-  UNIQUE(project_id, graha_id)
-);
-
-ALTER TABLE project_grahas ENABLE ROW LEVEL SECURITY;
-
--- Host priest and assigned priests can see project grahas
 CREATE POLICY "host_priest_sees_grahas" ON project_grahas FOR SELECT
   USING (
     EXISTS (
@@ -131,26 +162,6 @@ CREATE POLICY "host_priest_deletes_grahas" ON project_grahas FOR DELETE
     )
   );
 
-CREATE INDEX idx_project_grahas_project_id ON project_grahas(project_id);
-CREATE INDEX idx_project_grahas_graha_id ON project_grahas(graha_id);
-
--- ============================================================================
--- 4. PRIEST_ASSIGNMENTS TABLE: Assign priests to projects and specific grahas
--- ============================================================================
-CREATE TABLE IF NOT EXISTS priest_assignments (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  priest_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  assigned_grahas uuid[] DEFAULT ARRAY[]::uuid[],  -- Array of project_graha IDs
-  assignment_notes text,
-  assigned_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now(),
-  UNIQUE(project_id, priest_id)
-);
-
-ALTER TABLE priest_assignments ENABLE ROW LEVEL SECURITY;
-
--- Priests can see their own assignments
 CREATE POLICY "priests_see_own_assignments" ON priest_assignments FOR SELECT
   USING (auth.uid() = priest_id);
 
@@ -192,33 +203,6 @@ CREATE POLICY "host_priest_deletes_assignments" ON priest_assignments FOR DELETE
     )
   );
 
-CREATE INDEX idx_priest_assignments_project_id ON priest_assignments(project_id);
-CREATE INDEX idx_priest_assignments_priest_id ON priest_assignments(priest_id);
-CREATE INDEX idx_priest_assignments_unique ON priest_assignments(project_id, priest_id);
-
--- ============================================================================
--- 5. DELEGATION_SESSIONS TABLE: Extended chant sessions for delegation projects
--- ============================================================================
-CREATE TABLE IF NOT EXISTS delegation_sessions (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  project_graha_id uuid NOT NULL REFERENCES project_grahas(id) ON DELETE CASCADE,
-  graha_id uuid NOT NULL REFERENCES grahas(id) ON DELETE CASCADE,
-  count integer NOT NULL DEFAULT 0,
-  duration_seconds integer,
-  assignment_type text NOT NULL CHECK (assignment_type IN ('ASSIGNED', 'VOLUNTEER')),
-  session_status text NOT NULL DEFAULT 'active' CHECK (session_status IN ('active', 'completed', 'abandoned')),
-  started_at timestamp with time zone DEFAULT now(),
-  ended_at timestamp with time zone,
-  notes text,
-  created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now()
-);
-
-ALTER TABLE delegation_sessions ENABLE ROW LEVEL SECURITY;
-
--- Priests can see their own sessions
 CREATE POLICY "priests_see_own_sessions" ON delegation_sessions FOR SELECT
   USING (auth.uid() = user_id);
 
@@ -252,6 +236,37 @@ CREATE POLICY "priests_create_own_sessions" ON delegation_sessions FOR INSERT
 CREATE POLICY "priests_update_own_sessions" ON delegation_sessions FOR UPDATE
   USING (auth.uid() = user_id AND session_status = 'active');
 
+
+
+-- ============================================================================
+-- INDEXES SECTION
+-- ============================================================================
+CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
+CREATE INDEX idx_user_roles_role ON user_roles(role);
+
+-- ============================================================================
+-- 2. PROJECTS TABLE: Main Priest creates project for a client
+-- ============================================================================
+CREATE INDEX idx_projects_host_priest_id ON projects(host_priest_id);
+CREATE INDEX idx_projects_status ON projects(status);
+CREATE INDEX idx_projects_created_at ON projects(created_at);
+
+-- ============================================================================
+-- 3. PROJECT_GRAHAS TABLE: Maps grahas to projects with targets
+-- ============================================================================
+CREATE INDEX idx_project_grahas_project_id ON project_grahas(project_id);
+CREATE INDEX idx_project_grahas_graha_id ON project_grahas(graha_id);
+
+-- ============================================================================
+-- 4. PRIEST_ASSIGNMENTS TABLE: Assign priests to projects and specific grahas
+-- ============================================================================
+CREATE INDEX idx_priest_assignments_project_id ON priest_assignments(project_id);
+CREATE INDEX idx_priest_assignments_priest_id ON priest_assignments(priest_id);
+CREATE INDEX idx_priest_assignments_unique ON priest_assignments(project_id, priest_id);
+
+-- ============================================================================
+-- 5. DELEGATION_SESSIONS TABLE: Extended chant sessions for delegation projects
+-- ============================================================================
 CREATE INDEX idx_delegation_sessions_user_id ON delegation_sessions(user_id);
 CREATE INDEX idx_delegation_sessions_project_id ON delegation_sessions(project_id);
 CREATE INDEX idx_delegation_sessions_graha_id ON delegation_sessions(graha_id);
@@ -266,102 +281,11 @@ CREATE INDEX idx_delegation_sessions_created_at ON delegation_sessions(created_a
 -- ============================================================================
 
 -- View: Project status with graha completion percentages
-CREATE OR REPLACE VIEW v_project_status AS
-SELECT
-  p.id as project_id,
-  p.name as project_name,
-  p.client_name,
-  p.status,
-  p.host_priest_id,
-  g.id as graha_id,
-  g.name as graha_name,
-  pg.target_count,
-  pg.completed_count,
-  ROUND(
-    (pg.completed_count::numeric / NULLIF(pg.target_count, 0) * 100)::numeric,
-    2
-  ) as completion_percentage,
-  COUNT(DISTINCT ds.id) as total_sessions,
-  COUNT(DISTINCT CASE WHEN ds.assignment_type = 'ASSIGNED' THEN ds.id END) as assigned_sessions,
-  COUNT(DISTINCT CASE WHEN ds.assignment_type = 'VOLUNTEER' THEN ds.id END) as volunteer_sessions,
-  COUNT(DISTINCT ds.user_id) as unique_priests
-FROM projects p
-LEFT JOIN project_grahas pg ON p.id = pg.project_id
-LEFT JOIN grahas g ON pg.graha_id = g.id
-LEFT JOIN delegation_sessions ds ON pg.id = ds.project_graha_id
-GROUP BY p.id, p.name, p.client_name, p.status, p.host_priest_id, g.id, g.name, pg.id, pg.target_count, pg.completed_count;
 
--- View: Priest contributions by project and graha
-CREATE OR REPLACE VIEW v_priest_contributions AS
-SELECT
-  p.id as project_id,
-  p.name as project_name,
-  ds.user_id as priest_id,
-  pr.display_name as priest_name,
-  g.id as graha_id,
-  g.name as graha_name,
-  ds.assignment_type,
-  COUNT(ds.id) as session_count,
-  COALESCE(SUM(ds.count), 0) as total_count,
-  COALESCE(SUM(ds.duration_seconds), 0) as total_duration_seconds,
-  MAX(ds.ended_at) as last_session_at,
-  COUNT(CASE WHEN ds.session_status = 'completed' THEN 1 END) as completed_sessions
-FROM delegation_sessions ds
-JOIN projects p ON ds.project_id = p.id
-JOIN project_grahas pg ON ds.project_graha_id = pg.id
-JOIN grahas g ON ds.graha_id = g.id
-JOIN profiles pr ON ds.user_id = pr.id
-GROUP BY p.id, p.name, ds.user_id, pr.display_name, g.id, g.name, ds.assignment_type;
 
--- View: Graha-level contributions across all priests
-CREATE OR REPLACE VIEW v_graha_contributions AS
-SELECT
-  p.id as project_id,
-  p.name as project_name,
-  pg.id as project_graha_id,
-  g.id as graha_id,
-  g.name as graha_name,
-  pg.target_count,
-  pg.completed_count,
-  ROUND(
-    (pg.completed_count::numeric / NULLIF(pg.target_count, 0) * 100)::numeric,
-    2
-  ) as completion_percentage,
-  COUNT(DISTINCT ds.user_id) as unique_priests,
-  COUNT(DISTINCT ds.id) as total_sessions,
-  COUNT(DISTINCT CASE WHEN ds.assignment_type = 'ASSIGNED' THEN ds.id END) as assigned_sessions,
-  COUNT(DISTINCT CASE WHEN ds.assignment_type = 'VOLUNTEER' THEN ds.id END) as volunteer_sessions,
-  MAX(ds.ended_at) as last_contribution_at
-FROM projects p
-JOIN project_grahas pg ON p.id = pg.project_id
-JOIN grahas g ON pg.graha_id = g.id
-LEFT JOIN delegation_sessions ds ON pg.id = ds.project_graha_id
-GROUP BY p.id, p.name, pg.id, g.id, g.name, pg.target_count, pg.completed_count;
-
--- View: Project timeline (all sessions ordered by time)
-CREATE OR REPLACE VIEW v_project_timeline AS
-SELECT
-  ds.id as session_id,
-  p.id as project_id,
-  p.name as project_name,
-  ds.user_id as priest_id,
-  pr.display_name as priest_name,
-  g.id as graha_id,
-  g.name as graha_name,
-  ds.count,
-  ds.duration_seconds,
-  ds.assignment_type,
-  ds.session_status,
-  ds.started_at,
-  ds.ended_at,
-  ds.created_at
-FROM delegation_sessions ds
-JOIN projects p ON ds.project_id = p.id
-JOIN grahas g ON ds.graha_id = g.id
-JOIN profiles pr ON ds.user_id = pr.id
-ORDER BY ds.started_at DESC;
-
--- View: Priest activity summary for a project
+-- ============================================================================
+-- VIEWS SECTION
+-- ============================================================================
 CREATE OR REPLACE VIEW v_project_priests AS
 SELECT
   p.id as project_id,
