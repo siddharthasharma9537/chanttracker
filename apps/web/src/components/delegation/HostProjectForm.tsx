@@ -123,7 +123,8 @@ export function HostProjectForm() {
             type="text"
             placeholder="Enter client name"
             {...register('clientName')}
-            className={`w-full px-4 py-2 border rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+            style={{ color: '#000000' }}
+            className={`w-full px-4 py-2 border rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
               errors.clientName ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -163,7 +164,8 @@ export function HostProjectForm() {
             type="text"
             placeholder="Enter your name"
             {...register('hostPriestName')}
-            className={`w-full px-4 py-2 border rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+            style={{ color: '#000000' }}
+            className={`w-full px-4 py-2 border rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
               errors.hostPriestName ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -199,7 +201,8 @@ export function HostProjectForm() {
                     type="text"
                     placeholder="Enter priest name"
                     {...register(`priestAssignments.${index}.priestName`)}
-                    className={`w-full px-4 py-2 border rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                    style={{ color: '#000000' }}
+                    className={`w-full px-4 py-2 border rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
                       errors.priestAssignments?.[index]?.priestName
                         ? 'border-red-500'
                         : 'border-gray-300'
