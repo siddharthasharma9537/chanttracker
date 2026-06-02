@@ -3,23 +3,30 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { MainLayout } from '@/components/layout/MainLayout'
-import { AssignedPriestDashboard } from '@/components/delegation/AssignedPriestDashboard'
+import { AssignedPriestChantPage } from '@/components/delegation/AssignedPriestChantPage'
+import { AssignedPriestProjectHistory } from '@/components/delegation/AssignedPriestProjectHistory'
 import { AlertCircle } from 'lucide-react'
 
 interface AssignmentData {
   projectId: string
   priestId: string
+  projectName: string
 }
+
+type TabType = 'chant' | 'history'
 
 export default function AssignedPriestPage() {
   const router = useRouter()
   const { user } = useAuth()
   const [assignmentCode, setAssignmentCode] = useState('')
   const [selectedAssignment, setSelectedAssignment] = useState<AssignmentData | null>(null)
+  const [activeTab, setActiveTab] = useState<TabType>('chant')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const supabase = createClient()
 
   if (!user) {
     return null
@@ -48,8 +55,6 @@ export default function AssignedPriestPage() {
     setIsSubmitting(true)
 
     try {
-      const supabase = createClient()
-
       // Look up the assignment code
       const { data, error: queryError } = await supabase
         .from('priest_assignments')
@@ -70,9 +75,22 @@ export default function AssignedPriestPage() {
         return
       }
 
+      // Fetch project name
+      const { data: projectData, error: projectError } = await (supabase
+        .from('delegation_projects') as any)
+        .select('name')
+        .eq('id', data.project_id)
+        .single()
+
+      if (projectError || !projectData) {
+        setError('Could not fetch project details.')
+        setIsSubmitting(false)
+        return
+      }
+
       // Claim the assignment by updating priest_id
-      const { error: claimError } = await supabase
-        .from('priest_assignments')
+      const { error: claimError } = await (supabase
+        .from('priest_assignments') as any)
         .update({ priest_id: user.id })
         .eq('assignment_code', assignmentCode.toUpperCase().trim())
         .single()
@@ -87,7 +105,9 @@ export default function AssignedPriestPage() {
       setSelectedAssignment({
         projectId: data.project_id,
         priestId: user.id,
+        projectName: projectData.name,
       })
+      setActiveTab('chant')
     } catch (err: any) {
       setError(err.message || 'Failed to validate assignment code')
       setIsSubmitting(false)
@@ -97,11 +117,46 @@ export default function AssignedPriestPage() {
   if (selectedAssignment) {
     return (
       <MainLayout>
-        <AssignedPriestDashboard
-          projectId={selectedAssignment.projectId}
-          priestId={selectedAssignment.priestId}
-          onBack={handleBackToHome}
-        />
+        {/* Tabs */}
+        <div className="flex gap-4 px-4 sm:px-6 pt-4 border-b border-white/10">
+          <button
+            onClick={() => setActiveTab('chant')}
+            className={`pb-3 px-2 font-medium transition-colors ${
+              activeTab === 'chant'
+                ? 'text-white border-b-2 border-sacred-500'
+                : 'text-white/60 hover:text-white'
+            }`}
+          >
+            Chant
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`pb-3 px-2 font-medium transition-colors ${
+              activeTab === 'history'
+                ? 'text-white border-b-2 border-sacred-500'
+                : 'text-white/60 hover:text-white'
+            }`}
+          >
+            History
+          </button>
+        </div>
+
+        {/* Tab content */}
+        <div className="flex-1">
+          {activeTab === 'chant' ? (
+            <AssignedPriestChantPage
+              projectId={selectedAssignment.projectId}
+              priestId={selectedAssignment.priestId}
+              projectName={selectedAssignment.projectName}
+              onNavigateToHistory={() => setActiveTab('history')}
+            />
+          ) : (
+            <AssignedPriestProjectHistory
+              projectId={selectedAssignment.projectId}
+              priestId={selectedAssignment.priestId}
+            />
+          )}
+        </div>
       </MainLayout>
     )
   }

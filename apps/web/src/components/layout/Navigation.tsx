@@ -24,7 +24,8 @@ const hostNavItems: NavItem[] = [
 ]
 
 const assignedPriestNavItems: NavItem[] = [
-  { href: '/delegation/assigned', label: 'Assigned', icon: Briefcase },
+  { href: '/delegation/assigned?tab=chant', label: 'Chant', icon: Play },
+  { href: '/delegation/assigned?tab=history', label: 'History', icon: Clock },
   { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
