@@ -70,7 +70,20 @@ export default function AssignedPriestPage() {
         return
       }
 
-      // Successfully found the assignment and verified email
+      // Claim the assignment by updating priest_id
+      const { error: claimError } = await supabase
+        .from('priest_assignments')
+        .update({ priest_id: user.id })
+        .eq('assignment_code', assignmentCode.toUpperCase().trim())
+        .single()
+
+      if (claimError) {
+        setError('Failed to claim assignment. Please try again.')
+        setIsSubmitting(false)
+        return
+      }
+
+      // Successfully claimed the assignment
       setSelectedAssignment({
         projectId: data.project_id,
         priestId: user.id,
