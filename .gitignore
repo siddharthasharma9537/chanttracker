@@ -64,3 +64,4 @@ yarn-error.log*
 # OS
 Thumbs.db
 .vercel
+.env*.local

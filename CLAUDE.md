@@ -21,7 +21,7 @@ Naming discrepancy: docs/README refer to the shared client as `supabaseClient.js
 
 ChantTracker is a Hindu chant/japa (mantra repetition) tracker. The intended design is **one backend, many thin clients**: all platforms talk to Supabase (managed Postgres + Auth + RLS) through a single shared JS client, with Cloudflare edge resources for caching/audio/community. There is no custom backend server — business logic lives in Postgres (RPCs + triggers + RLS).
 
-`packages/api/index.js` is the architectural center and the best file to read first. It defines the entire app's data contract as thin wrappers over `@supabase/supabase-js`. Note it reads env via `import.meta.env.VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` (Vite-style), so it assumes a Vite/bundler consumer.
+`packages/api/index.js` is the architectural center and the best file to read first. It defines the entire app's data contract as thin wrappers over `@supabase/supabase-js`. It reads env via `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (Next.js convention). See **[ENV.md](ENV.md)** for full environment variable configuration across local, Vercel, and Supabase.
 
 Core domain model (as encoded in `index.js`, backed by the not-yet-present schema):
 
