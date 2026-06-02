@@ -51,7 +51,7 @@ export function SignUpForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium mb-2 text-gray-900" style={{ color: '#111827' }}>
+        <label htmlFor="email" className="block text-sm font-medium mb-2 text-white" style={{ color: '#ffffff' }}>
           Email
         </label>
         <input
@@ -69,7 +69,7 @@ export function SignUpForm() {
       </div>
 
       <div>
-        <label htmlFor="displayName" className="block text-sm font-medium mb-2 text-gray-900" style={{ color: '#111827' }}>
+        <label htmlFor="displayName" className="block text-sm font-medium mb-2 text-white" style={{ color: '#ffffff' }}>
           Display Name (optional)
         </label>
         <input
@@ -82,7 +82,7 @@ export function SignUpForm() {
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium mb-2 text-gray-900" style={{ color: '#111827' }}>
+        <label htmlFor="password" className="block text-sm font-medium mb-2 text-white" style={{ color: '#ffffff' }}>
           Password
         </label>
         <input
