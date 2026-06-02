@@ -1,7 +1,6 @@
 {
-  "rootDirectory": "apps/web",
-  "buildCommand": "next build",
-  "installCommand": "pnpm install --recursive",
-  "devCommand": "next dev",
+  "buildCommand": "cd apps/web && next build",
+  "installCommand": "pnpm install",
+  "devCommand": "cd apps/web && next dev",
   "framework": "nextjs"
 }
