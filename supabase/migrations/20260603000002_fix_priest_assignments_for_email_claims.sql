@@ -62,13 +62,14 @@ CREATE INDEX IF NOT EXISTS idx_priest_assignments_priest_email
 -- STEP 5: Update RLS policies to support email-based claims
 -- ============================================================================
 
--- Drop the old SELECT policy that only allows priest_id match
+-- Drop the old SELECT policies that may cause recursion
 DROP POLICY IF EXISTS "priests_see_own_assignments" ON priest_assignments;
+DROP POLICY IF EXISTS "Priests can view their own assignments" ON priest_assignments;
 
--- New policy: Allow priest to see assignments in three ways:
+-- New policy: Allow priest to see assignments in two ways:
 -- 1. They are the assigned priest (priest_id matches) - for claimed assignments
--- 2. Assignment code is not null (anyone can lookup unclaimed by code)
--- 3. Their email matches the priest_email (for verification before claiming)
+-- 2. Assignment code is not null AND priest_id is NULL - for unclaimed by code
+-- NOTE: Removed subquery to prevent infinite recursion with projects table policies
 CREATE POLICY "priests_see_assignments" ON priest_assignments FOR SELECT
   USING (
     -- Own claimed assignments (priest_id is set and matches current user)
