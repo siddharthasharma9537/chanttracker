@@ -2,6 +2,7 @@
 
 import { Header } from './Header'
 import { Navigation } from './Navigation'
+import { Breadcrumbs } from './Breadcrumbs'
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -12,6 +13,9 @@ export function MainLayout({ children }: MainLayoutProps) {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <Header />
+
+      {/* Breadcrumbs */}
+      <Breadcrumbs />
 
       {/* Main Content with Sidebar */}
       <div className="flex flex-1 overflow-hidden pt-0">

@@ -180,3 +180,238 @@ export const dailyHistory = (uid, date) =>
   supabase.from('chant_sessions')
     .select('*, mantras(devanagari,transliteration,accent_color)')
     .eq('user_id', uid).eq('chant_date', date).order('started_at')
+
+/* ══════════════════════════════════════════════════════════════
+   HOST / DELEGATION SYSTEM: Project management + priest assignments
+   ══════════════════════════════════════════════════════════════ */
+
+/* ───────────────────── PROJECT MANAGEMENT ───────────────────── */
+
+/**
+ * create_project(host_priest_id, client_name, description, graha_ids)
+ * Creates a new delegation project with optional initial grahas.
+ * @param {UUID} hostPriestId - ID of priest hosting the project
+ * @param {string} clientName - Name of the client/requester
+ * @param {string} [description] - Optional project description
+ * @param {UUID[]} [grahaIds] - Array of graha IDs to include (default: 108000 target per graha)
+ * @returns {Promise} { project_id, status, total_target_count }
+ */
+export const createProject = (hostPriestId, clientName, description = null, grahaIds = null) =>
+  supabase.rpc('create_project', {
+    p_host_priest_id: hostPriestId,
+    p_client_name: clientName,
+    p_description: description,
+    p_graha_ids: grahaIds,
+  })
+
+/**
+ * assign_priests(project_id, priestAssignments)
+ * Bulk assigns priests to grahas within a project.
+ * @param {UUID} projectId - Project ID
+ * @param {Object[]} priestAssignments - Array of assignment objects:
+ *   { priest_id: UUID, priest_name: string, assigned_graha_ids: UUID[] }
+ * @returns {Promise} { success, assigned_count }
+ */
+export const assignPriests = (projectId, priestAssignments) =>
+  supabase.rpc('assign_priests', {
+    p_project_id: projectId,
+    p_priest_assignments: priestAssignments,
+  })
+
+/**
+ * get_project_status(project_id)
+ * Retrieves comprehensive project status with graha-level breakdown and priest assignments.
+ * @param {UUID} projectId - Project ID
+ * @returns {Promise} {
+ *   client_name, status, overall_completion_pct, total_target, total_completed,
+ *   graha_breakdown: [{graha_id, graha_name, target, completed, completion_pct, assigned_priests}...]
+ * }
+ */
+export const getProjectStatus = (projectId) =>
+  supabase.rpc('get_project_status', {
+    p_project_id: projectId,
+  })
+
+/* ───────────────────── PRIEST DASHBOARD ───────────────────── */
+
+/**
+ * get_priest_assignments(project_id, priest_id)
+ * Lists all assigned grahas for a priest within a project.
+ * @param {UUID} projectId - Project ID
+ * @param {UUID} priestId - Priest ID
+ * @returns {Promise} [{graha_id, graha_name, target, completed, completion_pct, assignment_type}...]
+ */
+export const getPriestAssignments = (projectId, priestId) =>
+  supabase.rpc('get_priest_assignments', {
+    p_project_id: projectId,
+    p_priest_id: priestId,
+  })
+
+/**
+ * get_priest_dashboard(project_id, priest_id)
+ * Returns assigned grahas + all incomplete grahas available for volunteering.
+ * @param {UUID} projectId - Project ID
+ * @param {UUID} priestId - Priest ID
+ * @returns {Promise} [{
+ *   graha_id, graha_name, target, completed, completion_pct,
+ *   assignment_type ('assigned'|'unassigned'),
+ *   can_volunteer (boolean)
+ * }...]
+ */
+export const getPriestDashboard = (projectId, priestId) =>
+  supabase.rpc('get_priest_dashboard', {
+    p_project_id: projectId,
+    p_priest_id: priestId,
+  })
+
+/* ────────────────────── SESSION LOGGING ─────────────────────── */
+
+/**
+ * log_delegation_session(project_id, priest_id, graha_id, count, duration_secs, assignment_type)
+ * Logs a chanting session for a priest on a graha within a project.
+ * Automatically updates project_grahas.completed_count and projects.overall_completion_pct.
+ * @param {UUID} projectId - Project ID
+ * @param {UUID} priestId - Priest ID logging the session
+ * @param {UUID} grahaId - Graha ID
+ * @param {number} count - Number of japas completed
+ * @param {number} [durationSecs] - Optional duration in seconds
+ * @param {string} [assignmentType] - 'assigned' or 'volunteer' (default: 'assigned')
+ * @returns {Promise} { session_id, session_date }
+ */
+export const logDelegationSession = (projectId, priestId, grahaId, count, durationSecs = null, assignmentType = 'assigned') =>
+  supabase.rpc('log_delegation_session', {
+    p_project_id: projectId,
+    p_priest_id: priestId,
+    p_graha_id: grahaId,
+    p_count: count,
+    p_duration_secs: durationSecs,
+    p_assignment_type: assignmentType,
+  })
+
+/* ──────────────────────── CONTRIBUTIONS ─────────────────────── */
+
+/**
+ * get_graha_contributions(project_id, graha_id)
+ * Aggregates all priests working on a specific graha within a project.
+ * @param {UUID} projectId - Project ID
+ * @param {UUID} grahaId - Graha ID
+ * @returns {Promise} [{priest_id, priest_name, completed_count, assignment_type, sessions_count}...]
+ */
+export const getGrahaContributions = (projectId, grahaId) =>
+  supabase.rpc('get_graha_contributions', {
+    p_project_id: projectId,
+    p_graha_id: grahaId,
+  })
+
+/**
+ * get_priest_contributions(project_id, priest_id)
+ * Shows both assigned and volunteer work for a priest across all grahas in a project.
+ * @param {UUID} projectId - Project ID
+ * @param {UUID} priestId - Priest ID
+ * @returns {Promise} [{
+ *   graha_id, graha_name, target, completed, completion_pct,
+ *   assignment_type, sessions_count
+ * }...]
+ */
+export const getPriestContributions = (projectId, priestId) =>
+  supabase.rpc('get_priest_contributions', {
+    p_project_id: projectId,
+    p_priest_id: priestId,
+  })
+
+/* ──────────────────────── HISTORY & REPORTS ─────────────────── */
+
+/**
+ * get_project_history(project_id, start_date, end_date, priest_id, graha_id)
+ * Retrieves detailed session history with optional filtering.
+ * @param {UUID} projectId - Project ID
+ * @param {Date|string} [startDate] - Filter from this date (YYYY-MM-DD)
+ * @param {Date|string} [endDate] - Filter to this date (YYYY-MM-DD)
+ * @param {UUID} [priestId] - Filter by priest
+ * @param {UUID} [grahaId] - Filter by graha
+ * @returns {Promise} [{
+ *   session_date, priest_name, priest_id, graha_name, graha_id,
+ *   count, duration_secs, assignment_type, session_id
+ * }...]
+ */
+export const getProjectHistory = (
+  projectId,
+  startDate = null,
+  endDate = null,
+  priestId = null,
+  grahaId = null
+) =>
+  supabase.rpc('get_project_history', {
+    p_project_id: projectId,
+    p_start_date: startDate,
+    p_end_date: endDate,
+    p_priest_id: priestId,
+    p_graha_id: grahaId,
+  })
+
+/**
+ * complete_delegation_project(project_id)
+ * Marks a project as completed with timestamp.
+ * @param {UUID} projectId - Project ID
+ * @returns {Promise} { success, completion_timestamp }
+ */
+export const completeDelegationProject = (projectId) =>
+  supabase.rpc('complete_delegation_project', {
+    p_project_id: projectId,
+  })
+
+/* ──────────────────── DELEGATION VIEWS (raw queries) ──────────── */
+
+/**
+ * listProjects(hostPriestId)
+ * Lists all projects hosted by a priest.
+ */
+export const listProjects = (hostPriestId) =>
+  supabase.from('projects')
+    .select('*')
+    .eq('host_priest_id', hostPriestId)
+    .order('created_at', { ascending: false })
+
+/**
+ * getProjectById(projectId)
+ * Retrieves a single project by ID.
+ */
+export const getProjectById = (projectId) =>
+  supabase.from('projects')
+    .select('*')
+    .eq('id', projectId)
+    .single()
+
+/**
+ * listDelegationSessions(projectId, limit)
+ * Lists recent delegation sessions for a project.
+ */
+export const listDelegationSessions = (projectId, limit = 50) =>
+  supabase.from('delegation_sessions')
+    .select('*, grahas(name), profiles(display_name)')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+/**
+ * Direct view access for analytics
+ * v_project_status — Project-level breakdown
+ * v_priest_contributions — Per-priest per-project summary
+ * v_graha_contributions — Per-graha contributor aggregation
+ */
+export const viewProjectStatus = (projectId) =>
+  supabase.from('v_project_status')
+    .select('*')
+    .eq('id', projectId)
+    .single()
+
+export const viewPriestContributions = (priestId) =>
+  supabase.from('v_priest_contributions')
+    .select('*')
+    .eq('priest_id', priestId)
+
+export const viewGrahaContributions = (projectId, grahaId) =>
+  supabase.from('v_graha_contributions')
+    .select('*')
+    .eq('project_id', projectId)
+    .eq('graha_id', grahaId)

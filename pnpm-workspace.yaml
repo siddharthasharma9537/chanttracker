@@ -1,0 +1,5 @@
+packages:
+  - 'apps/web'
+  - 'apps/ios'
+  - 'apps/android'
+  - 'packages/api'
