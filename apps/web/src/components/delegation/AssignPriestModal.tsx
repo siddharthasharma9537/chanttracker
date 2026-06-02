@@ -9,6 +9,7 @@ import { X, Copy, Check, AlertCircle } from 'lucide-react'
 interface AssignPriestModalProps {
   isOpen: boolean
   projectId: string
+  projectCode: string
   onClose: () => void
   onSuccess?: () => void
 }
@@ -16,6 +17,7 @@ interface AssignPriestModalProps {
 export function AssignPriestModal({
   isOpen,
   projectId,
+  projectCode,
   onClose,
   onSuccess,
 }: AssignPriestModalProps) {
@@ -48,7 +50,7 @@ export function AssignPriestModal({
       return
     }
 
-    const code = generateAssignmentCode(email, mobile)
+    const code = generateAssignmentCode(email, mobile, projectCode)
     setAssignmentCode(code)
   }
 

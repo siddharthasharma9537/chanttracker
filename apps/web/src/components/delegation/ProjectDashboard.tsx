@@ -310,12 +310,15 @@ export function ProjectDashboard({
       )}
 
       {/* Assign Priest Modal */}
-      <AssignPriestModal
-        isOpen={showAssignModal}
-        projectId={projectId}
-        onClose={() => setShowAssignModal(false)}
-        onSuccess={() => refetch()}
-      />
+      {projectData?.project_code && (
+        <AssignPriestModal
+          isOpen={showAssignModal}
+          projectId={projectId}
+          projectCode={projectData.project_code}
+          onClose={() => setShowAssignModal(false)}
+          onSuccess={() => refetch()}
+        />
+      )}
     </div>
   )
 }

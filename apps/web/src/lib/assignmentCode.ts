@@ -1,11 +1,17 @@
 /**
- * Generate a unique 6-character alphanumeric code from email and mobile number
- * Uses a deterministic hash to ensure same email+mobile always produces same code
+ * Generate a deterministic 6-character alphanumeric code from email, mobile, and project code
+ * Same email+mobile+projectCode always produces same code (for re-generation)
+ * Reset when: host changes work on project OR project completes
  */
-export function generateAssignmentCode(email: string, mobile: string): string {
-  const combined = `${email.toLowerCase()}${mobile.replace(/\D/g, '')}`
+export function generateAssignmentCode(
+  email: string,
+  mobile: string,
+  projectCode: string
+): string {
+  // Combine all three components for uniqueness
+  const combined = `${email.toLowerCase()}${mobile.replace(/\D/g, '')}${projectCode.toUpperCase()}`
 
-  // Simple hash function to generate a deterministic 6-char code
+  // Deterministic hash function
   let hash = 0
   for (let i = 0; i < combined.length; i++) {
     const char = combined.charCodeAt(i)

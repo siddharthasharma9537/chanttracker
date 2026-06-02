@@ -20,6 +20,7 @@ interface ProjectItem {
   priests_count?: number
   created_at?: string
   status?: string
+  project_code?: string
 }
 
 export default function ProjectsListPage() {
@@ -27,7 +28,7 @@ export default function ProjectsListPage() {
   const { isSignedIn, isLoading: authLoading } = useAuth()
   const { data: projects, isLoading: projectsLoading } = useProjectsList()
   const [filterMode, setFilterMode] = useState<'all' | 'host' | 'priest'>('all')
-  const [selectedProjectForAssign, setSelectedProjectForAssign] = useState<string | null>(null)
+  const [selectedProjectForAssign, setSelectedProjectForAssign] = useState<{ id: string; code: string } | null>(null)
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -215,7 +216,7 @@ export default function ProjectsListPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      setSelectedProjectForAssign(project.id)
+                      setSelectedProjectForAssign({ id: project.id, code: project.project_code || '' })
                     }}
                     className="px-3 py-2 bg-temple-500/20 hover:bg-temple-500/30 text-temple-300 rounded-lg font-medium transition-colors text-sm flex items-center gap-1"
                   >
@@ -238,7 +239,8 @@ export default function ProjectsListPage() {
       {selectedProjectForAssign && (
         <AssignPriestModal
           isOpen={!!selectedProjectForAssign}
-          projectId={selectedProjectForAssign}
+          projectId={selectedProjectForAssign.id}
+          projectCode={selectedProjectForAssign.code}
           onClose={() => setSelectedProjectForAssign(null)}
           onSuccess={() => {
             setSelectedProjectForAssign(null)

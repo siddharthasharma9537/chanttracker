@@ -17,6 +17,7 @@ interface GrahaBreakdown {
 }
 
 interface ProjectStatusData {
+  project_code: string
   client_name: string
   status: string
   overall_completion_pct: number
@@ -50,6 +51,7 @@ export function useDelegationProject(
       // Transform single RPC response to our format
       const result = data[0]
       return {
+        project_code: result.project_code || '',
         client_name: result.client_name,
         status: result.status,
         overall_completion_pct: result.overall_completion_pct,
