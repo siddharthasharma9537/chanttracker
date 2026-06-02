@@ -98,11 +98,14 @@ export function HostProjectForm() {
   const onSubmit = async (data: HostProjectFormData) => {
     try {
       setFormError(null)
+      console.log('🔍 DEBUG: Form data received:', JSON.stringify(data, null, 2))
 
       // Validate that at least one priest has assignments
       const hasValidAssignment = data.priestAssignments.some(
         (pa) => pa.assignedGrahas.length > 0
       )
+      console.log('🔍 DEBUG: hasValidAssignment:', hasValidAssignment)
+
       if (!hasValidAssignment) {
         setFormError(
           'Please assign at least one graha to one priest'
@@ -110,15 +113,18 @@ export function HostProjectForm() {
         return
       }
 
+      console.log('🔍 DEBUG: About to call createProjectMutation.mutateAsync')
       const result = await createProjectMutation.mutateAsync(data)
+      console.log('🔍 DEBUG: RPC result:', result)
 
       // Show success message and redirect
+      console.log('🔍 DEBUG: Redirecting to /delegation/projects/' + result.project_id)
       router.push(`/delegation/projects/${result.project_id}`)
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Failed to create project'
+      console.error('❌ Form submission error:', error)
       setFormError(message)
-      console.error('Form submission error:', error)
     }
   }
 
@@ -174,6 +180,7 @@ export function HostProjectForm() {
                 <>
                   <input
                     type="checkbox"
+                    name="selectedGrahas"
                     checked={field.value.includes(graha.id)}
                     onChange={(e) => {
                       const newValue = e.target.checked
