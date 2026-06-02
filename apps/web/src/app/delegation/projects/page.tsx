@@ -150,11 +150,18 @@ export default function ProjectsListPage() {
                 {/* Background accent */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-sacred-500/10 via-transparent to-transparent pointer-events-none" />
 
+                {/* Project Code Badge (top right) */}
+                {project.project_code && (
+                  <div className="absolute top-6 right-6 px-3 py-1 rounded-lg bg-sacred-500/20 border border-sacred-400/50 text-xs font-mono font-semibold text-sacred-300">
+                    {project.project_code}
+                  </div>
+                )}
+
                 {/* Content */}
                 <div className="relative z-10 flex-1">
                   {/* Header */}
                   <div className="mb-4">
-                    <h3 className="text-lg sm:text-xl font-bold text-white mb-1 line-clamp-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-white mb-1 line-clamp-2 pr-16">
                       {project.client_name}
                     </h3>
                     <p className="text-xs sm:text-sm text-white/60">

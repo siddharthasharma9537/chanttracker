@@ -228,7 +228,7 @@ export const assignPriests = (projectId, priestAssignments) =>
  * Retrieves comprehensive project status with graha-level breakdown and priest assignments.
  * @param {UUID} projectId - Project ID
  * @returns {Promise} {
- *   client_name, status, overall_completion_pct, total_target, total_completed,
+ *   project_code, client_name, status, overall_completion_pct, total_target, total_completed,
  *   graha_breakdown: [{graha_id, graha_name, target, completed, completion_pct, assigned_priests}...]
  * }
  */
