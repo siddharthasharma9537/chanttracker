@@ -39,7 +39,7 @@ export function Navigation() {
 
   const handleSwitchMode = () => {
     if (isDelegationPath) {
-      router.push('/dashboard')
+      router.push('/')
     } else {
       router.push('/delegation/projects')
     }
