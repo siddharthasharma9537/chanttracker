@@ -48,6 +48,7 @@ export function HostProjectForm() {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<HostProjectFormData>({
     resolver: zodResolver(hostProjectSchema),
@@ -313,10 +314,12 @@ export function HostProjectForm() {
                                     type="checkbox"
                                     checked={isSelected}
                                     onChange={(e) => {
+                                      const currentValue = field.value || []
                                       const newValue = e.target.checked
-                                        ? [...field.value, grahaId]
-                                        : field.value.filter((id) => id !== grahaId)
-                                      field.onChange(newValue)
+                                        ? [...currentValue, grahaId]
+                                        : currentValue.filter((id) => id !== grahaId)
+                                      // Use setValue to explicitly update the form state
+                                      setValue(`priestAssignments.${index}.assignedGrahas`, newValue)
                                     }}
                                     className="w-4 h-4 rounded border-gray-300 text-orange-600 cursor-pointer"
                                   />
