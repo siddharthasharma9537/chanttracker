@@ -184,7 +184,7 @@ export function AssignPriestModal({
           {/* Help Text */}
           {!assignmentCode && (
             <p className="text-sm text-gray-500">
-              Enter the priest's email and mobile number to generate a unique assignment code.
+              Enter the priest&apos;s email and mobile number to generate a unique assignment code.
             </p>
           )}
         </div>
