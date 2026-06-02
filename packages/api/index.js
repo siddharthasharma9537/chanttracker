@@ -4,8 +4,13 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const URL = process.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL
-const KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+const URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+if (!URL || !KEY) {
+  console.error('Missing Supabase environment variables:', { URL: !!URL, KEY: !!KEY })
+  throw new Error('Supabase configuration is missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY environment variables.')
+}
 
 export const supabase = createClient(URL, KEY, {
   auth: { persistSession: true, autoRefreshToken: true },
