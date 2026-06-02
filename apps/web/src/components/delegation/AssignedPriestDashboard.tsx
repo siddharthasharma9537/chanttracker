@@ -119,7 +119,7 @@ export function AssignedPriestDashboard({
         p_graha_id: params.grahaId,
         p_count: params.count,
         p_duration_secs: params.durationSecs,
-      })
+      } as any)
 
       if (error) throw error
     },
