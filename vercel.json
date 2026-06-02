@@ -1,6 +1,6 @@
 {
-  "buildCommand": "cd apps/web && next build",
-  "installCommand": "pnpm install",
-  "devCommand": "cd apps/web && next dev",
+  "buildCommand": "pnpm --filter @chanttracker/web build",
+  "installCommand": "pnpm install --recursive",
+  "devCommand": "pnpm --filter @chanttracker/web dev",
   "framework": "nextjs"
 }
