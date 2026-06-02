@@ -79,7 +79,12 @@ export function AssignPriestModal({
       onClose()
     },
     onError: (err: any) => {
-      setError(err.message || 'Failed to assign priest')
+      // Handle specific constraint violations
+      if (err.message?.includes('duplicate key') || err.message?.includes('unique constraint')) {
+        setError('This priest is already assigned to this project. Each priest can only be assigned once per project.')
+      } else {
+        setError(err.message || 'Failed to assign priest')
+      }
     },
   })
 
