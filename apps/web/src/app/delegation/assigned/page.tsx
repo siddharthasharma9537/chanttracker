@@ -55,7 +55,7 @@ export default function AssignedPriestPage() {
         .from('priest_assignments')
         .select('project_id, priest_email')
         .eq('assignment_code', assignmentCode.toUpperCase().trim())
-        .single()
+        .single() as { data: { project_id: string; priest_email: string } | null; error: any }
 
       if (queryError || !data) {
         setError('Invalid assignment code. Please check and try again.')
