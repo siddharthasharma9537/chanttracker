@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,8 +8,9 @@ import { z } from 'zod'
 import { Plus, Trash2 } from 'lucide-react'
 import { useGrahas, useCreateProject } from '@/hooks/useDelegation'
 import { useAuth } from '@/hooks/useAuth'
-import { HostProjectFormData, PriestAssignment } from '@/types/delegation'
+import { HostProjectFormData } from '@/types/delegation'
 
+// Validation schema matching backend requirements
 const hostProjectSchema = z.object({
   clientName: z
     .string()
@@ -20,20 +21,21 @@ const hostProjectSchema = z.object({
     .min(1, 'Please select at least one graha'),
   hostPriestName: z
     .string()
-    .min(2, 'Priest name must be at least 2 characters')
-    .max(100, 'Priest name must not exceed 100 characters'),
+    .min(2, 'Host priest name must be at least 2 characters')
+    .max(100, 'Host priest name must not exceed 100 characters'),
   priestAssignments: z
     .array(
       z.object({
         priestName: z
           .string()
-          .min(2, 'Priest name must be at least 2 characters'),
+          .min(2, 'Priest name must be at least 2 characters')
+          .max(100, 'Priest name must not exceed 100 characters'),
         assignedGrahas: z
           .array(z.string())
           .min(1, 'Each priest must be assigned at least one graha'),
       })
     )
-    .min(1, 'Please add at least one priest assignment'),
+    .min(1, 'Please add at least one priest'),
 })
 
 export function HostProjectForm() {
@@ -42,14 +44,15 @@ export function HostProjectForm() {
   const { data: grahas = [], isLoading: grahsLoading } = useGrahas()
   const createProjectMutation = useCreateProject()
   const [formError, setFormError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Initialize form with React Hook Form
   const {
     register,
     control,
     handleSubmit,
     watch,
-    setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<HostProjectFormData>({
     resolver: zodResolver(hostProjectSchema),
     defaultValues: {
@@ -66,335 +69,219 @@ export function HostProjectForm() {
   })
 
   const selectedGrahas = watch('selectedGrahas')
-  const priestAssignments = watch('priestAssignments')
 
-  // Store refs for each priest assignment dropdown
-  const dropdownRefsMap = useRef<Record<number, HTMLDetailsElement | null>>({})
-
+  // Redirect if not authenticated
   useEffect(() => {
     if (!user) {
       router.push('/signin')
     }
   }, [user, router])
 
-  // Handle click-outside for all dropdown refs
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      Object.values(dropdownRefsMap.current).forEach((dropdownRef) => {
-        if (
-          dropdownRef &&
-          !dropdownRef.contains(event.target as Node)
-        ) {
-          dropdownRef.open = false
-        }
-      })
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
-
+  // Handle form submission
   const onSubmit = async (data: HostProjectFormData) => {
     try {
       setFormError(null)
-      console.log('🔍 DEBUG: Form data received:', JSON.stringify(data, null, 2))
+      setIsSubmitting(true)
 
-      // Validate that at least one priest has assignments
-      const hasValidAssignment = data.priestAssignments.some(
-        (pa) => pa.assignedGrahas.length > 0
-      )
-      console.log('🔍 DEBUG: hasValidAssignment:', hasValidAssignment)
-
-      if (!hasValidAssignment) {
-        setFormError(
-          'Please assign at least one graha to one priest'
-        )
-        return
-      }
-
-      console.log('🔍 DEBUG: About to call createProjectMutation.mutateAsync')
+      // Call backend API through mutation
       const result = await createProjectMutation.mutateAsync(data)
-      console.log('🔍 DEBUG: RPC result:', result)
 
-      // Show success message and redirect
-      console.log('🔍 DEBUG: Redirecting to /delegation/projects/' + result.project_id)
+      // Redirect to project page on success
       router.push(`/delegation/projects/${result.project_id}`)
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Failed to create project'
-      console.error('❌ Form submission error:', error)
       setFormError(message)
+      setIsSubmitting(false)
     }
   }
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('📝 Form submit handler called - preventing default')
-    await handleSubmit(onSubmit)()
-  }
-
-  const isLoading = grahsLoading || isSubmitting || createProjectMutation.isPending
 
   if (!user) {
     return null
   }
 
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-6 max-w-2xl text-white">
-      {formError && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-          {formError}
-        </div>
-      )}
+    <div className="max-w-3xl">
+      <h1 className="text-3xl font-bold text-white mb-2">Create Host Project</h1>
+      <p className="text-gray-400 mb-8">Set up a new delegation project for client grahas</p>
 
-      {/* Client Name Section */}
-      <div>
-        <label
-          htmlFor="clientName"
-          className="block text-sm font-medium mb-2 text-white"
-        >
-          CLIENT NAME
-        </label>
-        <input
-          id="clientName"
-          type="text"
-          placeholder="Enter client name..."
-          {...register('clientName')}
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 !text-slate-900 bg-white placeholder-gray-400 ${
-            errors.clientName ? 'border-red-500' : 'border-gray-300'
-          }`}
-        />
-        {errors.clientName && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.clientName.message}
-          </p>
-        )}
-      </div>
-
-      {/* Grahas Section */}
-      <div className="grid grid-cols-3 gap-3">
-        {grahas.map((graha) => (
-          <div
-            key={graha.id}
-            className="flex items-center gap-2"
-          >
-            <Controller
-              name="selectedGrahas"
-              control={control}
-              render={({ field }) => (
-                <>
-                  <input
-                    type="checkbox"
-                    name="selectedGrahas"
-                    checked={field.value.includes(graha.id)}
-                    onChange={(e) => {
-                      const newValue = e.target.checked
-                        ? [...field.value, graha.id]
-                        : field.value.filter((id) => id !== graha.id)
-                      field.onChange(newValue)
-                    }}
-                    className="w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
-                  />
-                  <button
-                    type="button"
-                    disabled
-                    className="px-2 py-1 text-sm bg-gray-700 text-white rounded cursor-default border border-gray-600 opacity-75"
-                  >
-                    {graha.name}
-                  </button>
-                </>
-              )}
-            />
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        {/* Error Message */}
+        {formError && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {formError}
           </div>
-        ))}
-      </div>
-      {errors.selectedGrahas && (
-        <p className="text-red-500 text-sm mt-1">
-          {errors.selectedGrahas.message}
-        </p>
-      )}
-
-      {/* Host Priest Name Section */}
-      <div>
-        <label
-          htmlFor="hostPriestName"
-          className="block text-sm font-medium mb-2 text-white"
-        >
-          HOST PRIEST NAME
-        </label>
-        <input
-          id="hostPriestName"
-          type="text"
-          placeholder="Enter your name..."
-          {...register('hostPriestName')}
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 !text-slate-900 bg-white placeholder-gray-400 ${
-            errors.hostPriestName ? 'border-red-500' : 'border-gray-300'
-          }`}
-        />
-        {errors.hostPriestName && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.hostPriestName.message}
-          </p>
         )}
-      </div>
 
-      {/* Priest Assignments Section */}
-      <div>
-        <label className="block text-sm font-medium mb-2 text-white">
-          ASSIGN PRIESTS TO GRAHAS
-        </label>
-        <div className="space-y-4">
-          {fields.map((field, index) => (
-            <div key={field.id} className="p-4 border border-gray-300 rounded-lg bg-white">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-white">
-                  Priest {index + 1}
-                </span>
-                {fields.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => remove(index)}
-                    className="text-red-600 hover:text-red-700 text-sm flex items-center gap-1"
-                  >
-                    <Trash2 size={16} />
-                    Remove
-                  </button>
-                )}
-              </div>
+        {/* Client Name */}
+        <div>
+          <label htmlFor="clientName" className="block text-sm font-medium text-white mb-2">
+            CLIENT NAME
+          </label>
+          <input
+            id="clientName"
+            type="text"
+            placeholder="Enter client name"
+            {...register('clientName')}
+            className={`w-full px-4 py-2 border rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+              errors.clientName ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+          {errors.clientName && (
+            <p className="text-red-500 text-sm mt-1">{errors.clientName.message}</p>
+          )}
+        </div>
 
-              {/* Priest Name Input */}
-              <div className="mb-3">
+        {/* Select Grahas */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-3">SELECT GRAHAS</label>
+          <div className="grid grid-cols-3 gap-3">
+            {grahas.map((graha) => (
+              <label key={graha.id} className="flex items-center gap-2 cursor-pointer">
                 <input
-                  type="text"
-                  placeholder="Priest name..."
-                  {...register(`priestAssignments.${index}.priestName`)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 !text-slate-900 bg-white placeholder-gray-400 ${
-                    errors.priestAssignments?.[index]?.priestName
-                      ? 'border-red-500'
-                      : 'border-gray-300'
-                  }`}
+                  type="checkbox"
+                  value={graha.id}
+                  {...register('selectedGrahas')}
+                  className="w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
                 />
-                {errors.priestAssignments?.[index]?.priestName && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.priestAssignments[index]?.priestName?.message}
-                  </p>
-                )}
-              </div>
+                <span className="text-white text-sm">{graha.name}</span>
+              </label>
+            ))}
+          </div>
+          {errors.selectedGrahas && (
+            <p className="text-red-500 text-sm mt-2">{errors.selectedGrahas.message}</p>
+          )}
+        </div>
 
-              {/* Grahas Multiselect Dropdown for Priest Assignment */}
-              <Controller
-                name={`priestAssignments.${index}.assignedGrahas`}
-                control={control}
-                render={({ field }) => (
+        {/* Host Priest Name */}
+        <div>
+          <label htmlFor="hostPriestName" className="block text-sm font-medium text-white mb-2">
+            HOST PRIEST NAME
+          </label>
+          <input
+            id="hostPriestName"
+            type="text"
+            placeholder="Enter your name"
+            {...register('hostPriestName')}
+            className={`w-full px-4 py-2 border rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+              errors.hostPriestName ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+          {errors.hostPriestName && (
+            <p className="text-red-500 text-sm mt-1">{errors.hostPriestName.message}</p>
+          )}
+        </div>
+
+        {/* Priest Assignments */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-4">ASSIGN PRIESTS TO GRAHAS</label>
+          <div className="space-y-4">
+            {fields.map((field, index) => (
+              <div key={field.id} className="border border-gray-300 rounded-lg p-4 bg-gray-800">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-white font-medium">Priest {index + 1}</h4>
+                  {fields.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="text-red-500 hover:text-red-600 flex items-center gap-1"
+                    >
+                      <Trash2 size={16} />
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                {/* Priest Name */}
+                <div className="mb-4">
+                  <label className="block text-sm text-gray-300 mb-2">Priest Name</label>
+                  <input
+                    type="text"
+                    placeholder="Enter priest name"
+                    {...register(`priestAssignments.${index}.priestName`)}
+                    className={`w-full px-4 py-2 border rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                      errors.priestAssignments?.[index]?.priestName
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    }`}
+                  />
+                  {errors.priestAssignments?.[index]?.priestName && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.priestAssignments[index]?.priestName?.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Assign Grahas */}
+                <div>
+                  <label className="block text-sm text-gray-300 mb-2">
+                    Assign Grahas ({selectedGrahas.length} available)
+                  </label>
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">
-                      Select Grahas for {priestAssignments[index]?.priestName || `Priest ${index + 1}`}
-                    </label>
                     {selectedGrahas.length > 0 ? (
-                      <div className="relative">
-                        <details ref={(el) => {
-                          if (el) dropdownRefsMap.current[index] = el
-                        }} className="group">
-                          <summary className="cursor-pointer px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm list-none hover:bg-gray-50">
-                            <div className="flex items-center justify-between">
-                              <span>
-                                {field.value.length} of {selectedGrahas.length} selected
-                              </span>
-                              <span className="text-gray-400 group-open:rotate-180 transition-transform">
-                                ▼
-                              </span>
-                            </div>
-                          </summary>
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
-                            {selectedGrahas.map((grahaId) => {
-                              const graha = grahas.find((g) => g.id === grahaId)
-                              const isSelected = field.value.includes(grahaId)
-                              return (
-                                <label
-                                  key={grahaId}
-                                  className="flex items-center px-3 py-2 border-b border-gray-100 hover:bg-orange-50 cursor-pointer"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={isSelected}
-                                    onChange={(e) => {
-                                      const currentValue = field.value || []
-                                      const newValue = e.target.checked
-                                        ? [...currentValue, grahaId]
-                                        : currentValue.filter((id) => id !== grahaId)
-                                      // Use setValue to explicitly update the form state
-                                      setValue(`priestAssignments.${index}.assignedGrahas`, newValue)
-                                    }}
-                                    className="w-4 h-4 rounded border-gray-300 text-orange-600 cursor-pointer"
-                                  />
-                                  <span className="ml-2 text-sm text-gray-900">
-                                    {graha?.name}
-                                  </span>
-                                </label>
-                              )
-                            })}
-                          </div>
-                        </details>
-                      </div>
+                      selectedGrahas.map((grahaId) => {
+                        const graha = grahas.find((g) => g.id === grahaId)
+                        return (
+                          <label
+                            key={grahaId}
+                            className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-700 rounded"
+                          >
+                            <input
+                              type="checkbox"
+                              value={grahaId}
+                              {...register(`priestAssignments.${index}.assignedGrahas`)}
+                              className="w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                            />
+                            <span className="text-white text-sm">{graha?.name}</span>
+                          </label>
+                        )
+                      })
                     ) : (
-                      <p className="text-sm text-gray-500 py-2">
-                        Select grahas above to assign to this priest
-                      </p>
+                      <p className="text-gray-400 text-sm">Select grahas above first</p>
                     )}
                   </div>
-                )}
-              />
-              {errors.priestAssignments?.[index]?.assignedGrahas && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.priestAssignments[index]?.assignedGrahas?.message}
-                </p>
-              )}
-            </div>
-          ))}
+                  {errors.priestAssignments?.[index]?.assignedGrahas && (
+                    <p className="text-red-500 text-sm mt-2">
+                      {errors.priestAssignments[index]?.assignedGrahas?.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {errors.priestAssignments?.root && (
+            <p className="text-red-500 text-sm mt-2">{errors.priestAssignments.root.message}</p>
+          )}
+
+          <button
+            type="button"
+            onClick={() => append({ priestName: '', assignedGrahas: [] })}
+            className="mt-4 flex items-center gap-2 text-orange-500 hover:text-orange-600 font-medium text-sm"
+          >
+            <Plus size={16} />
+            Add Priest
+          </button>
         </div>
 
-        {errors.priestAssignments && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.priestAssignments.message}
-          </p>
-        )}
-
-        {/* Add More Priests Button */}
-        <button
-          type="button"
-          onClick={() =>
-            append({ priestName: '', assignedGrahas: [] })
-          }
-          className="mt-4 flex items-center gap-2 px-4 py-2 text-orange-600 hover:text-orange-700 font-medium text-sm"
-        >
-          <Plus size={16} />
-          Add More Priests
-        </button>
-      </div>
-
-      {/* Form Actions */}
-      <div className="flex gap-3 pt-4">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-medium py-3 rounded-lg transition"
-        >
-          {isLoading
-            ? createProjectMutation.isPending
-              ? 'Creating Project...'
-              : 'Loading...'
-            : 'START'}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-3 rounded-lg transition"
-        >
-          CANCEL
-        </button>
-      </div>
-    </form>
+        {/* Submit Buttons */}
+        <div className="flex gap-3 pt-4">
+          <button
+            type="submit"
+            disabled={isSubmitting || grahsLoading}
+            className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-medium py-3 rounded-lg transition"
+          >
+            {isSubmitting ? 'Creating Project...' : 'START'}
+          </button>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 rounded-lg transition"
+          >
+            CANCEL
+          </button>
+        </div>
+      </form>
+    </div>
   )
 }
