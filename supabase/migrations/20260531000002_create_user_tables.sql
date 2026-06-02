@@ -27,7 +27,7 @@ CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT
 CREATE TABLE IF NOT EXISTS chant_sessions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  mantra_id uuid REFERENCES mantras(id),
+  mantra_id uuid,  -- REFERENCES mantras(id) - added in later migration
   mode text CHECK (mode IN ('counter', 'mala', 'voice')),
   count integer DEFAULT 0,
   target integer DEFAULT 108,
@@ -59,7 +59,7 @@ CREATE INDEX idx_chant_sessions_user_status ON chant_sessions(user_id, session_s
 CREATE TABLE IF NOT EXISTS sankalpas (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  mantra_id uuid NOT NULL REFERENCES mantras(id),
+  mantra_id uuid NOT NULL,  -- REFERENCES mantras(id) - added in later migration
   for_date date DEFAULT CURRENT_DATE,
   target_count integer DEFAULT 108,
   achieved_count integer DEFAULT 0,
@@ -84,7 +84,7 @@ CREATE INDEX idx_sankalpas_user_date ON sankalpas(user_id, for_date);
 CREATE TABLE IF NOT EXISTS anushthanas (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  mantra_id uuid NOT NULL REFERENCES mantras(id),
+  mantra_id uuid NOT NULL,  -- REFERENCES mantras(id) - added in later migration
   title text NOT NULL,
   intention text,
   daily_target_count integer DEFAULT 108,
