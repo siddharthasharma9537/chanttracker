@@ -111,7 +111,6 @@ export function SessionItem({
                     showLabel={false}
                     variant="linear"
                     size="sm"
-                    className="progress-glow"
                   />
                 </div>
               </div>
