@@ -92,7 +92,7 @@ export function Navigation() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 w-64 h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 flex-col z-30 pt-20">
+      <aside className="hidden lg:flex fixed left-0 top-0 w-64 h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 flex-col z-30 pt-28">
         <nav className="flex-1 px-4 py-6">
           {/* Section Indicator */}
           <div className="mb-6 px-4 py-2 rounded-lg bg-white/5 border border-white/10">

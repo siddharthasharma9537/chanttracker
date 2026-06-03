@@ -113,7 +113,7 @@ export default function ProjectProgressPage() {
         </button>
 
         {/* Header Section */}
-        <div className="mb-12">
+        <div className="mb-8">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-3" style={{ fontFamily: 'Merriweather, serif' }}>
             {projectData.name}
           </h1>
@@ -129,7 +129,7 @@ export default function ProjectProgressPage() {
         </div>
 
         {/* Overall Progress Card */}
-        <div className="glassmorphic rounded-2xl p-8 sm:p-10 mb-8">
+        <div className="glassmorphic rounded-2xl p-8 sm:p-10 mb-8 mt-4">
           <h2 className="text-2xl font-bold text-white mb-8">Overall Progress</h2>
 
           <div className="mb-8">

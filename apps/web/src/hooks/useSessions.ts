@@ -220,9 +220,16 @@ export function useSessions(limit = 50) {
   return useQuery({
     queryKey: ['sessions', limit],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
       const { data, error } = await supabase
         .from('chant_sessions')
         .select('*')
+        .eq('user_id', user.id)
         .order('started_at', { ascending: false })
         .limit(limit)
 
@@ -299,9 +306,17 @@ export function useStartSession() {
   return useMutation({
     mutationFn: async (mantraId: string) => {
       console.log('[useSessions] Inserting session with mantraId:', mantraId)
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
       const { data, error } = await (supabase
         .from('chant_sessions') as any)
         .insert({
+          user_id: user.id,
           mantra_id: mantraId,
           count: 0,
           session_status: 'active',

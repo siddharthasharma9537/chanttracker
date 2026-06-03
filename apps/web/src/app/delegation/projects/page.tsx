@@ -148,12 +148,12 @@ export default function ProjectsListPage() {
                   >
                     {/* Header with Title and Date */}
                     <div className="mb-6 pb-4 border-b border-white/10">
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <h3 className="text-lg font-bold text-white line-clamp-2 flex-1">
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <h3 className="text-2xl font-bold text-white line-clamp-2 flex-1">
                           {project.client_name}
                         </h3>
                         {project.status && (
-                          <Badge variant={project.status === 'active' ? 'success' : 'info'} size="sm">
+                          <Badge variant={project.status === 'active' ? 'success' : 'info'} size="sm" className="flex-shrink-0 mt-1">
                             {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                           </Badge>
                         )}

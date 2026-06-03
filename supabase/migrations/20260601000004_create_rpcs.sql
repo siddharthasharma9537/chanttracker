@@ -11,16 +11,14 @@ BEGIN
     CASE WHEN COALESCE(SUM(COALESCE(s.target_count, 0)), 0) > 0 THEN
       ROUND(100.0 * COALESCE(SUM(cs.count), 0) / NULLIF(SUM(COALESCE(s.target_count, 0)), 0))::INT
     ELSE 0 END as pct,
-    COALESCE(MAX(str.current_streak), 0)::INT as streak,
+    COALESCE((SELECT current_streak FROM streaks WHERE user_id = auth.uid()), 0)::INT as streak,
     (SELECT COUNT(*)::INT FROM chant_sessions WHERE user_id = auth.uid())::INT as total
   FROM (
     SELECT COUNT(*) as count, sankalpa_id FROM chant_sessions
     WHERE user_id = auth.uid() AND DATE(started_at) = CURRENT_DATE
     GROUP BY sankalpa_id
   ) cs
-  LEFT JOIN sankalpas s ON cs.sankalpa_id = s.id AND s.for_date = CURRENT_DATE
-  LEFT JOIN streaks str ON str.user_id = auth.uid()
-  GROUP BY cs.sankalpa_id, s.id, s.for_date;
+  LEFT JOIN sankalpas s ON cs.sankalpa_id = s.id AND s.for_date = CURRENT_DATE;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

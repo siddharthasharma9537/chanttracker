@@ -2,6 +2,7 @@
 
 import { Clock, Circle, CheckCircle2, XCircle } from 'lucide-react'
 import { Session } from '@/hooks/useSessions'
+import { Progress } from '@/components/feedback/Progress'
 
 interface SessionItemProps {
   session: Session
@@ -34,7 +35,8 @@ export function SessionItem({
 
   const isAbandoned = session.session_status === 'abandoned'
   const isIncomplete = session.session_status === 'active'
-  const isCompleted = session.session_status === 'completed'
+  const isCompleted = session.session_status === 'completed' || (session.count && session.target && session.count >= session.target)
+  const progressPercent = session.target ? Math.min((session.count / session.target) * 100, 100) : 0
 
   return (
     <div className="glassmorphic overflow-hidden hover:bg-white/20 transition-all duration-300 group">
@@ -59,7 +61,7 @@ export function SessionItem({
                   {isAbandoned && (
                     <XCircle className="w-5 h-5 text-red-400" />
                   )}
-                  {isIncomplete && (
+                  {isIncomplete && !isCompleted && (
                     <Circle className="w-5 h-5 text-amber-400" />
                   )}
                 </div>
@@ -76,19 +78,24 @@ export function SessionItem({
               </div>
 
               {/* Status Badge */}
-              {(isAbandoned || isIncomplete) && (
-                <div className="mt-2 inline-flex">
-                  <span
-                    className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      isAbandoned
-                        ? 'bg-red-500/30 text-red-200 border border-red-500/50'
-                        : 'bg-amber-500/30 text-amber-200 border border-amber-500/50'
-                    }`}
-                  >
-                    {isAbandoned ? 'Abandoned' : 'In Progress'}
-                  </span>
-                </div>
-              )}
+              <div className="mt-2 inline-flex">
+                <span
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                    isCompleted
+                      ? 'bg-green-500/30 text-green-200 border border-green-500/50'
+                      : isAbandoned
+                      ? 'bg-red-500/30 text-red-200 border border-red-500/50'
+                      : 'bg-amber-500/30 text-amber-200 border border-amber-500/50'
+                  }`}
+                >
+                  {isCompleted ? '✓ Completed' : isAbandoned ? 'Abandoned' : 'In Progress'}
+                </span>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mt-3 w-full max-w-xs">
+                <Progress value={progressPercent} showLabel={false} variant="linear" size="sm" />
+              </div>
             </div>
 
             {/* Stats Section */}

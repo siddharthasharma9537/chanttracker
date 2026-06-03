@@ -25,16 +25,24 @@ export function Header() {
     return parts.map((p) => p[0]).join('').toUpperCase().slice(0, 2)
   }
 
+  const getDisplayName = (email?: string) => {
+    if (!email) return 'User'
+    // Extract username and show first 6 chars max
+    const username = email.split('@')[0].toLowerCase()
+    const displayName = username.charAt(0).toUpperCase() + username.slice(1, 6)
+    return displayName
+  }
+
   return (
-    <header className="bg-white/10 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40 lg:pl-64">
-      <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+    <header className="bg-white/10 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40 lg:pl-72">
+      <div className="px-4 sm:px-6 lg:px-10 py-3 sm:py-4 lg:py-4">
         <div className="flex items-center justify-between">
           {/* Logo/Branding */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-3 sm:gap-4 lg:gap-5">
             <div className="w-10 h-10 bg-gradient-to-br from-sacred-500 to-amber-500 rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-lg">☮</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white hidden sm:block">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white hidden sm:block tracking-tight">
               ChantTracker
             </h1>
           </div>
@@ -50,7 +58,7 @@ export function Header() {
                 {getInitials(user?.email)}
               </div>
               <span className="text-sm font-medium text-white/90 hidden sm:block">
-                {user?.email?.split('@')[0] || 'User'}
+                {getDisplayName(user?.email)}
               </span>
             </button>
 
