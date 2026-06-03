@@ -66,10 +66,11 @@ export function Breadcrumbs() {
 
   return (
     <nav
-      className="sticky top-16 z-20 bg-white/5 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 lg:px-8 py-2"
+      className="sticky top-16 z-20 bg-white/5 backdrop-blur-md border-b border-white/10"
       aria-label="Breadcrumb"
     >
-      <ol className="flex items-center gap-2 text-sm">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+        <ol className="flex items-center gap-2 text-sm">
         {breadcrumbs.map((crumb, index) => (
           <li key={crumb.href} className="flex items-center gap-2">
             {index === 0 ? (
@@ -97,7 +98,8 @@ export function Breadcrumbs() {
             )}
           </li>
         ))}
-      </ol>
+        </ol>
+      </div>
     </nav>
   )
 }

@@ -27,7 +27,7 @@ export function Header() {
 
   return (
     <header className="bg-white/10 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo/Branding */}
           <div className="flex items-center gap-2 sm:gap-3">
