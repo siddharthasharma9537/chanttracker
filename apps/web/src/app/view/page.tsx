@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MainLayout } from '@/components/layout/MainLayout'
+import { Zap } from 'lucide-react'
 
 export default function ClientViewPage() {
   const router = useRouter()
@@ -30,86 +31,96 @@ export default function ClientViewPage() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-orange-600 to-yellow-600 text-white py-8 sm:py-12">
-          <div className="max-w-4xl mx-auto px-4">
-            <h1 className="text-3xl sm:text-4xl font-bold">Track Project Progress</h1>
-            <p className="text-orange-100 mt-2">Enter your project code to view real-time progress</p>
-          </div>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        {/* Header Section */}
+        <div className="mb-12 sm:mb-16">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-3" style={{ fontFamily: 'Merriweather, serif' }}>
+            Track Project Progress
+          </h1>
+          <p className="text-lg sm:text-xl text-white/70 font-light max-w-2xl">
+            Enter your project code to view real-time updates on all grahas
+          </p>
         </div>
 
-        {/* Main Content */}
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 border border-orange-200">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+        {/* Main Card */}
+        <div className="glassmorphic rounded-2xl p-8 sm:p-12 mb-8">
+          <div className="text-center mb-10">
+            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
+              <Zap className="w-8 h-8 text-white/70" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">Enter Project Code</h2>
+            <p className="text-white/70 mt-2 max-w-lg mx-auto">
+              Your host priest will share an 8-character code that grants you access to view the project progress
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-6">
+            <div>
+              <label htmlFor="code" className="block text-sm font-semibold text-white/90 mb-3">
+                Project Code
+              </label>
+              <div className="relative">
+                <input
+                  id="code"
+                  type="text"
+                  placeholder="e.g., ABC12345"
+                  value={projectCode}
+                  onChange={(e) => {
+                    setProjectCode(e.target.value.toUpperCase())
+                    setError('')
+                  }}
+                  maxLength={8}
+                  className="w-full px-4 py-3 text-center text-lg font-mono bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-sacred-400/50 focus:ring-2 focus:ring-sacred-500/20 transition text-white placeholder-white/40"
+                />
+                <div className="absolute right-4 top-3 text-white/50 text-sm">
+                  {projectCode.length}/8
+                </div>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Enter Project Code</h2>
-              <p className="text-gray-600 mt-2">Share your project code to track progress in real-time</p>
+
+              {error && (
+                <p className="text-red-400/90 text-sm mt-2 font-medium">{error}</p>
+              )}
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="code" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Project Code
-                </label>
-                <div className="relative">
-                  <input
-                    id="code"
-                    type="text"
-                    placeholder="e.g., ABC12345"
-                    value={projectCode}
-                    onChange={(e) => {
-                      setProjectCode(e.target.value.toUpperCase())
-                      setError('')
-                    }}
-                    maxLength={8}
-                    className="w-full px-4 py-3 text-center text-lg font-mono border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition"
-                  />
-                  <div className="absolute right-4 top-3 text-gray-500 text-sm">
-                    {projectCode.length}/8
-                  </div>
-                </div>
+            <button
+              type="submit"
+              className="w-full px-6 py-3 rounded-xl bg-sacred-500/20 border border-sacred-400/50 text-white font-semibold hover:bg-sacred-500/30 hover:border-sacred-400/70 transition-all duration-300 hover:shadow-lg hover:shadow-sacred-500/20 active:scale-95"
+            >
+              View Progress
+            </button>
+          </form>
 
-                {error && (
-                  <p className="text-red-600 text-sm mt-2 font-medium">{error}</p>
-                )}
-
-                <p className="text-gray-600 text-sm mt-3">
-                  💡 Your host priest will share this code with you to track the project progress.
+          {/* Info Section */}
+          <div className="mt-10 pt-8 border-t border-white/10">
+            <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider mb-4">How it works</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-white/5 rounded-lg p-4">
+                <p className="text-white/70 text-sm">
+                  ✓ Enter the project code shared by your host priest
                 </p>
               </div>
-
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-700 hover:to-yellow-700 text-white font-semibold py-3 px-4 rounded-lg transition transform hover:scale-105 active:scale-95"
-              >
-                View Progress
-              </button>
-            </form>
-
-            {/* Info Box */}
-            <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-900 mb-2">ℹ️ How it works</h3>
-              <ul className="text-blue-800 text-sm space-y-1">
-                <li>✓ Enter the 8-character project code shared by your host priest</li>
-                <li>✓ View real-time progress of all grahas (mantras)</li>
-                <li>✓ See completion percentages and daily targets</li>
-                <li>✓ Track which priests are assigned to each graha</li>
-              </ul>
+              <div className="bg-white/5 rounded-lg p-4">
+                <p className="text-white/70 text-sm">
+                  ✓ View real-time progress of all grahas
+                </p>
+              </div>
+              <div className="bg-white/5 rounded-lg p-4">
+                <p className="text-white/70 text-sm">
+                  ✓ See completion percentages and targets
+                </p>
+              </div>
+              <div className="bg-white/5 rounded-lg p-4">
+                <p className="text-white/70 text-sm">
+                  ✓ Track priest assignments per graha
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="bg-gray-100 py-8 mt-12">
-          <div className="max-w-4xl mx-auto px-4 text-center text-gray-600">
-            <p>🙏 ChantTracker • Track your spiritual progress in real-time</p>
-          </div>
+        {/* Footer Info */}
+        <div className="text-center text-white/50 text-sm">
+          <p>🙏 Access projects shared with you to track spiritual progress</p>
         </div>
       </div>
     </MainLayout>
