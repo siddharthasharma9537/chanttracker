@@ -388,6 +388,64 @@ export const getProjectById = (projectId) =>
     .single()
 
 /**
+ * getProjectByCode(projectCode)
+ * Retrieves a project by its 8-character public code, along with grahas and progress.
+ * Used for client/observer view to track project progress without authentication.
+ */
+export const getProjectByCode = async (projectCode) => {
+  const { data: project, error: projectError } = await supabase
+    .from('projects')
+    .select('id, name, client_name, status, project_code, host_priest_id, created_at')
+    .eq('project_code', projectCode.toUpperCase())
+    .single()
+
+  if (projectError || !project) {
+    throw new Error(projectError?.message || 'Project not found')
+  }
+
+  // Fetch grahas and their progress for this project
+  const { data: grahas, error: grahasError } = await supabase
+    .from('project_grahas')
+    .select(`
+      id,
+      graha_id,
+      total_target,
+      completed_count,
+      status,
+      priest_id,
+      grahas!inner(name, deity_name),
+      profiles(display_name)
+    `)
+    .eq('project_id', project.id)
+    .order('created_at', { ascending: true })
+
+  if (grahasError) {
+    console.error('Error fetching grahas:', grahasError)
+    return {
+      ...project,
+      grahas: []
+    }
+  }
+
+  // Transform grahas data
+  const transformedGrahas = (grahas || []).map(pg => ({
+    id: pg.id,
+    grahaId: pg.graha_id,
+    name: pg.grahas?.name || 'Unknown Graha',
+    deityName: pg.grahas?.deity_name || '',
+    total_target: pg.total_target || 0,
+    completed: pg.completed_count || 0,
+    status: pg.status || 'pending',
+    priests: pg.priest_id && pg.profiles ? [pg.profiles.display_name] : []
+  }))
+
+  return {
+    ...project,
+    grahas: transformedGrahas
+  }
+}
+
+/**
  * listDelegationSessions(projectId, limit)
  * Lists recent delegation sessions for a project.
  */
