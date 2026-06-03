@@ -185,3 +185,21 @@
     background-color: var(--color-info);
   }
 }
+
+/* ================================================================
+   GLOW EFFECT
+   ================================================================ */
+
+.linearFill {
+  filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.4)) drop-shadow(0 0 8px rgba(34, 197, 94, 0.2));
+  animation: progressGlow 2s ease-in-out infinite;
+}
+
+@keyframes progressGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.4)) drop-shadow(0 0 8px rgba(34, 197, 94, 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.6)) drop-shadow(0 0 12px rgba(34, 197, 94, 0.3));
+  }
+}

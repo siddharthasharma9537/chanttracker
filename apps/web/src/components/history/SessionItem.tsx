@@ -92,9 +92,28 @@ export function SessionItem({
                 </span>
               </div>
 
-              {/* Progress Bar */}
+              {/* Progress Bar with Percentage */}
               <div className="mt-3 w-full max-w-xs">
-                <Progress value={progressPercent} showLabel={false} variant="linear" size="sm" />
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs text-white/60 font-medium">Progress</div>
+                  <div className="text-sm font-bold" style={{
+                    color: progressPercent <= 25 ? '#ef4444' :
+                           progressPercent <= 50 ? '#f97316' :
+                           progressPercent <= 75 ? '#eab308' :
+                           '#22c55e'
+                  }}>
+                    {Math.round(progressPercent)}%
+                  </div>
+                </div>
+                <div className="relative">
+                  <Progress
+                    value={progressPercent}
+                    showLabel={false}
+                    variant="linear"
+                    size="sm"
+                    className="progress-glow"
+                  />
+                </div>
               </div>
             </div>
 
