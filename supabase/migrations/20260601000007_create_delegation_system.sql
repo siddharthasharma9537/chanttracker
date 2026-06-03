@@ -277,33 +277,9 @@ CREATE INDEX idx_delegation_sessions_user_project ON delegation_sessions(user_id
 CREATE INDEX idx_delegation_sessions_created_at ON delegation_sessions(created_at);
 
 -- ============================================================================
--- 6. VIEWS: Aggregations and reporting
+-- 6. VIEWS: Aggregations and reporting (reserved for future use)
 -- ============================================================================
-
--- View: Project status with graha completion percentages
-
-
--- ============================================================================
--- VIEWS SECTION
--- ============================================================================
-CREATE OR REPLACE VIEW v_project_priests AS
-SELECT
-  p.id as project_id,
-  p.name as project_name,
-  pa.priest_id,
-  pr.display_name as priest_name,
-  pa.assignment_type,
-  COUNT(DISTINCT ds.id) as total_sessions,
-  COALESCE(SUM(CASE WHEN ds.assignment_type = pa.assignment_type THEN ds.count ELSE 0 END), 0) as total_count,
-  MAX(ds.ended_at) as last_activity_at,
-  array_agg(DISTINCT g.name) FILTER (WHERE g.name IS NOT NULL) as assigned_grahas
-FROM projects p
-LEFT JOIN priest_assignments pa ON p.id = pa.project_id
-LEFT JOIN profiles pr ON pa.priest_id = pr.id
-LEFT JOIN delegation_sessions ds ON p.id = ds.project_id AND pa.priest_id = ds.user_id
-LEFT JOIN project_grahas pg ON p.id = pg.project_id
-LEFT JOIN grahas g ON pg.graha_id = g.id
-GROUP BY p.id, p.name, pa.id, pa.priest_id, pr.display_name, pa.assignment_type;
+-- Views will be added once the complete schema is finalized
 
 -- ============================================================================
 -- 7. TRIGGERS: Keep project_grahas.completed_count in sync

@@ -9,8 +9,17 @@
 -- Add project_code to projects table if it doesn't exist
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS project_code VARCHAR(8);
 
--- Add unique constraint if it doesn't exist
-ALTER TABLE projects ADD CONSTRAINT IF NOT EXISTS unique_project_code UNIQUE (project_code);
+-- Add unique constraint on project_code (if not already present)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints
+    WHERE constraint_name = 'unique_project_code'
+    AND table_name = 'projects'
+  ) THEN
+    ALTER TABLE projects ADD CONSTRAINT unique_project_code UNIQUE (project_code);
+  END IF;
+END $$;
 
 -- Create index for project_code if it doesn't exist
 CREATE INDEX IF NOT EXISTS idx_projects_project_code ON projects(project_code);
@@ -76,7 +85,11 @@ WHERE project_code IS NULL OR project_code = '';
 -- 3. Update RPC functions to include project_code
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION get_project_status(p_project_id UUID)
+-- Drop existing function if it exists (signature change requires DROP)
+DROP FUNCTION IF EXISTS get_project_status(UUID) CASCADE;
+
+-- Create the updated function with project_code included
+CREATE FUNCTION get_project_status(p_project_id UUID)
 RETURNS TABLE (
   project_code TEXT,
   client_name TEXT,
@@ -89,7 +102,7 @@ RETURNS TABLE (
 BEGIN
   RETURN QUERY
   SELECT
-    p.project_code,
+    p.project_code::TEXT,
     p.client_name,
     p.status,
     CASE WHEN COALESCE(SUM(pg.target_count), 0) > 0 THEN
@@ -105,22 +118,14 @@ BEGIN
         'completed', pg.completed_count,
         'completion_pct', CASE WHEN pg.target_count > 0 THEN
           ROUND(100.0 * pg.completed_count / pg.target_count)::INT
-        ELSE 0 END,
-        'assigned_priests', (
-          SELECT json_agg(
-            json_build_object('priest_id', pr.id, 'priest_name', pr.display_name, 'assignment_type', pa.assignment_type)
-          )
-          FROM priest_assignments pa
-          JOIN profiles pr ON pa.priest_id = pr.id
-          WHERE pa.project_id = p.id AND pa.graha_id = pg.graha_id
-        )
+        ELSE 0 END
       )
     )
   FROM projects p
   LEFT JOIN project_grahas pg ON p.id = pg.project_id
   LEFT JOIN grahas g ON pg.graha_id = g.id
   WHERE p.id = p_project_id
-  GROUP BY p.id, p.client_name, p.status, p.project_code;
+  GROUP BY p.id, p.project_code, p.client_name, p.status;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -134,11 +139,9 @@ CREATE INDEX IF NOT EXISTS idx_project_grahas_project_id ON project_grahas(proje
 CREATE INDEX IF NOT EXISTS idx_project_grahas_graha_id ON project_grahas(graha_id);
 CREATE INDEX IF NOT EXISTS idx_priest_assignments_project_id ON priest_assignments(project_id);
 CREATE INDEX IF NOT EXISTS idx_priest_assignments_priest_id ON priest_assignments(priest_id);
-CREATE INDEX IF NOT EXISTS idx_priest_assignments_graha_id ON priest_assignments(graha_id);
 CREATE INDEX IF NOT EXISTS idx_delegation_sessions_project_id ON delegation_sessions(project_id);
-CREATE INDEX IF NOT EXISTS idx_delegation_sessions_priest_id ON delegation_sessions(priest_id);
+CREATE INDEX IF NOT EXISTS idx_delegation_sessions_user_id ON delegation_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_delegation_sessions_graha_id ON delegation_sessions(graha_id);
-CREATE INDEX IF NOT EXISTS idx_delegation_sessions_date ON delegation_sessions(session_date);
 
 -- ============================================================================
 -- End of comprehensive dependency fixes
