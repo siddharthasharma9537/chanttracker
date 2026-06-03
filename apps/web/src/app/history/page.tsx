@@ -7,7 +7,10 @@ import { useSessions } from '@/hooks/useSessions'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { DateSelector } from '@/components/history/DateSelector'
 import { SessionList } from '@/components/history/SessionList'
-import { ChevronLeft } from 'lucide-react'
+import { LoadingSkeleton } from '@/components/states/LoadingSkeleton'
+import { EmptyState } from '@/components/states/EmptyState'
+import { ErrorState } from '@/components/states/ErrorState'
+import { ChevronLeft, Clock } from 'lucide-react'
 
 export default function HistoryPage() {
   const router = useRouter()
@@ -36,6 +39,12 @@ export default function HistoryPage() {
     return null
   }
 
+  const filteredSessions = sessions.filter(session => {
+    const sessionDate = new Date(session.started_at).toLocaleDateString('sv')
+    const selectedDateStr = selectedDate.toLocaleDateString('sv')
+    return sessionDate === selectedDateStr
+  })
+
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -43,12 +52,13 @@ export default function HistoryPage() {
         <div className="mb-8 flex items-center gap-4">
           <button
             onClick={() => router.push('/dashboard')}
-            className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 transition-colors"
+            className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 transition-colors p-2 hover:bg-white/10 rounded-lg"
+            title="Back to Dashboard"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-2">
+            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-2" style={{ fontFamily: 'Merriweather, serif' }}>
               Practice History
             </h1>
             <p className="text-white/70 text-base sm:text-lg">
@@ -58,18 +68,36 @@ export default function HistoryPage() {
         </div>
 
         {/* Date Selector */}
-        <div className="mb-6">
+        <div className="mb-8">
           <DateSelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
         </div>
 
         {/* Session List */}
-        <SessionList
-          sessions={sessions}
-          selectedDate={selectedDate}
-          isLoading={isLoading}
-          error={error}
-          onRetry={() => refetch()}
-        />
+        {isLoading ? (
+          <LoadingSkeleton variant="card" count={3} />
+        ) : error ? (
+          <ErrorState
+            message="Failed to load sessions"
+            details="Could not fetch your session history. Please try again."
+            onRetry={() => refetch()}
+          />
+        ) : filteredSessions.length === 0 ? (
+          <EmptyState
+            icon={<Clock className="w-12 h-12 text-white/40" />}
+            heading="No sessions yet"
+            description={`You haven't recorded any sessions for ${selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`}
+            ctaLabel="Start Chanting"
+            onCTA={() => router.push('/chant')}
+          />
+        ) : (
+          <SessionList
+            sessions={filteredSessions}
+            selectedDate={selectedDate}
+            isLoading={isLoading}
+            error={error}
+            onRetry={() => refetch()}
+          />
+        )}
       </div>
     </MainLayout>
   )

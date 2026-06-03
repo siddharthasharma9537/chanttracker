@@ -3,7 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MainLayout } from '@/components/layout/MainLayout'
-import { Zap } from 'lucide-react'
+import { Card } from '@/components/cards/Card'
+import { Button } from '@/components/buttons/Button'
+import { Input } from '@/components/forms/Input'
+import { Eye, AlertCircle } from 'lucide-react'
 
 export default function ClientViewPage() {
   const router = useRouter()
@@ -43,84 +46,94 @@ export default function ClientViewPage() {
         </div>
 
         {/* Main Card */}
-        <div className="glassmorphic rounded-2xl p-8 sm:p-12 mb-8">
-          <div className="text-center mb-10">
-            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
-              <Zap className="w-8 h-8 text-white/70" />
+        <div className="max-w-2xl mx-auto mb-8">
+          {/* Header Icon */}
+          <div className="flex justify-center mb-8">
+            <div className="p-4 bg-sacred-500/20 rounded-2xl">
+              <Eye className="w-8 h-8 text-sacred-400" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">Enter Project Code</h2>
-            <p className="text-white/70 mt-2 max-w-lg mx-auto">
-              Your host priest will share an 8-character code that grants you access to view the project progress
-            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-6">
-            <div>
-              <label htmlFor="code" className="block text-sm font-semibold text-white/90 mb-3">
-                Project Code
-              </label>
-              <div className="relative">
-                <input
-                  id="code"
-                  type="text"
-                  placeholder="e.g., ABC12345"
-                  value={projectCode}
-                  onChange={(e) => {
-                    setProjectCode(e.target.value.toUpperCase())
-                    setError('')
-                  }}
-                  maxLength={8}
-                  className="w-full px-4 py-3 text-center text-lg font-mono bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-sacred-400/50 focus:ring-2 focus:ring-sacred-500/20 transition text-white placeholder-white/40"
-                />
-                <div className="absolute right-4 top-3 text-white/50 text-sm">
-                  {projectCode.length}/8
+          {/* Form Card */}
+          <Card variant="featured" className="mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 text-center">
+              Access Project
+            </h2>
+            <p className="text-white/70 text-center mb-8 max-w-lg mx-auto">
+              Enter the 8-character project code to view real-time progress updates
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Code Input */}
+              <div>
+                <label htmlFor="code" className="block text-sm font-semibold text-white mb-3">
+                  Project Code
+                </label>
+                <div className="relative">
+                  <input
+                    id="code"
+                    type="text"
+                    placeholder="e.g., ABC12345"
+                    value={projectCode}
+                    onChange={(e) => {
+                      setProjectCode(e.target.value.toUpperCase())
+                      setError('')
+                    }}
+                    maxLength={8}
+                    className="w-full px-4 py-4 text-center text-2xl font-mono bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-sacred-400 focus:ring-2 focus:ring-sacred-500/20 transition text-white placeholder-white/40 tracking-widest font-bold"
+                    required
+                  />
+                  <div className="absolute right-4 top-4 text-white/50 text-sm font-medium">
+                    {projectCode.length}/8
+                  </div>
+                </div>
+
+                {/* Error Message */}
+                {error && (
+                  <div className="mt-3 flex items-start gap-2 p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
+                    <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-red-200">{error}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                variant="primary"
+                size="lg"
+                type="submit"
+                className="w-full"
+              >
+                View Project Progress
+              </Button>
+            </form>
+          </Card>
+
+          {/* Info Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Card variant="standard">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 p-2 bg-white/10 rounded-lg">
+                  <Eye className="w-4 h-4 text-white/70" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white mb-1">Real-time Updates</p>
+                  <p className="text-xs text-white/60">View live progress of all mantras</p>
                 </div>
               </div>
-
-              {error && (
-                <p className="text-red-400/90 text-sm mt-2 font-medium">{error}</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className="w-full px-6 py-3 rounded-xl bg-sacred-500/20 border border-sacred-400/50 text-white font-semibold hover:bg-sacred-500/30 hover:border-sacred-400/70 transition-all duration-300 hover:shadow-lg hover:shadow-sacred-500/20 active:scale-95"
-            >
-              View Progress
-            </button>
-          </form>
-
-          {/* Info Section */}
-          <div className="mt-10 pt-8 border-t border-white/10">
-            <h3 className="text-sm font-semibold text-white/90 uppercase tracking-wider mb-4">How it works</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-white/5 rounded-lg p-4">
-                <p className="text-white/70 text-sm">
-                  ✓ Enter the project code shared by your host priest
-                </p>
+            </Card>
+            <Card variant="standard">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 p-2 bg-white/10 rounded-lg">
+                  <Eye className="w-4 h-4 text-white/70" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white mb-1">Priest Tracking</p>
+                  <p className="text-xs text-white/60">See assigned priests per graha</p>
+                </div>
               </div>
-              <div className="bg-white/5 rounded-lg p-4">
-                <p className="text-white/70 text-sm">
-                  ✓ View real-time progress of all grahas
-                </p>
-              </div>
-              <div className="bg-white/5 rounded-lg p-4">
-                <p className="text-white/70 text-sm">
-                  ✓ See completion percentages and targets
-                </p>
-              </div>
-              <div className="bg-white/5 rounded-lg p-4">
-                <p className="text-white/70 text-sm">
-                  ✓ Track priest assignments per graha
-                </p>
-              </div>
-            </div>
+            </Card>
           </div>
-        </div>
-
-        {/* Footer Info */}
-        <div className="text-center text-white/50 text-sm">
-          <p>🙏 Access projects shared with you to track spiritual progress</p>
         </div>
       </div>
     </MainLayout>

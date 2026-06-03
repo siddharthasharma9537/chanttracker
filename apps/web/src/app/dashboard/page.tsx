@@ -9,6 +9,12 @@ import { TodaysPractice } from '@/components/dashboard/TodaysPractice'
 import { ActivityGraph } from '@/components/dashboard/ActivityGraph'
 import { QuickStatsCards } from '@/components/dashboard/QuickStatsCards'
 import { RecentSessions } from '@/components/dashboard/RecentSessions'
+import { Card } from '@/components/cards/Card'
+import { Badge } from '@/components/feedback/Badge'
+import { Progress } from '@/components/feedback/Progress'
+import { ErrorState } from '@/components/states/ErrorState'
+import { LoadingSkeleton } from '@/components/states/LoadingSkeleton'
+import { Zap, Target, Flame } from 'lucide-react'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -54,53 +60,103 @@ export default function DashboardPage() {
 
         {/* Error State */}
         {hasError && (
-          <div className="mb-8 bg-red-500/20 border border-red-500/30 rounded-xl p-4 sm:p-6 flex items-start justify-between backdrop-blur">
-            <div>
-              <h3 className="text-sm font-semibold text-red-200 mb-1">
-                Unable to load dashboard
-              </h3>
-              <p className="text-sm text-red-200/80">
-                {dataError?.message || 'An error occurred while fetching your data.'}
-              </p>
-            </div>
-            <button
-              onClick={() => refetch()}
-              className="text-sm font-semibold text-red-300 hover:text-red-200 whitespace-nowrap ml-2"
-            >
-              Retry
-            </button>
+          <div className="mb-8">
+            <ErrorState
+              message="Unable to load dashboard"
+              details={dataError?.message || 'An error occurred while fetching your data.'}
+              onRetry={() => refetch()}
+            />
           </div>
         )}
 
         {/* Main Content */}
-        <div className="space-y-8 lg:space-y-10">
-          {/* Featured Section: Today's Practice */}
-          {isLoading ? (
-            <div className="glassmorphic h-96 animate-pulse" />
-          ) : (
-            <TodaysPractice
-              done={dashboardData?.done ?? 0}
-              target={dashboardData?.target ?? 0}
-            />
-          )}
+        {!hasError && (
+          <div className="space-y-8 lg:space-y-10">
+            {/* Featured Section: Today's Practice */}
+            {isLoading ? (
+              <LoadingSkeleton variant="card" count={1} />
+            ) : (
+              <TodaysPractice
+                done={dashboardData?.done ?? 0}
+                target={dashboardData?.target ?? 0}
+              />
+            )}
 
-          {/* Activity Graph - Full Width */}
-          {isLoading ? (
-            <div className="glassmorphic h-64 animate-pulse" />
-          ) : (
-            <ActivityGraph isLoading={isLoading} />
-          )}
+            {/* Quick Stats - Three Card Grid */}
+            {isLoading ? (
+              <LoadingSkeleton variant="card" count={3} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Streak Card */}
+                <Card variant="standard">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-sm font-medium text-white/70 mb-2">Current Streak</p>
+                      <h3 className="text-3xl font-bold text-white">{dashboardData?.streak ?? 0}</h3>
+                    </div>
+                    <div className="p-3 bg-orange-500/20 rounded-lg">
+                      <Flame className="w-6 h-6 text-orange-400" />
+                    </div>
+                  </div>
+                  {(dashboardData?.streak ?? 0) > 0 && (
+                    <Badge variant="success" size="sm">
+                      Active
+                    </Badge>
+                  )}
+                </Card>
 
-          {/* Quick Stats Cards - Two Column Grid */}
-          <QuickStatsCards
-            streak={dashboardData?.streak ?? 0}
-            total={dashboardData?.total ?? 0}
-            isLoading={isLoading}
-          />
+                {/* Total Sessions Card */}
+                <Card variant="standard">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-sm font-medium text-white/70 mb-2">Total Sessions</p>
+                      <h3 className="text-3xl font-bold text-white">{dashboardData?.total ?? 0}</h3>
+                    </div>
+                    <div className="p-3 bg-blue-500/20 rounded-lg">
+                      <Zap className="w-6 h-6 text-blue-400" />
+                    </div>
+                  </div>
+                  <p className="text-xs text-white/50">All-time sessions</p>
+                </Card>
 
-          {/* Recent Sessions */}
-          <RecentSessions isLoading={isLoading} />
-        </div>
+                {/* Today's Progress Card */}
+                <Card variant="standard">
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm font-medium text-white/70">Today&apos;s Target</p>
+                      <Badge variant={((dashboardData?.pct) ?? 0) >= 100 ? 'success' : 'info'} size="sm">
+                        {dashboardData?.pct ?? 0}%
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-white/50 mb-3">
+                      {dashboardData?.done ?? 0} / {dashboardData?.target ?? 0}
+                    </p>
+                    <Progress
+                      value={Math.min(dashboardData?.pct ?? 0, 100)}
+                      showLabel={false}
+                      variant="linear"
+                      size="sm"
+                    />
+                  </div>
+                </Card>
+              </div>
+            )}
+
+            {/* Activity Graph - Full Width */}
+            {isLoading ? (
+              <LoadingSkeleton variant="card" count={1} />
+            ) : (
+              <ActivityGraph isLoading={isLoading} />
+            )}
+
+            {/* Recent Sessions */}
+            {isLoading ? (
+              <LoadingSkeleton variant="card" count={3} />
+            ) : (
+              <RecentSessions isLoading={isLoading} />
+            )}
+          </div>
+        )}
       </div>
     </MainLayout>
   )

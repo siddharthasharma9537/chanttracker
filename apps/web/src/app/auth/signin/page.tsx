@@ -2,23 +2,37 @@
 
 import Link from 'next/link'
 import { SignInForm } from '@/components/auth/SignInForm'
+import { Card } from '@/components/cards/Card'
+import { Flame } from 'lucide-react'
 
 export default function SignInPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">Sign In</h1>
-          <p className="text-gray-600">Welcome back to ChantTracker</p>
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="flex justify-center mb-4">
+            <div className="p-3 bg-orange-500/20 rounded-2xl">
+              <Flame className="w-8 h-8 text-orange-400" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-white mb-3" style={{ fontFamily: 'Merriweather, serif' }}>
+            Welcome back
+          </h1>
+          <p className="text-white/70">Sign in to continue your spiritual practice</p>
         </div>
 
-        <SignInForm />
+        {/* Sign In Form Card */}
+        <Card variant="featured" className="mb-8">
+          <SignInForm />
+        </Card>
 
-        <p className="text-center text-gray-600 text-sm mt-6">
+        {/* Sign Up Link */}
+        <p className="text-center text-white/70 text-sm">
           Don&apos;t have an account?{' '}
           <Link
             href="/auth/signup"
-            className="text-orange-600 hover:text-orange-700 font-medium"
+            className="text-orange-400 hover:text-orange-300 font-semibold transition-colors"
           >
             Sign up
           </Link>

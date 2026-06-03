@@ -8,7 +8,11 @@ import { createClient } from '@/lib/supabase/client'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { AssignedPriestChantPage } from '@/components/delegation/AssignedPriestChantPage'
 import { AssignedPriestProjectHistory } from '@/components/delegation/AssignedPriestProjectHistory'
-import { AlertCircle } from 'lucide-react'
+import { Card } from '@/components/cards/Card'
+import { Input } from '@/components/forms/Input'
+import { Button } from '@/components/buttons/Button'
+import { ErrorState } from '@/components/states/ErrorState'
+import { AlertCircle, Lock } from 'lucide-react'
 
 interface AssignmentData {
   projectId: string
@@ -163,17 +167,27 @@ export default function AssignedPriestPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-2xl mx-auto px-4 py-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-white mb-2">Assigned Priest</h1>
-          <p className="text-white/70">Enter your assignment code to view your assigned tasks</p>
+        <div className="mb-12 text-center">
+          <div className="flex justify-center mb-6">
+            <div className="p-4 bg-sacred-500/20 rounded-2xl">
+              <Lock className="w-8 h-8 text-sacred-400" />
+            </div>
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-3" style={{ fontFamily: 'Merriweather, serif' }}>
+            Assigned Priest Access
+          </h1>
+          <p className="text-lg text-white/70 max-w-md mx-auto">
+            Enter your unique assignment code to access your delegation project
+          </p>
         </div>
 
         {/* Assignment Code Input Form */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 mb-8">
-          <form onSubmit={handleCodeSubmit}>
-            <div className="mb-6">
+        <Card variant="featured" className="mb-8">
+          <form onSubmit={handleCodeSubmit} className="space-y-6">
+            {/* Code Input Field */}
+            <div>
               <label htmlFor="assignmentCode" className="block text-sm font-semibold text-white mb-3">
                 Assignment Code
               </label>
@@ -182,42 +196,55 @@ export default function AssignedPriestPage() {
                 type="text"
                 value={assignmentCode}
                 onChange={(e) => {
-                  setAssignmentCode(e.target.value)
+                  setAssignmentCode(e.target.value.toUpperCase())
                   setError('')
                 }}
-                placeholder="Paste your 6-character code here"
+                placeholder="Enter 6-character code"
                 maxLength={6}
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/50 focus:outline-none focus:border-temple-500 focus:ring-2 focus:ring-temple-500/20 transition-all uppercase text-center text-2xl tracking-widest font-mono"
+                className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:border-sacred-400 focus:ring-2 focus:ring-sacred-500/20 transition-all text-center text-3xl tracking-widest font-mono font-bold"
                 disabled={isSubmitting}
                 autoComplete="off"
+                required
               />
-              <p className="mt-2 text-xs text-white/50">
+              <p className="mt-3 text-sm text-white/60">
                 Your host priest will provide you with a unique 6-character code
               </p>
             </div>
 
+            {/* Error Message */}
             {error && (
-              <div className="flex items-start gap-3 p-4 bg-red-500/20 border border-red-500/50 rounded-lg mb-6">
-                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-200">{error}</p>
+              <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
+                <p className="text-sm text-red-200 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  {error}
+                </p>
               </div>
             )}
 
-            <button
+            {/* Submit Button */}
+            <Button
+              variant="primary"
+              size="lg"
               type="submit"
               disabled={!assignmentCode.trim() || isSubmitting}
-              className="w-full px-6 py-3 bg-temple-500 hover:bg-temple-600 disabled:bg-white/20 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+              loading={isSubmitting}
+              className="w-full"
             >
               {isSubmitting ? 'Verifying...' : 'Access Project'}
-            </button>
+            </Button>
+
+            {/* Helper Text */}
+            <p className="text-xs text-white/50 text-center">
+              By accessing a project, you will be marked as the assigned priest for this delegation task
+            </p>
           </form>
-        </div>
+        </Card>
 
         {/* Back to Home */}
         <div className="text-center">
           <button
             onClick={() => router.push('/')}
-            className="text-white/60 hover:text-white transition-colors text-sm"
+            className="text-white/60 hover:text-white hover:bg-white/10 transition-colors px-4 py-2 rounded-lg text-sm font-medium"
           >
             ← Back to Home
           </button>
