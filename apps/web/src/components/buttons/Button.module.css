@@ -1,0 +1,178 @@
+/**
+ * Button Component Styles
+ * Uses design tokens from design-tokens.css
+ */
+
+.button {
+  /* Base button styles */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all var(--transition-base);
+  font-family: inherit;
+  user-select: none;
+  -webkit-user-select: none;
+
+  /* Focus state for accessibility */
+  &:focus {
+    outline: 2px solid var(--color-primary-300);
+    outline-offset: 2px;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-300);
+    outline-offset: 2px;
+  }
+}
+
+/* ================================================================
+   VARIANTS
+   ================================================================ */
+
+/* Primary variant - sacred orange with white text */
+.variant-primary {
+  background-color: var(--color-primary-500);
+  color: white;
+  border-color: var(--color-primary-500);
+  box-shadow: var(--shadow-md);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-primary-600);
+    border-color: var(--color-primary-600);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--color-primary-700);
+    border-color: var(--color-primary-700);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(0);
+  }
+}
+
+/* Secondary variant - semi-transparent white with border */
+.variant-secondary {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border-color: var(--border-color-medium);
+  backdrop-filter: blur(8px);
+
+  &:hover:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0.25);
+    border-color: var(--border-color-strong);
+    box-shadow: var(--shadow-glass-md);
+  }
+
+  &:active:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--border-color-medium);
+  }
+}
+
+/* Tertiary variant - minimal style with text only */
+.variant-tertiary {
+  background-color: transparent;
+  color: var(--color-primary-300);
+  border-color: var(--color-primary-300);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-primary-900);
+    color: var(--color-primary-200);
+    border-color: var(--color-primary-200);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--color-primary-800);
+  }
+}
+
+/* Ghost variant - text only, no background or border */
+.variant-ghost {
+  background-color: transparent;
+  color: var(--color-primary-300);
+  border-color: transparent;
+
+  &:hover:not(:disabled) {
+    color: var(--color-primary-200);
+    background-color: rgba(245, 158, 11, 0.1);
+  }
+
+  &:active:not(:disabled) {
+    background-color: rgba(245, 158, 11, 0.15);
+  }
+}
+
+/* ================================================================
+   SIZES
+   ================================================================ */
+
+.size-sm {
+  height: var(--button-height-sm);
+  padding: 0 var(--spacing-sm);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+}
+
+.size-md {
+  height: var(--button-height-md);
+  padding: 0 var(--spacing-lg);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+.size-lg {
+  height: var(--button-height-lg);
+  padding: 0 var(--spacing-xl);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+/* ================================================================
+   STATES
+   ================================================================ */
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  animation: spin 1s linear infinite;
+}
+
+.spinnerDot {
+  width: 0.4em;
+  height: 0.4em;
+  background-color: currentColor;
+  border-radius: var(--border-radius-full);
+}
+
+/* Animation for loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

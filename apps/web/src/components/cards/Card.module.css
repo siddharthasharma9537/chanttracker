@@ -1,0 +1,74 @@
+/**
+ * Card Component Styles
+ * Glassmorphic design using backdrop filters and opacity layers
+ */
+
+.card {
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color-light);
+  padding: var(--spacing-lg);
+  backdrop-filter: blur(10px);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ================================================================
+   VARIANTS
+   ================================================================ */
+
+/* Featured variant - brightest, most prominent */
+.variant-featured {
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-glass-md);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow-glass-lg);
+  }
+}
+
+/* Standard variant - balanced appearance */
+.variant-standard {
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-glass-sm);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: var(--shadow-glass-md);
+  }
+}
+
+/* Subtle variant - minimal, subdued */
+.variant-subtle {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-color-light);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-glass-sm);
+  }
+}
+
+/* ================================================================
+   INTERACTIVE STATE
+   ================================================================ */
+
+.interactive {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  /* Focus state for keyboard navigation */
+  &:focus-within {
+    outline: 2px solid var(--color-primary-300);
+    outline-offset: 2px;
+  }
+}

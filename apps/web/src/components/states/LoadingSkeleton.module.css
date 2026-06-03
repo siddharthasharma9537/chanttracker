@@ -1,0 +1,123 @@
+/**
+ * LoadingSkeleton Component Styles
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.inline {
+  flex-direction: row;
+}
+
+.element {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  border-radius: var(--border-radius-md);
+}
+
+/* ================================================================
+   CARD SKELETON
+   ================================================================ */
+
+.card {
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: var(--spacing-lg);
+  gap: var(--spacing-lg);
+}
+
+.cardImage {
+  width: 100%;
+  height: 200px;
+  border-radius: var(--border-radius-md);
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* ================================================================
+   TEXT SKELETON
+   ================================================================ */
+
+.text {
+  height: 1.5rem;
+  width: 100%;
+  border-radius: var(--border-radius-sm);
+}
+
+.textSmall {
+  height: 1rem;
+  width: 80%;
+  border-radius: var(--border-radius-sm);
+}
+
+/* ================================================================
+   AVATAR SKELETON
+   ================================================================ */
+
+.avatar {
+  gap: var(--spacing-md);
+}
+
+.avatarImage {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-full);
+  flex-shrink: 0;
+}
+
+/* ================================================================
+   ANIMATIONS
+   ================================================================ */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    opacity: 0.8;
+  }
+
+  .element {
+    animation: none;
+    background: rgba(255, 255, 255, 0.1);
+  }
+}

@@ -1,0 +1,159 @@
+/**
+ * Progress Component Styles
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--spacing-md);
+}
+
+.linear {
+  gap: var(--spacing-sm);
+}
+
+.labelContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.labelText {
+  font-size: var(--font-size-body-sm);
+  font-weight: 600;
+  color: white;
+}
+
+/* ================================================================
+   LINEAR PROGRESS
+   ================================================================ */
+
+.linearTrack {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-full);
+  overflow: hidden;
+  border: 1px solid var(--border-color-light);
+}
+
+.linearFill {
+  height: 100%;
+  border-radius: var(--border-radius-full);
+  transition: width var(--transition-base);
+  box-shadow: var(--shadow-glass-sm);
+}
+
+.size-sm .linearFill {
+  height: 4px;
+}
+
+.size-md .linearFill {
+  height: 8px;
+}
+
+.size-lg .linearFill {
+  height: 12px;
+}
+
+/* ================================================================
+   CIRCULAR PROGRESS
+   ================================================================ */
+
+.circular {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circleSvg {
+  transform: rotate(-90deg);
+  filter: drop-shadow(var(--shadow-glass-sm));
+}
+
+.size-sm {
+  width: 60px;
+  height: 60px;
+}
+
+.size-md {
+  width: 100px;
+  height: 100px;
+}
+
+.size-lg {
+  width: 140px;
+  height: 140px;
+}
+
+.circleBackground {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 4;
+}
+
+.circleFill {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--transition-base);
+}
+
+.circleLabel {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+}
+
+.size-sm .circleLabel {
+  font-size: var(--font-size-body-sm);
+}
+
+.size-md .circleLabel {
+  font-size: var(--font-size-h4);
+}
+
+.size-lg .circleLabel {
+  font-size: var(--font-size-h3);
+}
+
+/* ================================================================
+   COLOR VARIANTS
+   ================================================================ */
+
+.color-success {
+  stroke: var(--color-success);
+
+  .linearFill {
+    background-color: var(--color-success);
+  }
+}
+
+.color-error {
+  stroke: var(--color-error);
+
+  .linearFill {
+    background-color: var(--color-error);
+  }
+}
+
+.color-warning {
+  stroke: var(--color-warning);
+
+  .linearFill {
+    background-color: var(--color-warning);
+  }
+}
+
+.color-info {
+  stroke: var(--color-info);
+
+  .linearFill {
+    background-color: var(--color-info);
+  }
+}

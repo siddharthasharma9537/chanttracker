@@ -1,0 +1,108 @@
+/**
+ * Input Component Styles
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.label {
+  font-size: var(--font-size-body-sm);
+  font-weight: 500;
+  color: white;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.required {
+  color: var(--color-error);
+  margin-left: var(--spacing-xs);
+}
+
+.field {
+  width: 100%;
+  height: var(--input-height);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--border-color-medium);
+  border-radius: var(--border-radius-md);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-family: inherit;
+  backdrop-filter: blur(8px);
+  transition: all var(--transition-base);
+
+  /* Placeholder styling */
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Focus state */
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary-400);
+    background-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+  }
+
+  /* Hover state */
+  &:hover:not(:disabled):not(:focus) {
+    border-color: var(--border-color-strong);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Error state */
+  .hasError & {
+    border-color: var(--color-error);
+    background-color: rgba(239, 68, 68, 0.08);
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+  }
+
+  /* Disabled state */
+  &:disabled,
+  .disabled & {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-color: var(--border-color-light);
+  }
+}
+
+/* Textarea specific adjustments */
+textarea.field {
+  height: auto;
+  min-height: 6rem;
+  padding: var(--spacing-lg);
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Select styling */
+select.field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-lg) center;
+  background-size: 12px;
+  padding-right: var(--spacing-2xl);
+}
+
+.errorMessage {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-error-light);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.helperText {
+  font-size: var(--font-size-body-sm);
+  color: rgba(255, 255, 255, 0.6);
+}
