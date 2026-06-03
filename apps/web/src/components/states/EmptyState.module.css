@@ -1,5 +1,6 @@
 /**
  * EmptyState Component Styles
+ * Includes fade-in and subtle scale animation for entry
  */
 
 .container {
@@ -11,6 +12,18 @@
   padding: var(--spacing-3xl) var(--spacing-lg);
   text-align: center;
   min-height: 300px;
+  animation: emptyStateFadeIn 500ms ease-out;
+}
+
+@keyframes emptyStateFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .icon {
@@ -22,6 +35,16 @@
   justify-content: center;
   height: 80px;
   width: 80px;
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .heading {

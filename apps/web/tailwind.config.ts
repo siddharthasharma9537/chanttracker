@@ -149,6 +149,93 @@ const config: Config = {
         '2xl': '20px',
         '3xl': '24px',
       },
+      keyframes: {
+        fadeIn: {
+          'from': { opacity: '0' },
+          'to': { opacity: '1' },
+        },
+        fadeOut: {
+          'from': { opacity: '1' },
+          'to': { opacity: '0' },
+        },
+        scaleIn: {
+          'from': { opacity: '0', transform: 'scale(0.95)' },
+          'to': { opacity: '1', transform: 'scale(1)' },
+        },
+        scaleOut: {
+          'from': { opacity: '1', transform: 'scale(1)' },
+          'to': { opacity: '0', transform: 'scale(0.95)' },
+        },
+        slideInTop: {
+          'from': { opacity: '0', transform: 'translateY(-10px)' },
+          'to': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideOutTop: {
+          'from': { opacity: '1', transform: 'translateY(0)' },
+          'to': { opacity: '0', transform: 'translateY(-10px)' },
+        },
+        slideInBottom: {
+          'from': { opacity: '0', transform: 'translateY(10px)' },
+          'to': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideOutBottom: {
+          'from': { opacity: '1', transform: 'translateY(0)' },
+          'to': { opacity: '0', transform: 'translateY(10px)' },
+        },
+        slideInLeft: {
+          'from': { opacity: '0', transform: 'translateX(-10px)' },
+          'to': { opacity: '1', transform: 'translateX(0)' },
+        },
+        slideOutLeft: {
+          'from': { opacity: '1', transform: 'translateX(0)' },
+          'to': { opacity: '0', transform: 'translateX(-10px)' },
+        },
+        slideInRight: {
+          'from': { opacity: '0', transform: 'translateX(10px)' },
+          'to': { opacity: '1', transform: 'translateX(0)' },
+        },
+        slideOutRight: {
+          'from': { opacity: '1', transform: 'translateX(0)' },
+          'to': { opacity: '0', transform: 'translateX(10px)' },
+        },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '25%': { transform: 'translateX(-3px)' },
+          '50%': { transform: 'translateX(3px)' },
+          '75%': { transform: 'translateX(-3px)' },
+        },
+        pulseScale: {
+          '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+          '50%': { opacity: '0.8', transform: 'scale(1.02)' },
+        },
+        glow: {
+          '0%, 100%': { boxShadow: '0 0 10px rgba(245, 158, 11, 0.3)' },
+          '50%': { boxShadow: '0 0 20px rgba(245, 158, 11, 0.5)' },
+        },
+        checkmarkScale: {
+          '0%': { opacity: '0', transform: 'scale(0)' },
+          '50%': { opacity: '1', transform: 'scale(1.2)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+      },
+      animation: {
+        fadeIn: 'fadeIn var(--transition-base)',
+        fadeOut: 'fadeOut var(--transition-base)',
+        scaleIn: 'scaleIn var(--transition-base)',
+        scaleOut: 'scaleOut var(--transition-base)',
+        slideInTop: 'slideInTop var(--transition-base)',
+        slideOutTop: 'slideOutTop var(--transition-base)',
+        slideInBottom: 'slideInBottom var(--transition-base)',
+        slideOutBottom: 'slideOutBottom var(--transition-base)',
+        slideInLeft: 'slideInLeft var(--transition-base)',
+        slideOutLeft: 'slideOutLeft var(--transition-base)',
+        slideInRight: 'slideInRight var(--transition-base)',
+        slideOutRight: 'slideOutRight var(--transition-base)',
+        shake: 'shake 400ms',
+        pulseScale: 'pulseScale var(--transition-slow) infinite',
+        glow: 'glow 2s ease-in-out infinite',
+        checkmarkScale: 'checkmarkScale 400ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+      },
     },
   },
   plugins: [],

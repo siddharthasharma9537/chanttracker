@@ -22,8 +22,8 @@ export function MainLayout({ children }: MainLayoutProps) {
         {/* Desktop Sidebar - occupies space but invisible on mobile */}
         <div className="hidden lg:block w-64 flex-shrink-0" />
 
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
+        {/* Content - with fade-in animation on page load */}
+        <main className="flex-1 overflow-y-auto pb-20 lg:pb-0 animate-fadeIn">
           {children}
         </main>
       </div>

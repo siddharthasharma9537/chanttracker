@@ -40,8 +40,36 @@
 .linearFill {
   height: 100%;
   border-radius: var(--border-radius-full);
-  transition: width var(--transition-base);
+  transition: width var(--transition-slow), background-color var(--transition-base), box-shadow var(--transition-base);
   box-shadow: var(--shadow-glass-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer effect for animated progress bars */
+.linearFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: progressShimmer 2s infinite;
+}
+
+@keyframes progressShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .size-sm .linearFill {
@@ -97,7 +125,7 @@
   fill: none;
   stroke-width: 4;
   stroke-linecap: round;
-  transition: stroke-dashoffset var(--transition-base);
+  transition: stroke-dashoffset var(--transition-slow), stroke var(--transition-base);
 }
 
 .circleLabel {

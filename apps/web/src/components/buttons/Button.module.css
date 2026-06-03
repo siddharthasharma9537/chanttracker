@@ -19,6 +19,8 @@
   font-family: inherit;
   user-select: none;
   -webkit-user-select: none;
+  position: relative;
+  overflow: hidden;
 
   /* Focus state for accessibility */
   &:focus {
@@ -34,6 +36,12 @@
     outline: 2px solid var(--color-primary-300);
     outline-offset: 2px;
   }
+
+  /* Smooth scale effect on click for tactile feedback */
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+    transition: transform 100ms ease-out;
+  }
 }
 
 /* ================================================================
@@ -46,19 +54,21 @@
   color: white;
   border-color: var(--color-primary-500);
   box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
 
   &:hover:not(:disabled) {
     background-color: var(--color-primary-600);
     border-color: var(--color-primary-600);
     box-shadow: var(--shadow-lg);
-    transform: translateY(-1px);
+    transform: translateY(-2px) scale(1.02);
+    transition: all var(--transition-fast);
   }
 
   &:active:not(:disabled) {
     background-color: var(--color-primary-700);
     border-color: var(--color-primary-700);
     box-shadow: var(--shadow-sm);
-    transform: translateY(0);
+    transform: scale(0.95);
   }
 }
 
@@ -68,16 +78,20 @@
   color: white;
   border-color: var(--border-color-medium);
   backdrop-filter: blur(8px);
+  transition: all var(--transition-base);
 
   &:hover:not(:disabled) {
     background-color: rgba(255, 255, 255, 0.25);
     border-color: var(--border-color-strong);
     box-shadow: var(--shadow-glass-md);
+    transform: translateY(-2px);
+    transition: all var(--transition-fast);
   }
 
   &:active:not(:disabled) {
     background-color: rgba(255, 255, 255, 0.2);
     border-color: var(--border-color-medium);
+    transform: scale(0.95);
   }
 }
 
@@ -86,15 +100,20 @@
   background-color: transparent;
   color: var(--color-primary-300);
   border-color: var(--color-primary-300);
+  transition: all var(--transition-base);
 
   &:hover:not(:disabled) {
     background-color: var(--color-primary-900);
     color: var(--color-primary-200);
     border-color: var(--color-primary-200);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-fast);
   }
 
   &:active:not(:disabled) {
     background-color: var(--color-primary-800);
+    transform: scale(0.95);
   }
 }
 
@@ -103,14 +122,18 @@
   background-color: transparent;
   color: var(--color-primary-300);
   border-color: transparent;
+  transition: all var(--transition-base);
 
   &:hover:not(:disabled) {
     color: var(--color-primary-200);
     background-color: rgba(245, 158, 11, 0.1);
+    transform: translateY(-2px);
+    transition: all var(--transition-fast);
   }
 
   &:active:not(:disabled) {
     background-color: rgba(245, 158, 11, 0.15);
+    transform: scale(0.95);
   }
 }
 

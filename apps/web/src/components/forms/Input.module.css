@@ -39,29 +39,35 @@
   /* Placeholder styling */
   &::placeholder {
     color: rgba(255, 255, 255, 0.5);
+    transition: color var(--transition-fast);
   }
 
-  /* Focus state */
+  /* Focus state with smooth glow and border animation */
   &:focus {
     outline: none;
     border-color: var(--color-primary-400);
     background-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2), inset 0 0 0 1px rgba(245, 158, 11, 0.1);
+    transform: scale(1.01);
+    transition: all var(--transition-fast);
   }
 
   /* Hover state */
   &:hover:not(:disabled):not(:focus) {
     border-color: var(--border-color-strong);
     background-color: rgba(255, 255, 255, 0.1);
+    transition: all var(--transition-fast);
   }
 
-  /* Error state */
+  /* Error state with shake animation */
   .hasError & {
     border-color: var(--color-error);
     background-color: rgba(239, 68, 68, 0.08);
+    animation: shake 300ms;
 
     &:focus {
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2), inset 0 0 0 1px rgba(239, 68, 68, 0.1);
+      border-color: var(--color-error-dark);
     }
   }
 
@@ -72,6 +78,22 @@
     cursor: not-allowed;
     background-color: rgba(255, 255, 255, 0.04);
     border-color: var(--border-color-light);
+  }
+}
+
+/* Shake animation for error states */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-3px);
   }
 }
 
