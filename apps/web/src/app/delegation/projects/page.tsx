@@ -198,25 +198,36 @@ export default function ProjectsListPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2 mt-auto pt-2">
+                    <div className="flex flex-col gap-2 mt-auto pt-2">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/delegation/projects/${project.id}`)
+                          }}
+                          className="flex-1 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-colors text-sm"
+                        >
+                          Details
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedProjectForAssign(project.id)
+                          }}
+                          className="px-4 py-2.5 bg-sacred-500/20 hover:bg-sacred-500/30 border border-sacred-400/50 text-sacred-300 rounded-lg font-medium transition-colors text-sm flex items-center gap-1 whitespace-nowrap"
+                        >
+                          <UserPlus className="w-4 h-4" />
+                          Assign
+                        </button>
+                      </div>
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
-                          router.push(`/delegation/projects/${project.id}`)
+                          router.push(`/delegation/projects/${project.id}?tab=priests`)
                         }}
-                        className="flex-1 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-colors text-sm"
+                        className="px-4 py-2.5 bg-white/10 hover:bg-white/15 text-white/80 hover:text-white rounded-lg font-medium transition-colors text-sm"
                       >
-                        Details
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSelectedProjectForAssign(project.id)
-                        }}
-                        className="px-4 py-2.5 bg-sacred-500/20 hover:bg-sacred-500/30 border border-sacred-400/50 text-sacred-300 rounded-lg font-medium transition-colors text-sm flex items-center gap-1 whitespace-nowrap"
-                      >
-                        <UserPlus className="w-4 h-4" />
-                        Assign
+                        Manage Priests
                       </button>
                     </div>
                   </Card>
