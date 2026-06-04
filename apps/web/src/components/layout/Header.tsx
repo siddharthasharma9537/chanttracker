@@ -57,7 +57,7 @@ export function Header() {
                 style={{
                   backgroundColor: '#1a1f2c',
                   backdropFilter: 'blur(10px)',
-                  top: '72px',
+                  top: '80px',
                   right: '24px',
                   zIndex: 9999,
                   pointerEvents: 'auto'
