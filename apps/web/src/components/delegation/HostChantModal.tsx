@@ -5,7 +5,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { useSessionCounter } from '@/hooks/useSessionCounter'
 import { CounterDisplay } from '@/components/chant/CounterDisplay'
-import { SessionControls } from '@/components/chant/SessionControls'
 import { X, ChevronLeft } from 'lucide-react'
 
 interface HostChantModalProps {
@@ -31,15 +30,13 @@ export function HostChantModal({
   const supabase = createClient()
   const queryClient = useQueryClient()
   const [selectedGraha, setSelectedGraha] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const {
-    count,
-    isRunning,
-    paused,
-    elapsedTime,
+    state,
+    start,
     increment,
     decrement,
-    toggleTimer,
+    pause,
+    resume,
     reset,
   } = useSessionCounter()
 
@@ -47,7 +44,7 @@ export function HostChantModal({
 
   const completeSessionMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedGrahaData) throw new Error('No graha selected')
+      if (!selectedGrahaData || !selectedGraha) throw new Error('No graha selected')
 
       const { user } = await supabase.auth.getUser()
       if (!user?.id) throw new Error('User not authenticated')
@@ -59,8 +56,8 @@ export function HostChantModal({
           project_id: projectId,
           priest_id: user.id,
           graha_id: selectedGraha,
-          count,
-          duration_seconds: elapsedTime,
+          count: state.count,
+          duration_seconds: state.durationSecs,
           assignment_type: 'assigned',
           session_date: new Date().toLocaleDateString('sv'),
         })
@@ -82,6 +79,12 @@ export function HostChantModal({
   })
 
   if (!isOpen) return null
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -158,27 +161,87 @@ export function HostChantModal({
                     </p>
                   </div>
 
-                  <CounterDisplay
-                    count={count}
-                    onIncrement={increment}
-                    onDecrement={decrement}
-                  />
+                  {state.state === 'idle' ? (
+                    <button
+                      onClick={() => start('temp', selectedGraha, selectedGrahaData.target)}
+                      className="w-full px-4 py-3 bg-temple-500 hover:bg-temple-600 text-white rounded-lg font-semibold transition-colors"
+                    >
+                      Start Chanting
+                    </button>
+                  ) : (
+                    <>
+                      <CounterDisplay
+                        count={state.count}
+                        target={state.target}
+                        mantraName={selectedGrahaData.graha_name}
+                        durationSecs={state.durationSecs}
+                        state={state.state}
+                        onIncrement={increment}
+                      />
 
-                  <SessionControls
-                    isRunning={isRunning}
-                    paused={paused}
-                    elapsedTime={elapsedTime}
-                    onToggleTimer={toggleTimer}
-                    onComplete={() => {
-                      setIsSubmitting(true)
-                      completeSessionMutation.mutate()
-                    }}
-                    onAbandon={() => {
-                      reset()
-                      setSelectedGraha(null)
-                    }}
-                    isCompleting={completeSessionMutation.isPending}
-                  />
+                      <div className="space-y-2">
+                        <div className="text-center text-sm text-gray-600 mb-3">
+                          Time: {formatTime(state.durationSecs)}
+                        </div>
+
+                        <div className="flex gap-2">
+                          {state.state === 'active' ? (
+                            <button
+                              onClick={pause}
+                              className="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors"
+                            >
+                              Pause
+                            </button>
+                          ) : state.state === 'paused' ? (
+                            <button
+                              onClick={resume}
+                              className="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors"
+                            >
+                              Resume
+                            </button>
+                          ) : null}
+
+                          <button
+                            onClick={() => {
+                              decrement()
+                            }}
+                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-medium transition-colors"
+                          >
+                            −
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              increment()
+                            }}
+                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-medium transition-colors"
+                          >
+                            +
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              completeSessionMutation.mutate()
+                            }}
+                            disabled={completeSessionMutation.isPending}
+                            className="flex-1 px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+                          >
+                            {completeSessionMutation.isPending ? 'Saving...' : 'Complete'}
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              reset()
+                              setSelectedGraha(null)
+                            }}
+                            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </>
               )}
             </div>
