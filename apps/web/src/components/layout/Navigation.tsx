@@ -94,7 +94,7 @@ export function Navigation() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 w-64 h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 flex-col z-20 pt-28">
+      <aside className="hidden lg:flex fixed left-0 top-0 w-64 h-screen frosted-bar border-r border-white/20 flex-col z-20 pt-28">
         <nav className="flex-1 px-4 py-6">
           {/* Section Indicator */}
           <div className="mb-6 px-4 py-2 rounded-lg bg-white/5 border border-white/10">
@@ -162,7 +162,7 @@ export function Navigation() {
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/5 backdrop-blur-xl border-t border-white/15 z-40 pb-safe">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 frosted-bar border-t border-white/15 z-40 pb-safe">
         <ul className="grid gap-0" style={{ gridTemplateColumns: `repeat(${navItems.length}, 1fr)` }}>
           {navItems.map((item) => {
             const Icon = item.icon

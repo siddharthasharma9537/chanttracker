@@ -66,7 +66,7 @@ export function Breadcrumbs() {
 
   return (
     <nav
-      className="sticky top-16 z-40 bg-white/5 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 lg:px-10 py-3 lg:pl-72"
+      className="sticky top-16 z-40 frosted-bar border-b border-white/10 px-4 sm:px-6 lg:px-10 py-3 lg:pl-72"
       aria-label="Breadcrumb"
     >
         <ol className="flex items-center gap-3 text-sm pl-2 sm:pl-0">

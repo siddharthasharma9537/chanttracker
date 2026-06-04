@@ -34,6 +34,24 @@
     @apply glassmorphic px-6 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-md hover:shadow-lg;
   }
 
+  /* Frosted glass bars (header, breadcrumb, sidebar, mobile nav).
+     Uses a DARK semi-opaque tint — not bg-white — so light/white content
+     scrolling behind gets darkened and the white text/icons stay readable.
+     iOS "thick material" style: strong blur + saturation. */
+  .frosted-bar {
+    background-color: rgba(15, 23, 42, 0.8); /* slate-900 @ 80% */
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+  }
+
+  /* Fallback for browsers without backdrop-filter: make it nearly opaque so
+     text never washes out. */
+  @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .frosted-bar {
+      background-color: rgba(15, 23, 42, 0.95);
+    }
+  }
+
   /* Sacred orange accent button */
   .sacred-button {
     @apply bg-sacred-500/20 border border-sacred-400/50 text-white font-semibold px-6 py-3 rounded-2xl transition-all duration-300 hover:bg-sacred-500/30 hover:border-sacred-400/70 hover:shadow-lg hover:shadow-sacred-500/20 active:scale-95;

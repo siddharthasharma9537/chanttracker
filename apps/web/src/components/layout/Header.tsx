@@ -114,7 +114,7 @@ export function Header() {
   )
 
   return (
-    <header className="bg-white/10 backdrop-blur-xl border-b border-white/20 sticky top-0 z-30 lg:pl-72">
+    <header className="frosted-bar border-b border-white/20 sticky top-0 z-30 lg:pl-72">
       <div className="px-4 sm:px-6 lg:px-10 py-3 sm:py-4 lg:py-4">
         <div className="flex items-center justify-between">
           {/* Logo/Branding */}
