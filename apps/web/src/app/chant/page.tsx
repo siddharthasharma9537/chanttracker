@@ -10,6 +10,7 @@ import { useOfflineStore } from '@/store/offlineStore'
 import { MantrasDropdown } from '@/components/chant/MantrasDropdown'
 import { CounterDisplay } from '@/components/chant/CounterDisplay'
 import { SessionControls } from '@/components/chant/SessionControls'
+import { LanguageSelector } from '@/components/chant/LanguageSelector'
 
 interface SelectedMantra {
   id: string
@@ -170,6 +171,7 @@ export default function ChantPage() {
         <div className="min-w-0 flex-1">
           <MantrasDropdown onSelect={handleSelectMantra} isLoading={isStarting} />
         </div>
+        <LanguageSelector />
       </div>
 
       {/* Cockpit — fills remaining height, never scrolls */}

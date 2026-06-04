@@ -7,6 +7,7 @@ import { useSessionCounter } from '@/hooks/useSessionCounter'
 import { createClient } from '@/lib/supabase/client'
 import { CounterDisplay } from '@/components/chant/CounterDisplay'
 import { SessionControls } from '@/components/chant/SessionControls'
+import { LanguageSelector } from '@/components/chant/LanguageSelector'
 
 interface ProjectGraha {
   id: string
@@ -311,12 +312,14 @@ export function AssignedPriestChantPage({
           <span>{projectName}</span>
         </div>
         <div className="min-w-0 flex-1">
+
           {showGrahaSelector ? (
             <div className="text-white text-sm font-medium">Select a graha</div>
           ) : selectedGraha ? (
             <div className="text-white text-sm font-medium">{selectedGraha.graha_name}</div>
           ) : null}
         </div>
+        <LanguageSelector />
       </div>
 
       {/* Main content area */}
