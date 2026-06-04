@@ -53,12 +53,14 @@ export function Header() {
             {/* Dropdown Menu */}
             {isMenuOpen && (
               <div
-                className="fixed w-56 rounded-lg shadow-2xl border border-white/20 py-2 z-50"
+                className="fixed w-56 rounded-lg shadow-2xl border border-white/20 py-2"
                 style={{
                   backgroundColor: '#1a1f2c',
                   backdropFilter: 'blur(10px)',
-                  top: '64px',
-                  right: '16px'
+                  top: '72px',
+                  right: '24px',
+                  zIndex: 9999,
+                  pointerEvents: 'auto'
                 }}
               >
                 <div className="px-4 py-3 border-b border-white/10">
