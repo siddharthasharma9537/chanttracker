@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/hooks/useAuth'
 import { useSessionCounter } from '@/hooks/useSessionCounter'
 import { CounterDisplay } from '@/components/chant/CounterDisplay'
 import { X, ChevronLeft } from 'lucide-react'
@@ -29,6 +30,7 @@ export function HostChantModal({
 }: HostChantModalProps) {
   const supabase = createClient()
   const queryClient = useQueryClient()
+  const { user } = useAuth()
   const [selectedGraha, setSelectedGraha] = useState<string | null>(null)
   const {
     state,
@@ -45,8 +47,6 @@ export function HostChantModal({
   const completeSessionMutation = useMutation({
     mutationFn: async () => {
       if (!selectedGrahaData || !selectedGraha) throw new Error('No graha selected')
-
-      const { user } = await supabase.auth.getUser()
       if (!user?.id) throw new Error('User not authenticated')
 
       // Log the delegation session
@@ -54,13 +54,13 @@ export function HostChantModal({
         .from('delegation_sessions')
         .insert({
           project_id: projectId,
-          priest_id: user.id,
+          priest_id: user!.id,
           graha_id: selectedGraha,
           count: state.count,
           duration_seconds: state.durationSecs,
           assignment_type: 'assigned',
           session_date: new Date().toLocaleDateString('sv'),
-        })
+        } as any)
 
       if (error) throw error
     },
@@ -73,8 +73,13 @@ export function HostChantModal({
       onClose()
     },
     onError: (err: any) => {
-      console.error('Failed to log session:', err)
-      alert('Failed to save session. Please try again.')
+      console.error('Failed to log session:', {
+        message: err.message,
+        error: err,
+        details: err.details || err.hint || 'Unknown error'
+      })
+      const errorMsg = err.message || 'Unknown error'
+      alert(`Failed to save session: ${errorMsg}`)
     },
   })
 
