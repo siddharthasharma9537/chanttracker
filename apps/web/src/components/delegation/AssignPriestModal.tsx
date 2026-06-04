@@ -85,6 +85,24 @@ export function AssignPriestModal({
         throw new Error('Please generate a code first')
       }
 
+      // Check if this assignment code already exists (from a previous assignment)
+      const { data: existingAssignment, error: checkError } = await supabase
+        .from('priest_assignments')
+        .select('id')
+        .eq('assignment_code', assignmentCode)
+        .single()
+
+      // If it exists, delete it first (it was probably deleted but code still exists)
+      if (existingAssignment?.id) {
+        const { error: deleteError } = await supabase
+          .from('priest_assignments')
+          .delete()
+          .eq('id', existingAssignment.id)
+
+        if (deleteError) throw deleteError
+      }
+
+      // Now insert the new assignment
       const { error: insertError } = await supabase
         .from('priest_assignments')
         .insert({
@@ -107,7 +125,7 @@ export function AssignPriestModal({
     },
     onError: (err: any) => {
       if (err.message?.includes('duplicate key') || err.message?.includes('unique constraint')) {
-        setError('This priest is already assigned to this project. Each priest can only be assigned once per project.')
+        setError('Assignment code conflict. Please try a different email or mobile number.')
       } else {
         setError(err.message || 'Failed to assign priest')
       }
