@@ -6,7 +6,6 @@ import { useDelegationProject } from '@/hooks/useDelegationProject'
 import { GrahaProgressCard } from './GrahaProgressCard'
 import { PriestContributionsModal } from './PriestContributionsModal'
 import { AssignPriestModal } from './AssignPriestModal'
-import { HostChantModal } from './HostChantModal'
 import { AlertCircle, RefreshCw, Plus, UserPlus, Zap } from 'lucide-react'
 
 interface ProjectDashboardProps {
@@ -28,7 +27,6 @@ export function ProjectDashboard({
   } | null>(null)
   const [showContributionsModal, setShowContributionsModal] = useState(false)
   const [showAssignModal, setShowAssignModal] = useState(false)
-  const [showHostChantModal, setShowHostChantModal] = useState(false)
 
   const {
     data: projectData,
@@ -264,7 +262,7 @@ export function ProjectDashboard({
         {projectData.graha_breakdown && projectData.graha_breakdown.length > 0 && (
           <div className="space-y-3 mb-8">
             <button
-              onClick={() => setShowHostChantModal(true)}
+              onClick={() => router.push(`/delegation/projects/${projectId}/chant`)}
               className="w-full px-4 py-3 bg-gradient-to-r from-sacred-500 to-temple-500 hover:from-sacred-600 hover:to-temple-600 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
             >
               <Zap className="w-5 h-5" />
@@ -328,21 +326,6 @@ export function ProjectDashboard({
         onSuccess={() => refetch()}
       />
 
-      {/* Host Chant Modal */}
-      {projectData?.graha_breakdown && (
-        <HostChantModal
-          isOpen={showHostChantModal}
-          projectId={projectId}
-          grahas={projectData.graha_breakdown.map((g) => ({
-            graha_id: g.graha_id,
-            graha_name: g.graha_name,
-            target: g.target,
-            completed: g.completed,
-          }))}
-          onClose={() => setShowHostChantModal(false)}
-          onSuccess={() => refetch()}
-        />
-      )}
     </div>
   )
 }
