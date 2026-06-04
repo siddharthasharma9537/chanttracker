@@ -22,7 +22,7 @@ export function Header() {
   }
 
   return (
-    <header className="bg-white/10 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40 lg:pl-72">
+    <header className="bg-white/10 backdrop-blur-xl border-b border-white/20 sticky top-0 z-30 lg:pl-72">
       <div className="px-4 sm:px-6 lg:px-10 py-3 sm:py-4 lg:py-4">
         <div className="flex items-center justify-between">
           {/* Logo/Branding */}
@@ -52,7 +52,7 @@ export function Header() {
 
             {/* Dropdown Menu */}
             {isMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white/10 backdrop-blur-xl rounded-lg shadow-lg border border-white/20 py-2 z-50">
+              <div className="fixed top-16 right-6 w-56 bg-white/10 backdrop-blur-xl rounded-lg shadow-2xl border border-white/20 py-2 z-50" style={{ minWidth: '224px' }}>
                 <div className="px-4 py-3 border-b border-white/10">
                   <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Account</p>
                   <p className="text-sm font-semibold text-white truncate">
