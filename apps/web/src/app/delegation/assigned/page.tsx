@@ -86,25 +86,13 @@ export default function AssignedPriestPage() {
         return
       }
 
-      // Fetch project name
-      const { data: projectData, error: projectError } = await (supabase
-        .from('delegation_projects') as any)
-        .select('name')
-        .eq('id', data.project_id)
-        .single()
-
-      if (projectError || !projectData) {
-        setError('Could not fetch project details.')
-        setIsSubmitting(false)
-        return
-      }
-
-      // Claim the assignment by updating priest_id
+      // Claim the assignment FIRST (sets priest_id = current user). This must
+      // happen before reading the project, because the projects / project_grahas
+      // RLS policies only allow a priest who is claimed on this project.
       const { error: claimError } = await (supabase
         .from('priest_assignments') as any)
         .update({ priest_id: user.id })
         .eq('assignment_code', normalizedCode)
-        .single()
 
       if (claimError) {
         setError('Failed to claim assignment. Please try again.')
@@ -112,11 +100,24 @@ export default function AssignedPriestPage() {
         return
       }
 
-      // Successfully claimed the assignment
+      // Fetch the project name (best-effort — never block chanting on this).
+      // Source of truth is projects.client_name (there is no delegation_projects table).
+      let projectName = 'Project'
+      const { data: projectData } = (await supabase
+        .from('projects')
+        .select('client_name')
+        .eq('id', data.project_id)
+        .single()) as { data: { client_name: string } | null }
+
+      if (projectData?.client_name) {
+        projectName = projectData.client_name
+      }
+
+      // Proceed to the tabbed Chant / History experience
       setSelectedAssignment({
         projectId: data.project_id,
         priestId: user.id,
-        projectName: projectData.name,
+        projectName,
       })
       setActiveTab('chant')
     } catch (err: any) {
