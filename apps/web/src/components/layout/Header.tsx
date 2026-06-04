@@ -52,7 +52,7 @@ export function Header() {
 
             {/* Dropdown Menu */}
             {isMenuOpen && (
-              <div className="absolute top-full right-0 mt-2 w-56 bg-white/10 backdrop-blur-xl rounded-lg shadow-2xl border border-white/20 py-2 z-50">
+              <div className="absolute top-full right-0 mt-2 w-56 rounded-lg shadow-2xl border border-white/20 py-2 z-50" style={{ backgroundColor: '#1a1f2c', backdropFilter: 'blur(10px)' }}>
                 <div className="px-4 py-3 border-b border-white/10">
                   <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Account</p>
                   <p className="text-sm font-semibold text-white truncate">
