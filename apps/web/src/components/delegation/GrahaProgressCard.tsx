@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Zap } from 'lucide-react'
 
 interface AssignedPriest {
   priest_id: string
@@ -11,20 +11,24 @@ interface AssignedPriest {
 
 interface GrahaProgressCardProps {
   grahaName: string
+  grahaId: string
   completed: number
   target: number
   completionPct: number
   assignedPriests: AssignedPriest[]
   onShowContributions?: () => void
+  onChant?: (grahaId: string) => void
 }
 
 export function GrahaProgressCard({
   grahaName,
+  grahaId,
   completed,
   target,
   completionPct,
   assignedPriests,
   onShowContributions,
+  onChant,
 }: GrahaProgressCardProps) {
   const [expanded, setExpanded] = useState(false)
   const isComplete = completionPct === 100
@@ -86,11 +90,21 @@ export function GrahaProgressCard({
             />
           </div>
 
-          {/* Percentage */}
-          <div className="text-right">
-            <span className="text-xs font-semibold text-gray-600">
-              {completionPct}%
-            </span>
+          {/* Percentage + Chant button row */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-gray-600">{completionPct}%</span>
+            {onChant && !isComplete && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onChant(grahaId) }}
+                className="flex items-center gap-1 px-3 py-1 bg-sacred-500 hover:bg-sacred-600 text-white text-xs font-semibold rounded-lg transition-colors"
+              >
+                <Zap className="w-3 h-3" />
+                Chant
+              </button>
+            )}
+            {isComplete && (
+              <span className="text-xs text-green-600 font-semibold">Complete ✓</span>
+            )}
           </div>
         </div>
       </button>

@@ -27,6 +27,7 @@ interface AssignedPriestChantPageProps {
   projectId: string
   priestId: string
   projectName: string
+  initialGrahaId?: string
   onNavigateToHistory?: () => void
 }
 
@@ -34,6 +35,7 @@ export function AssignedPriestChantPage({
   projectId,
   priestId,
   projectName,
+  initialGrahaId,
   onNavigateToHistory,
 }: AssignedPriestChantPageProps) {
   const supabase = createClient()
@@ -70,8 +72,9 @@ export function AssignedPriestChantPage({
       // so the graha mantra is matched by name; its deities link via parent_graha_id.
       const { data: mData, error: mErr } = await supabase
         .from('mantras')
-        .select('id, name_en, deity, devanagari, mantra_type, parent_graha_id')
+        .select('id, name_en, deity, devanagari, mantra_telugu, mantra_type, parent_graha_id')
         .eq('category', 'navagraha')
+        .eq('is_active', true)
 
       if (mErr) throw mErr
       const mantras = (mData || []) as any[]
@@ -114,11 +117,12 @@ export function AssignedPriestChantPage({
           color: row.grahas?.color ?? '#f97316',
           total_target: row.target_count ?? 0,
           completed_count: row.completed_count ?? 0,
-          graha_mantra_devanagari: grahaMantra?.devanagari ?? '',
+          // Prefer Telugu text; fall back to devanagari (other scripts)
+          graha_mantra_devanagari: grahaMantra?.mantra_telugu || grahaMantra?.devanagari || '',
           adhidevata_name: stripLabel(adhi?.name_en),
-          adhidevata_mantra_devanagari: adhi?.devanagari ?? '',
+          adhidevata_mantra_devanagari: adhi?.mantra_telugu || adhi?.devanagari || '',
           pratyadhidevata_name: stripLabel(pratya?.name_en),
-          pratyadhidevata_mantra_devanagari: pratya?.devanagari ?? '',
+          pratyadhidevata_mantra_devanagari: pratya?.mantra_telugu || pratya?.devanagari || '',
         }
       }) as ProjectGraha[]
     },
@@ -130,6 +134,14 @@ export function AssignedPriestChantPage({
       setSelectedGraha(grahas[0])
     }
   }, [grahas, selectedGraha])
+
+  // Auto-select graha from URL param (e.g. clicking "Chant" on a specific graha card)
+  useEffect(() => {
+    if (initialGrahaId && grahas.length > 0 && !selectedGraha) {
+      const match = grahas.find((g) => g.graha_id === initialGrahaId)
+      if (match) setSelectedGraha(match)
+    }
+  }, [initialGrahaId, grahas, selectedGraha])
 
   // Mutation to start a delegation session
   const startSessionMutation = useMutation({

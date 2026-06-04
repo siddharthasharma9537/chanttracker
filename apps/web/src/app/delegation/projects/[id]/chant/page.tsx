@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useDelegationProject } from '@/hooks/useDelegationProject'
@@ -14,8 +14,10 @@ type TabType = 'chant' | 'history'
 export default function HostProjectChantPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user } = useAuth()
   const projectId = params.id as string
+  const initialGrahaId = searchParams.get('graha') || undefined
   const [activeTab, setActiveTab] = useState<TabType>('chant')
 
   const { data: projectData } = useDelegationProject(projectId)
@@ -68,6 +70,7 @@ export default function HostProjectChantPage() {
             projectId={projectId}
             priestId={user.id}
             projectName={projectName}
+            initialGrahaId={initialGrahaId}
             onNavigateToHistory={() => setActiveTab('history')}
           />
         ) : (

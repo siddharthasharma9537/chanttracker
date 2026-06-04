@@ -231,6 +231,7 @@ export function ProjectDashboard({
               {projectData.graha_breakdown.map((graha) => (
                 <GrahaProgressCard
                   key={graha.graha_id}
+                  grahaId={graha.graha_id}
                   grahaName={graha.graha_name}
                   completed={graha.completed}
                   target={graha.target}
@@ -238,6 +239,9 @@ export function ProjectDashboard({
                   assignedPriests={graha.assigned_priests || []}
                   onShowContributions={() =>
                     handleShowContributions(graha.graha_id, graha.graha_name)
+                  }
+                  onChant={(grahaId) =>
+                    router.push(`/delegation/projects/${projectId}/chant?graha=${grahaId}`)
                   }
                 />
               ))}
@@ -274,7 +278,7 @@ export function ProjectDashboard({
                 className="px-4 py-3 bg-temple-500 hover:bg-temple-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
               >
                 <UserPlus className="w-4 h-4" />
-                Assign Priest
+                Manage Priests
               </button>
               <button
                 onClick={() => onNavigateToAssignPriests?.()}

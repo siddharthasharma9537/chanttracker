@@ -59,9 +59,10 @@ export function MantrasDropdown({ onSelect, isLoading }: MantrasDropdownProps) {
         const { data, error } = await supabase
           .from('mantras')
           .select(
-            'id, name_en, name_te, name_sa, devanagari, accent_color, category, mantra_type, parent_graha_id, deity'
+            'id, name_en, name_te, name_sa, devanagari, mantra_telugu, accent_color, category, mantra_type, parent_graha_id, deity'
           )
-          .neq('is_active', false)
+          .eq('is_active', true)
+          .eq('is_archived', false)
 
         if (error) throw error
 
@@ -93,11 +94,12 @@ export function MantrasDropdown({ onSelect, isLoading }: MantrasDropdownProps) {
             name_te: r.name_te || undefined,
             category: r.category || 'custom',
             color: r.accent_color || undefined,
-            mantra_devanagari: r.devanagari || undefined,
+            // Prefer Telugu; fall back to devanagari for non-navagraha rows
+            mantra_devanagari: (r as any).mantra_telugu || r.devanagari || undefined,
             adhidevata_te: adhi ? stripLabel(adhi.name_en) : undefined,
-            adhidevata_mantra_devanagari: adhi?.devanagari || undefined,
+            adhidevata_mantra_devanagari: (adhi as any)?.mantra_telugu || adhi?.devanagari || undefined,
             pratyadhidevata_te: pratya ? stripLabel(pratya.name_en) : undefined,
-            pratyadhidevata_mantra_devanagari: pratya?.devanagari || undefined,
+            pratyadhidevata_mantra_devanagari: (pratya as any)?.mantra_telugu || pratya?.devanagari || undefined,
           }
         })
 
@@ -156,7 +158,7 @@ export function MantrasDropdown({ onSelect, isLoading }: MantrasDropdownProps) {
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white/8 backdrop-blur-lg border border-white/20 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-2 border border-white/20 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto" style={{ backgroundColor: '#1a1f2c' }}>
             {mantras.length === 0 ? (
               <p className="px-4 sm:px-6 py-4 text-sm text-white/60">
                 No mantras available.
