@@ -107,7 +107,7 @@ export function AssignPriestModal({
         .from('priest_assignments')
         .insert({
           project_id: projectId,
-          priest_email: email.toLowerCase(),
+          priest_email: email.toLowerCase().trim(),
           priest_mobile: mobile.replace(/\D/g, ''),
           assignment_code: assignmentCode,
         } as any)

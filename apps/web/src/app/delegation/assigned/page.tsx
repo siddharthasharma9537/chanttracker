@@ -59,12 +59,15 @@ export default function AssignedPriestPage() {
     setIsSubmitting(true)
 
     try {
+      // Normalize the assignment code
+      const normalizedCode = assignmentCode.toUpperCase().trim()
+
       // Look up the assignment code
       const { data, error: queryError } = await supabase
         .from('priest_assignments')
-        .select('project_id, priest_email')
-        .eq('assignment_code', assignmentCode.toUpperCase().trim())
-        .single() as { data: { project_id: string; priest_email: string } | null; error: any }
+        .select('project_id, priest_email, id')
+        .eq('assignment_code', normalizedCode)
+        .single() as { data: { id: string; project_id: string; priest_email: string } | null; error: any }
 
       if (queryError || !data) {
         setError('Invalid assignment code. Please check and try again.')
@@ -72,9 +75,13 @@ export default function AssignedPriestPage() {
         return
       }
 
+      // Normalize emails for comparison (trim and lowercase)
+      const storedEmail = data.priest_email.toLowerCase().trim()
+      const currentUserEmail = user.email.toLowerCase().trim()
+
       // Verify the logged-in user's email matches the assignment
-      if (data.priest_email.toLowerCase() !== user.email.toLowerCase()) {
-        setError('This assignment code is not for your email address.')
+      if (storedEmail !== currentUserEmail) {
+        setError(`This code is registered for ${data.priest_email}, but you're logged in as ${user.email}. Please log in with the correct email address.`)
         setIsSubmitting(false)
         return
       }
@@ -96,7 +103,7 @@ export default function AssignedPriestPage() {
       const { error: claimError } = await (supabase
         .from('priest_assignments') as any)
         .update({ priest_id: user.id })
-        .eq('assignment_code', assignmentCode.toUpperCase().trim())
+        .eq('assignment_code', normalizedCode)
         .single()
 
       if (claimError) {
