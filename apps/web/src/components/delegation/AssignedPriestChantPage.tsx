@@ -12,10 +12,15 @@ interface ProjectGraha {
   id: string
   graha_id: string
   graha_name: string
-  bija_mantra: string
   color: string
   total_target: number
   completed_count: number
+  // Full mantra texts pulled from the `mantras` reference table
+  graha_mantra_devanagari: string
+  adhidevata_name: string
+  adhidevata_mantra_devanagari: string
+  pratyadhidevata_name: string
+  pratyadhidevata_mantra_devanagari: string
 }
 
 interface AssignedPriestChantPageProps {
@@ -51,25 +56,71 @@ export function AssignedPriestChantPage({
   const { data: grahas = [], isLoading: grahasLoading } = useQuery({
     queryKey: ['project-grahas', projectId],
     queryFn: async () => {
-      // project_grahas holds target/completed; the graha name, mantra and color
-      // live in the referenced grahas table — join it and flatten.
+      // project_grahas holds target/completed; name + color come from grahas.
       const { data, error } = await supabase
         .from('project_grahas')
-        .select('id, graha_id, target_count, completed_count, grahas(name, bija_mantra, color)')
+        .select('id, graha_id, target_count, completed_count, grahas(name, color)')
         .eq('project_id', projectId)
         .order('created_at', { ascending: true })
 
       if (error) throw error
 
-      return (data || []).map((row: any) => ({
-        id: row.id,
-        graha_id: row.graha_id,
-        graha_name: row.grahas?.name ?? 'Graha',
-        bija_mantra: row.grahas?.bija_mantra ?? '',
-        color: row.grahas?.color ?? '#f97316',
-        total_target: row.target_count ?? 0,
-        completed_count: row.completed_count ?? 0,
-      })) as ProjectGraha[]
+      // Full mantra texts (graha + adhidevata + pratyadhidevata) live in the
+      // public `mantras` reference table. There is no FK from grahas → mantras,
+      // so the graha mantra is matched by name; its deities link via parent_graha_id.
+      const { data: mData, error: mErr } = await supabase
+        .from('mantras')
+        .select('id, name_en, deity, devanagari, mantra_type, parent_graha_id')
+        .eq('category', 'navagraha')
+
+      if (mErr) throw mErr
+      const mantras = (mData || []) as any[]
+
+      // "Bhumi (Adhidevata of Mangala)" -> "Bhumi"
+      const stripLabel = (s?: string) =>
+        (s || '').replace(/\s*\(.*\)\s*/g, '').trim()
+
+      return (data || []).map((row: any) => {
+        const grahaName: string = row.grahas?.name ?? 'Graha'
+        const lower = grahaName.toLowerCase()
+
+        const grahaCandidates = mantras.filter(
+          (m) =>
+            m.mantra_type === 'graha' &&
+            (m.name_en?.toLowerCase().startsWith(lower) ||
+              m.deity?.toLowerCase() === lower)
+        )
+        // Prefer the "… Graha Mantra" row over e.g. a "… Beeja Mantra" row.
+        const grahaMantra =
+          grahaCandidates.find((m) => /graha mantra/i.test(m.name_en || '')) ||
+          grahaCandidates[0]
+
+        const adhi = grahaMantra
+          ? mantras.find(
+              (m) => m.mantra_type === 'adhidevata' && m.parent_graha_id === grahaMantra.id
+            )
+          : undefined
+        const pratya = grahaMantra
+          ? mantras.find(
+              (m) =>
+                m.mantra_type === 'pratyadhidevata' && m.parent_graha_id === grahaMantra.id
+            )
+          : undefined
+
+        return {
+          id: row.id,
+          graha_id: row.graha_id,
+          graha_name: grahaName,
+          color: row.grahas?.color ?? '#f97316',
+          total_target: row.target_count ?? 0,
+          completed_count: row.completed_count ?? 0,
+          graha_mantra_devanagari: grahaMantra?.devanagari ?? '',
+          adhidevata_name: stripLabel(adhi?.name_en),
+          adhidevata_mantra_devanagari: adhi?.devanagari ?? '',
+          pratyadhidevata_name: stripLabel(pratya?.name_en),
+          pratyadhidevata_mantra_devanagari: pratya?.devanagari ?? '',
+        }
+      }) as ProjectGraha[]
     },
   })
 
@@ -298,7 +349,11 @@ export function AssignedPriestChantPage({
             count={counterState.count}
             target={counterState.target}
             mantraName={selectedGraha.graha_name}
-            mantra_devanagari={selectedGraha.bija_mantra}
+            mantra_devanagari={selectedGraha.graha_mantra_devanagari}
+            adhidevata_te={selectedGraha.adhidevata_name}
+            adhidevata_mantra_devanagari={selectedGraha.adhidevata_mantra_devanagari}
+            pratyadhidevata_te={selectedGraha.pratyadhidevata_name}
+            pratyadhidevata_mantra_devanagari={selectedGraha.pratyadhidevata_mantra_devanagari}
             durationSecs={counterState.durationSecs}
             state={counterState.state}
             color={selectedGraha.color}
