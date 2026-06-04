@@ -22,17 +22,36 @@ const settingsSchema = z.object({
 type SettingsFormData = z.infer<typeof settingsSchema>
 
 const TIMEZONES = [
+  // UTC
   'UTC',
+  // Americas
   'America/New_York',
   'America/Chicago',
   'America/Denver',
   'America/Los_Angeles',
+  'America/Toronto',
+  'America/Mexico_City',
+  'America/Sao_Paulo',
+  // Europe
   'Europe/London',
   'Europe/Paris',
-  'Asia/Tokyo',
-  'Asia/Shanghai',
+  'Europe/Berlin',
+  'Europe/Rome',
+  'Europe/Amsterdam',
+  'Europe/Istanbul',
+  // Asia
+  'Asia/Dubai',
   'Asia/Kolkata',
+  'Asia/Bangkok',
+  'Asia/Singapore',
+  'Asia/Hong_Kong',
+  'Asia/Shanghai',
+  'Asia/Tokyo',
+  'Asia/Seoul',
+  // Australia
   'Australia/Sydney',
+  'Australia/Melbourne',
+  'Australia/Brisbane',
   'Pacific/Auckland',
 ]
 
@@ -224,8 +243,9 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-12">
+      <div className="flex flex-col justify-center items-center py-12 gap-3">
         <div className="animate-spin rounded-full h-8 w-8 border-4 border-white/30 border-t-amber-400"></div>
+        <p className="text-white/60 text-sm">Loading your settings...</p>
       </div>
     )
   }
@@ -259,7 +279,7 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
           <label htmlFor="display_name" className="block text-sm font-medium text-white/90 mb-1">
             Display Name
           </label>
-          <p className="text-xs text-white/60 mb-2">How your name appears in the app</p>
+          <p className="text-xs text-white/60 mb-2">How your name appears in projects and delegation history</p>
           <input
             id="display_name"
             type="text"
@@ -278,7 +298,7 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
           <label htmlFor="daily_goal" className="block text-sm font-medium text-white/90 mb-1">
             Daily Goal
           </label>
-          <p className="text-xs text-white/60 mb-2">Target chant count per day</p>
+          <p className="text-xs text-white/60 mb-2">Target total count per day (sum of all mantras)</p>
           <input
             id="daily_goal"
             type="number"
@@ -344,6 +364,7 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
           <label htmlFor="timezone" className="block text-sm font-medium text-white/90 mb-1">
             Timezone
           </label>
+          <p className="text-xs text-white/60 mb-2">Used for calculating daily goals and session tracking</p>
           <select
             id="timezone"
             {...register('timezone')}
@@ -395,6 +416,7 @@ export function SettingsForm({ onProfileLoad }: SettingsFormProps) {
 
         <div>
           <label className="block text-sm font-medium text-white/90 mb-1">Email</label>
+          <p className="text-xs text-white/60 mb-2">Managed by your authentication provider</p>
           <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white/80">
             {user?.email || 'Not available'}
           </div>
