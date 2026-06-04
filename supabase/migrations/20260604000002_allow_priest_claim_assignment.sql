@@ -16,6 +16,8 @@
 -- created for THEIR email, and only set priest_id to themselves. The host-only
 -- management policies remain untouched.
 
+DROP POLICY IF EXISTS "priests_claim_own_assignment" ON priest_assignments;
+
 CREATE POLICY "priests_claim_own_assignment" ON priest_assignments
   FOR UPDATE
   USING (
