@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useUserProfile } from '@/hooks/useUserProfile'
@@ -11,6 +11,21 @@ export function Header() {
   const { user, signOut } = useAuth()
   const { displayName, initials, email } = useUserProfile()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isMenuOpen])
 
   const handleSignOut = async () => {
     try {
@@ -36,11 +51,13 @@ export function Header() {
           </div>
 
           {/* User Menu */}
-          <div className="relative z-50">
+          <div className="relative" ref={menuRef}>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
               aria-label="User menu"
+              aria-expanded={isMenuOpen}
+              aria-haspopup="menu"
             >
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-xs font-semibold text-white">
                 {initials}
@@ -57,11 +74,12 @@ export function Header() {
                 style={{
                   backgroundColor: '#1a1f2c',
                   backdropFilter: 'blur(10px)',
-                  top: '80px',
-                  right: '24px',
+                  top: 'calc(4rem + 16px)',
+                  right: '16px',
                   zIndex: 9999,
                   pointerEvents: 'auto'
                 }}
+                role="menu"
               >
                 <div className="px-4 py-3 border-b border-white/10">
                   <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Account</p>
