@@ -40,7 +40,7 @@ export function AssignedPriestProjectHistory({
           duration_seconds,
           session_date,
           created_at,
-          project_grahas(graha_name)
+          grahas(name)
         `)
         .eq('project_id', projectId)
         .eq('priest_id', priestId)
@@ -49,10 +49,10 @@ export function AssignedPriestProjectHistory({
 
       if (error) throw error
 
-      // Map the response to extract graha_name from the nested project_grahas
+      // graha name lives in the referenced grahas table (via graha_id)
       const sessionsWithNames = (data || []).map((session: any) => ({
         ...session,
-        graha_name: session.project_grahas?.graha_name || 'Unknown Graha',
+        graha_name: session.grahas?.name || 'Unknown Graha',
       }))
 
       return sessionsWithNames as DelegationSessionWithGrahaName[]

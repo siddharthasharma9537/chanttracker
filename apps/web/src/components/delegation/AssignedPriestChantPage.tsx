@@ -12,21 +12,10 @@ interface ProjectGraha {
   id: string
   graha_id: string
   graha_name: string
-  graha_name_te: string
-  graha_name_devanagari: string
+  bija_mantra: string
   color: string
   total_target: number
   completed_count: number
-  adhidevata_name?: string
-  adhidevata_name_te?: string
-  adhidevata_mantra_te?: string
-  adhidevata_mantra_devanagari?: string
-  pratyadhidevata_name?: string
-  pratyadhidevata_name_te?: string
-  pratyadhidevata_mantra_te?: string
-  pratyadhidevata_mantra_devanagari?: string
-  graha_mantra_te?: string
-  graha_mantra_devanagari?: string
 }
 
 interface AssignedPriestChantPageProps {
@@ -62,14 +51,25 @@ export function AssignedPriestChantPage({
   const { data: grahas = [], isLoading: grahasLoading } = useQuery({
     queryKey: ['project-grahas', projectId],
     queryFn: async () => {
+      // project_grahas holds target/completed; the graha name, mantra and color
+      // live in the referenced grahas table — join it and flatten.
       const { data, error } = await supabase
         .from('project_grahas')
-        .select('*')
+        .select('id, graha_id, target_count, completed_count, grahas(name, bija_mantra, color)')
         .eq('project_id', projectId)
         .order('created_at', { ascending: true })
 
       if (error) throw error
-      return (data || []) as ProjectGraha[]
+
+      return (data || []).map((row: any) => ({
+        id: row.id,
+        graha_id: row.graha_id,
+        graha_name: row.grahas?.name ?? 'Graha',
+        bija_mantra: row.grahas?.bija_mantra ?? '',
+        color: row.grahas?.color ?? '#f97316',
+        total_target: row.target_count ?? 0,
+        completed_count: row.completed_count ?? 0,
+      })) as ProjectGraha[]
     },
   })
 
@@ -298,18 +298,7 @@ export function AssignedPriestChantPage({
             count={counterState.count}
             target={counterState.target}
             mantraName={selectedGraha.graha_name}
-            mantraDevanagari={selectedGraha.graha_name_devanagari}
-            name_te={selectedGraha.graha_name_te}
-            adhidevata_te={selectedGraha.adhidevata_name_te}
-            adhidevata_devanagari={selectedGraha.adhidevata_name}
-            adhidevata_mantra_te={selectedGraha.adhidevata_mantra_te}
-            adhidevata_mantra_devanagari={selectedGraha.adhidevata_mantra_devanagari}
-            pratyadhidevata_te={selectedGraha.pratyadhidevata_name_te}
-            pratyadhidevata_devanagari={selectedGraha.pratyadhidevata_name}
-            pratyadhidevata_mantra_te={selectedGraha.pratyadhidevata_mantra_te}
-            pratyadhidevata_mantra_devanagari={selectedGraha.pratyadhidevata_mantra_devanagari}
-            mantra_te={selectedGraha.graha_mantra_te}
-            mantra_devanagari={selectedGraha.graha_mantra_devanagari}
+            mantra_devanagari={selectedGraha.bija_mantra}
             durationSecs={counterState.durationSecs}
             state={counterState.state}
             color={selectedGraha.color}
