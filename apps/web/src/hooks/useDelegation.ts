@@ -174,39 +174,6 @@ export function usePriestContributions(projectId: string | null) {
   })
 }
 
-export interface PriestDashboardItem {
-  graha_id: string
-  graha_name: string
-  target: number
-  completed: number
-  completion_pct: number
-  assignment_type: 'assigned' | 'unassigned'
-  can_volunteer: boolean
-}
-
-export function usePriestDashboard(projectId: string | null, priestId: string | null, options = {}) {
-  const supabase = createClient()
-  const { user } = useAuth()
-  const { refetchInterval = 5000 } = options as { refetchInterval?: number }
-
-  return useQuery<PriestDashboardItem[], Error>({
-    queryKey: ['priestDashboard', projectId, priestId],
-    queryFn: async () => {
-      if (!projectId || !priestId) throw new Error('Project ID and Priest ID are required')
-
-      const { data, error } = await (supabase.rpc('get_priest_dashboard', {
-        p_project_id: projectId,
-        p_priest_id: priestId,
-      } as any) as any)
-
-      if (error) throw error
-      return (data || []) as PriestDashboardItem[]
-    },
-    enabled: !!projectId && !!priestId && !!user,
-    refetchInterval,
-    staleTime: 2000,
-  })
-}
 
 export function useLogDelegationSession() {
   const supabase = createClient()

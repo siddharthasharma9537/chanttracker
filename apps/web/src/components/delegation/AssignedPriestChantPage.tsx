@@ -59,67 +59,53 @@ export function AssignedPriestChantPage({
   const { data: grahas = [], isLoading: grahasLoading } = useQuery({
     queryKey: ['project-grahas', projectId],
     queryFn: async () => {
-      // project_grahas holds target/completed; name + color come from grahas.
+      // Join project_grahas → grahas (name/color) → mantras (via grahas.mantra_id FK)
+      // and also fetch adhidevata/pratyadhidevata via mantras.parent_graha_id.
       const { data, error } = await supabase
         .from('project_grahas')
-        .select('id, graha_id, target_count, completed_count, grahas(name, color)')
+        .select(`
+          id, graha_id, target_count, completed_count,
+          grahas(name, color, mantra_id,
+            mantras!grahas_mantra_id_fkey(
+              id, name_en, mantra_telugu, devanagari
+            )
+          )
+        `)
         .eq('project_id', projectId)
         .order('created_at', { ascending: true })
 
       if (error) throw error
 
-      // Full mantra texts (graha + adhidevata + pratyadhidevata) live in the
-      // public `mantras` reference table. There is no FK from grahas → mantras,
-      // so the graha mantra is matched by name; its deities link via parent_graha_id.
-      const { data: mData, error: mErr } = await supabase
+      // Fetch adhidevata + pratyadhidevata for all mantra IDs in one call
+      const mantraIds = (data || [])
+        .map((r: any) => r.grahas?.mantras?.id)
+        .filter(Boolean)
+
+      const { data: deityData } = await supabase
         .from('mantras')
-        .select('id, name_en, deity, devanagari, mantra_telugu, mantra_type, parent_graha_id')
-        .eq('category', 'navagraha')
+        .select('id, name_en, mantra_telugu, devanagari, mantra_type, parent_graha_id')
+        .in('parent_graha_id', mantraIds)
         .eq('is_active', true)
+        .in('mantra_type', ['adhidevata', 'pratyadhidevata'])
 
-      if (mErr) throw mErr
-      const mantras = (mData || []) as any[]
-
-      // "Bhumi (Adhidevata of Mangala)" -> "Bhumi"
-      const stripLabel = (s?: string) =>
-        (s || '').replace(/\s*\(.*\)\s*/g, '').trim()
+      const deities = (deityData || []) as any[]
+      const stripLabel = (s?: string) => (s || '').replace(/\s*\(.*\)\s*/g, '').trim()
 
       return (data || []).map((row: any) => {
-        const grahaName: string = row.grahas?.name ?? 'Graha'
-        const lower = grahaName.toLowerCase()
-
-        const grahaCandidates = mantras.filter(
-          (m) =>
-            m.mantra_type === 'graha' &&
-            (m.name_en?.toLowerCase().startsWith(lower) ||
-              m.deity?.toLowerCase() === lower)
-        )
-        // Prefer the "… Graha Mantra" row over e.g. a "… Beeja Mantra" row.
-        const grahaMantra =
-          grahaCandidates.find((m) => /graha mantra/i.test(m.name_en || '')) ||
-          grahaCandidates[0]
-
-        const adhi = grahaMantra
-          ? mantras.find(
-              (m) => m.mantra_type === 'adhidevata' && m.parent_graha_id === grahaMantra.id
-            )
-          : undefined
-        const pratya = grahaMantra
-          ? mantras.find(
-              (m) =>
-                m.mantra_type === 'pratyadhidevata' && m.parent_graha_id === grahaMantra.id
-            )
-          : undefined
+        const g = row.grahas ?? {}
+        const m = g.mantras ?? {}
+        const mantraId = m.id
+        const adhi  = deities.find(d => d.mantra_type === 'adhidevata'       && d.parent_graha_id === mantraId)
+        const pratya = deities.find(d => d.mantra_type === 'pratyadhidevata' && d.parent_graha_id === mantraId)
 
         return {
           id: row.id,
           graha_id: row.graha_id,
-          graha_name: grahaName,
-          color: row.grahas?.color ?? '#f97316',
+          graha_name: g.name ?? 'Graha',
+          color: g.color ?? '#f97316',
           total_target: row.target_count ?? 0,
           completed_count: row.completed_count ?? 0,
-          // Prefer Telugu text; fall back to devanagari (other scripts)
-          graha_mantra_devanagari: grahaMantra?.mantra_telugu || grahaMantra?.devanagari || '',
+          graha_mantra_devanagari: m.mantra_telugu || m.devanagari || '',
           adhidevata_name: stripLabel(adhi?.name_en),
           adhidevata_mantra_devanagari: adhi?.mantra_telugu || adhi?.devanagari || '',
           pratyadhidevata_name: stripLabel(pratya?.name_en),
