@@ -6,7 +6,8 @@ import { useDelegationProject } from '@/hooks/useDelegationProject'
 import { GrahaProgressCard } from './GrahaProgressCard'
 import { PriestContributionsModal } from './PriestContributionsModal'
 import { AssignPriestModal } from './AssignPriestModal'
-import { AlertCircle, RefreshCw, Plus, UserPlus } from 'lucide-react'
+import { HostChantModal } from './HostChantModal'
+import { AlertCircle, RefreshCw, Plus, UserPlus, Zap } from 'lucide-react'
 
 interface ProjectDashboardProps {
   projectId: string
@@ -27,6 +28,7 @@ export function ProjectDashboard({
   } | null>(null)
   const [showContributionsModal, setShowContributionsModal] = useState(false)
   const [showAssignModal, setShowAssignModal] = useState(false)
+  const [showHostChantModal, setShowHostChantModal] = useState(false)
 
   const {
     data: projectData,
@@ -260,27 +262,36 @@ export function ProjectDashboard({
 
         {/* Action Buttons */}
         {projectData.graha_breakdown && projectData.graha_breakdown.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+          <div className="space-y-3 mb-8">
             <button
-              onClick={() => setShowAssignModal(true)}
-              className="px-4 py-3 bg-temple-500 hover:bg-temple-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              onClick={() => setShowHostChantModal(true)}
+              className="w-full px-4 py-3 bg-gradient-to-r from-sacred-500 to-temple-500 hover:from-sacred-600 hover:to-temple-600 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
             >
-              <UserPlus className="w-4 h-4" />
-              Assign Priest
+              <Zap className="w-5 h-5" />
+              Chant for Project
             </button>
-            <button
-              onClick={() => onNavigateToAssignPriests?.()}
-              className="px-4 py-3 bg-sacred-500 hover:bg-sacred-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Manage Grahas
-            </button>
-            <button
-              onClick={() => onNavigateToHistory?.()}
-              className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-medium transition-colors"
-            >
-              View History
-            </button>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button
+                onClick={() => setShowAssignModal(true)}
+                className="px-4 py-3 bg-temple-500 hover:bg-temple-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                Assign Priest
+              </button>
+              <button
+                onClick={() => onNavigateToAssignPriests?.()}
+                className="px-4 py-3 bg-sacred-500 hover:bg-sacred-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Manage Grahas
+              </button>
+              <button
+                onClick={() => onNavigateToHistory?.()}
+                className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-medium transition-colors"
+              >
+                View History
+              </button>
+            </div>
           </div>
         )}
 
@@ -316,6 +327,22 @@ export function ProjectDashboard({
         onClose={() => setShowAssignModal(false)}
         onSuccess={() => refetch()}
       />
+
+      {/* Host Chant Modal */}
+      {projectData?.graha_breakdown && (
+        <HostChantModal
+          isOpen={showHostChantModal}
+          projectId={projectId}
+          grahas={projectData.graha_breakdown.map((g) => ({
+            graha_id: g.graha_id,
+            graha_name: g.graha_name,
+            target: g.target,
+            completed: g.completed,
+          }))}
+          onClose={() => setShowHostChantModal(false)}
+          onSuccess={() => refetch()}
+        />
+      )}
     </div>
   )
 }
