@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { useUserProfile } from '@/hooks/useUserProfile'
 import { User, LogOut } from 'lucide-react'
 
 export function Header() {
   const router = useRouter()
   const { user, signOut } = useAuth()
+  const { displayName, initials, email } = useUserProfile()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const handleSignOut = async () => {
@@ -17,20 +19,6 @@ export function Header() {
     } catch (error) {
       console.error('Sign out failed:', error)
     }
-  }
-
-  const getInitials = (email?: string) => {
-    if (!email) return 'U'
-    const parts = email.split('@')[0].split('.')
-    return parts.map((p) => p[0]).join('').toUpperCase().slice(0, 2)
-  }
-
-  const getDisplayName = (email?: string) => {
-    if (!email) return 'User'
-    // Extract username and show first 6 chars max
-    const username = email.split('@')[0].toLowerCase()
-    const displayName = username.charAt(0).toUpperCase() + username.slice(1, 6)
-    return displayName
   }
 
   return (
@@ -55,31 +43,30 @@ export function Header() {
               aria-label="User menu"
             >
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-xs font-semibold text-white">
-                {getInitials(user?.email)}
+                {initials}
               </div>
-              <span className="text-sm font-medium text-white/90 hidden sm:block">
-                {getDisplayName(user?.email)}
+              <span className="text-sm font-medium text-white/90 hidden sm:block truncate max-w-[120px]">
+                {displayName}
               </span>
             </button>
 
             {/* Dropdown Menu */}
             {isMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white/10 backdrop-blur-xl rounded-lg shadow-lg border border-white/20 py-2 z-50">
-                <div className="px-4 py-2 border-b border-white/10">
-                  <p className="text-xs text-white/60">Signed in as</p>
-                  <p className="text-sm font-medium text-white truncate">
-                    {user?.email}
+              <div className="absolute right-0 mt-2 w-56 bg-white/10 backdrop-blur-xl rounded-lg shadow-lg border border-white/20 py-2 z-50">
+                <div className="px-4 py-3 border-b border-white/10">
+                  <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Account</p>
+                  <p className="text-sm font-semibold text-white truncate">
+                    {displayName}
+                  </p>
+                  <p className="text-xs text-white/50 truncate mt-1">
+                    {email}
                   </p>
                 </div>
                 <button
-                  onClick={() => router.push('/settings')}
-                  className="w-full text-left px-4 py-2 text-sm text-white/90 hover:bg-white/10 flex items-center gap-2 transition-colors"
-                >
-                  <User className="w-4 h-4" />
-                  Profile
-                </button>
-                <button
-                  onClick={() => router.push('/settings')}
+                  onClick={() => {
+                    router.push('/settings')
+                    setIsMenuOpen(false)
+                  }}
                   className="w-full text-left px-4 py-2 text-sm text-white/90 hover:bg-white/10 flex items-center gap-2 transition-colors"
                 >
                   <User className="w-4 h-4" />
@@ -87,7 +74,7 @@ export function Header() {
                 </button>
                 <button
                   onClick={handleSignOut}
-                  className="w-full text-left px-4 py-2 text-sm text-red-300 hover:bg-red-500/20 flex items-center gap-2 transition-colors"
+                  className="w-full text-left px-4 py-2 text-sm text-red-300 hover:bg-red-500/20 flex items-center gap-2 transition-colors border-t border-white/10"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out

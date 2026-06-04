@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { Home, Play, Clock, Settings, Briefcase, Plus, LogOut } from 'lucide-react'
+import { useUserProfile } from '@/hooks/useUserProfile'
 import { clsx } from 'clsx'
 
 interface NavItem {
@@ -39,6 +40,7 @@ type ModeType = 'personal' | 'host' | 'assigned' | 'client'
 export function Navigation() {
   const pathname = usePathname()
   const router = useRouter()
+  const { displayName, initials } = useUserProfile()
 
   // Determine current mode based on pathname
   const getCurrentMode = (): ModeType => {
@@ -141,17 +143,21 @@ export function Navigation() {
 
         {/* User Card at Bottom */}
         <div className="border-t border-white/10 p-4">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors cursor-pointer" onClick={() => router.push('/settings')}>
+          <button
+            onClick={() => router.push('/settings')}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+            title="Go to Settings"
+          >
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
-              P
+              {initials}
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs text-white/60">Account</p>
+            <div className="min-w-0 flex-1 text-left">
+              <p className="text-xs text-white/60 uppercase tracking-wider">Account</p>
               <p className="text-sm font-medium text-white truncate">
-                account
+                {displayName}
               </p>
             </div>
-          </div>
+          </button>
         </div>
       </aside>
 
