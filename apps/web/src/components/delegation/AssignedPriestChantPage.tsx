@@ -67,7 +67,7 @@ export function AssignedPriestChantPage({
           id, graha_id, target_count, completed_count,
           grahas(name, color, mantra_id,
             mantras!grahas_mantra_id_fkey(
-              id, name_en, mantra_telugu_plain, mantra_telugu, devanagari
+              id, name_en, mantra_telugu, devanagari
             )
           )
         `)
@@ -83,7 +83,7 @@ export function AssignedPriestChantPage({
 
       const { data: deityData } = await supabase
         .from('mantras')
-        .select('id, name_en, mantra_telugu_plain, mantra_telugu, devanagari, mantra_type, parent_graha_id')
+        .select('id, name_en, mantra_telugu, devanagari, mantra_type, parent_graha_id')
         .in('parent_graha_id', mantraIds)
         .eq('is_active', true)
         .in('mantra_type', ['adhidevata', 'pratyadhidevata'])
@@ -105,13 +105,12 @@ export function AssignedPriestChantPage({
           color: g.color ?? '#f97316',
           total_target: row.target_count ?? 0,
           completed_count: row.completed_count ?? 0,
-          // plain = swaras stripped → renders with Noto Sans Telugu
-          // telugu = full swaras for future specialized font
-          graha_mantra_devanagari: m.mantra_telugu_plain || m.mantra_telugu || m.devanagari || '',
+          // Use Telugu text (with swaras); fall back to Devanagari (beeja + swaras)
+          graha_mantra_devanagari: m.mantra_telugu || m.devanagari || '',
           adhidevata_name: stripLabel(adhi?.name_en),
-          adhidevata_mantra_devanagari: adhi?.mantra_telugu_plain || adhi?.mantra_telugu || adhi?.devanagari || '',
+          adhidevata_mantra_devanagari: adhi?.mantra_telugu || adhi?.devanagari || '',
           pratyadhidevata_name: stripLabel(pratya?.name_en),
-          pratyadhidevata_mantra_devanagari: pratya?.mantra_telugu_plain || pratya?.mantra_telugu || pratya?.devanagari || '',
+          pratyadhidevata_mantra_devanagari: pratya?.mantra_telugu || pratya?.devanagari || '',
         }
       }) as ProjectGraha[]
     },

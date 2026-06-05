@@ -59,7 +59,7 @@ export function MantrasDropdown({ onSelect, isLoading }: MantrasDropdownProps) {
         const { data, error } = await supabase
           .from('mantras')
           .select(
-            'id, name_en, name_te, name_sa, devanagari, mantra_telugu_plain, mantra_telugu, accent_color, category, mantra_type, parent_graha_id, deity'
+            'id, name_en, name_te, name_sa, devanagari, mantra_telugu, accent_color, category, mantra_type, parent_graha_id, deity'
           )
           .eq('is_active', true)
           .eq('is_archived', false)
@@ -90,16 +90,17 @@ export function MantrasDropdown({ onSelect, isLoading }: MantrasDropdownProps) {
           return {
             id: r.id,
             name: r.name_en || 'Mantra',
-            name_devanagari: r.name_sa || r.name_en || '',
+            // Subtitle shows mantra text preview (Telugu/Devanagari with swaras), not the English name
+            name_devanagari: (r as any).mantra_telugu || r.devanagari || r.name_sa || r.name_en || '',
             name_te: r.name_te || undefined,
             category: r.category || 'custom',
             color: r.accent_color || undefined,
-            // plain = swaras stripped → renders with Noto Sans Telugu
-            mantra_devanagari: (r as any).mantra_telugu_plain || (r as any).mantra_telugu || r.devanagari || undefined,
+            // Use Telugu text (with Vedic swaras); fall back to Devanagari (beeja + swaras)
+            mantra_devanagari: (r as any).mantra_telugu || r.devanagari || undefined,
             adhidevata_te: adhi ? stripLabel(adhi.name_en) : undefined,
-            adhidevata_mantra_devanagari: (adhi as any)?.mantra_telugu_plain || (adhi as any)?.mantra_telugu || adhi?.devanagari || undefined,
+            adhidevata_mantra_devanagari: (adhi as any)?.mantra_telugu || adhi?.devanagari || undefined,
             pratyadhidevata_te: pratya ? stripLabel(pratya.name_en) : undefined,
-            pratyadhidevata_mantra_devanagari: (pratya as any)?.mantra_telugu_plain || (pratya as any)?.mantra_telugu || pratya?.devanagari || undefined,
+            pratyadhidevata_mantra_devanagari: (pratya as any)?.mantra_telugu || pratya?.devanagari || undefined,
           }
         })
 
