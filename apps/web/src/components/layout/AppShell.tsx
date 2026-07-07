@@ -1,8 +1,10 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { Play, Users, Clock, Settings } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Play, Users, Clock, Settings, Flame } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { getStreak } from '@/lib/api/progress'
 import { clsx } from 'clsx'
 
 const NAV = [
@@ -20,6 +22,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     (user?.user_metadata?.display_name as string) || user?.email?.split('@')[0] || ''
   const initials = name.slice(0, 2).toUpperCase()
 
+  const { data: streak } = useQuery({
+    queryKey: ['streak', user?.id],
+    queryFn: () => getStreak(user!.id),
+    enabled: !!user,
+  })
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -33,15 +41,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               ChantTracker
             </span>
           </div>
-          <button
-            onClick={() => router.push('/settings')}
-            className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10"
-            title={name}
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-xs font-semibold text-white">
-              {initials}
-            </span>
-          </button>
+          <div className="flex items-center gap-3">
+            {!!streak?.current_streak && (
+              <span
+                className="flex items-center gap-1 rounded-full bg-orange-500/15 px-2.5 py-1 text-sm font-semibold text-orange-300"
+                title={`Longest streak: ${streak.longest_streak} days`}
+              >
+                <Flame className="h-4 w-4" />
+                {streak.current_streak}
+              </span>
+            )}
+            <button
+              onClick={() => router.push('/settings')}
+              className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-white/10"
+              title={name}
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-xs font-semibold text-white">
+                {initials}
+              </span>
+            </button>
+          </div>
         </div>
       </header>
 
