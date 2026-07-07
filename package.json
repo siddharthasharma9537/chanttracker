@@ -6,8 +6,7 @@
   "workspaces": [
     "apps/web",
     "apps/ios",
-    "apps/android",
-    "packages/api"
+    "apps/android"
   ],
   "scripts": {
     "install:all": "pnpm install -r",

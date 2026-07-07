@@ -33,7 +33,7 @@ export function SignInForm() {
     startTransition(async () => {
       try {
         await signIn(data.email, data.password)
-        router.push('/dashboard')
+        router.push('/practice')
       } catch (error) {
         const message =
           error instanceof Error ? error.message : 'Sign in failed'
