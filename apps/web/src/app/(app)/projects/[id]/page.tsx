@@ -3,31 +3,63 @@
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Copy, Check, Play } from 'lucide-react'
+import { ArrowLeft, Copy, Check, Play, KeyRound, Link as LinkIcon } from 'lucide-react'
 import { getProject, type ProjectGrahaWithGraha } from '@/lib/api/projects'
 import { listMantras } from '@/lib/api/mantras'
 import { Counter } from '@/components/practice/Counter'
 import { useAuth } from '@/hooks/useAuth'
 
-function CopyField({ label, value }: { label: string; value: string }) {
+function ShareRow({
+  icon: Icon,
+  label,
+  hint,
+  value,
+  mono,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  hint: string
+  value: string
+  mono?: boolean
+}) {
   const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // Clipboard permission denied — nothing to recover; value is still selectable.
+    }
+  }
   return (
-    <button
-      onClick={() => {
-        navigator.clipboard.writeText(value)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 1500)
-      }}
-      className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/[0.05] px-3 py-2 text-sm hover:bg-white/10"
-    >
-      <span className="text-white/50">{label}</span>
-      <span className="font-mono font-semibold tracking-widest text-white">{value}</span>
-      {copied ? (
-        <Check className="h-4 w-4 text-green-400" />
-      ) : (
-        <Copy className="h-4 w-4 text-white/40" />
-      )}
-    </button>
+    <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.05] p-3">
+      <Icon className="h-4 w-4 shrink-0 text-white/40" />
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-medium text-white/50">{label}</p>
+        <p
+          className={`truncate text-sm text-white ${mono ? 'font-mono font-semibold tracking-widest' : ''}`}
+          title={value}
+        >
+          {value}
+        </p>
+        <p className="mt-0.5 truncate text-xs text-white/40">{hint}</p>
+      </div>
+      <button
+        onClick={copy}
+        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/15 px-3 py-1.5 text-xs font-medium text-white/80 hover:bg-white/10"
+      >
+        {copied ? (
+          <>
+            <Check className="h-3.5 w-3.5 text-green-400" /> Copied
+          </>
+        ) : (
+          <>
+            <Copy className="h-3.5 w-3.5" /> Copy
+          </>
+        )}
+      </button>
+    </div>
   )
 }
 
@@ -101,10 +133,18 @@ export default function ProjectPage() {
 
       {/* Organizer: codes */}
       {project.my_role === 'organizer' && (
-        <div className="mb-6 flex flex-wrap gap-3">
-          <CopyField label="Chanter invite" value={project.invite_code} />
-          <CopyField
+        <div className="mb-6 space-y-2">
+          <ShareRow
+            icon={KeyRound}
+            label="Chanter invite code"
+            hint="Share with a priest so they can join and chant"
+            value={project.invite_code}
+            mono
+          />
+          <ShareRow
+            icon={LinkIcon}
             label="Beneficiary link"
+            hint="Share so they can watch progress — no account needed"
             value={`${typeof window !== 'undefined' ? window.location.origin : ''}/view/${project.share_code}`}
           />
         </div>
