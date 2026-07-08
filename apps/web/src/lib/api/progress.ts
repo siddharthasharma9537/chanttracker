@@ -45,3 +45,30 @@ export async function listAchievements(userId: string): Promise<Achievement[]> {
       a.user_achievements.find((u: any) => u.user_id === userId)?.unlocked_at ?? null,
   }))
 }
+
+/**
+ * Lifetime completed japa count per mantra — the "goal" for a navagraha
+ * mantra (graha, adhidevata, pratyadhidevata) is completing its own
+ * default_target across all sessions ever logged, not per-sitting.
+ */
+export async function getMantraTotals(
+  userId: string,
+  mantraIds: string[]
+): Promise<Record<string, number>> {
+  if (mantraIds.length === 0) return {}
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('mantra_id, count')
+    .eq('user_id', userId)
+    .eq('status', 'completed')
+    .in('mantra_id', mantraIds)
+  if (error) throw error
+
+  const totals: Record<string, number> = {}
+  for (const row of data ?? []) {
+    if (!row.mantra_id) continue
+    totals[row.mantra_id] = (totals[row.mantra_id] ?? 0) + row.count
+  }
+  return totals
+}
