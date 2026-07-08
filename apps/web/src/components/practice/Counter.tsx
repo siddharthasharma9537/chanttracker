@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Check, RotateCcw } from 'lucide-react'
 import { displayText, type Mantra } from '@/lib/api/mantras'
@@ -90,6 +90,13 @@ export function Counter({ mantra, projectId, grahaId, target, onBack }: CounterP
       setSaved(true)
     },
   })
+
+  // After the "Session saved" confirmation, return to the picker on its own.
+  useEffect(() => {
+    if (!saved) return
+    const t = setTimeout(onBack, 2500)
+    return () => clearTimeout(t)
+  }, [saved, onBack])
 
   const tapMain = () => {
     if (saved) return
