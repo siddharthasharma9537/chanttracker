@@ -5,32 +5,14 @@
 
 import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
-
-interface Row {
-  beneficiary_name: string
-  description: string | null
-  status: string
-  created_at: string
-  graha_name: string
-  graha_color: string | null
-  target_count: number
-  completed_count: number
-}
+import { getProjectByShareCode } from '@/lib/api/projects'
 
 export default function BeneficiaryViewPage() {
   const { code } = useParams<{ code: string }>()
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['view', code],
-    queryFn: async () => {
-      const supabase = createClient()
-      const { data, error } = await supabase.rpc('project_progress_by_share_code', {
-        p_share_code: code,
-      })
-      if (error) throw error
-      return (data ?? []) as Row[]
-    },
+    queryFn: () => getProjectByShareCode(code),
     refetchInterval: 60_000, // live-ish progress for the family watching
   })
 
@@ -47,6 +29,11 @@ export default function BeneficiaryViewPage() {
   const target = data.reduce((s, r) => s + r.target_count, 0)
   const done = data.reduce((s, r) => s + r.completed_count, 0)
   const pct = target ? Math.min(100, Math.round((done / target) * 100)) : 0
+  const sankalpa = [
+    first.beneficiary_gotra && `Gotra: ${first.beneficiary_gotra}`,
+    first.beneficiary_nakshatra && `Nakshatra: ${first.beneficiary_nakshatra}`,
+    first.intention && `Intention: ${first.intention}`,
+  ].filter(Boolean)
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
@@ -57,8 +44,16 @@ export default function BeneficiaryViewPage() {
         {first.beneficiary_name}
       </h1>
       {first.description && (
-        <p className="mb-6 text-center text-white/60">{first.description}</p>
+        <p className="text-center text-white/60">{first.description}</p>
       )}
+      {sankalpa.length > 0 && (
+        <p className="mb-2 text-center text-sm text-white/50">{sankalpa.join(' · ')}</p>
+      )}
+      <p className="mb-6 text-center">
+        <a href={`/view/${code}/certificate`} className="text-sm text-sacred-400 hover:text-sacred-300">
+          {first.status === 'completed' ? 'View completion certificate →' : 'View progress statement →'}
+        </a>
+      </p>
 
       <div className="mb-2 h-3 overflow-hidden rounded-full bg-white/10">
         <div className="h-full rounded-full bg-sacred-500" style={{ width: `${pct}%` }} />

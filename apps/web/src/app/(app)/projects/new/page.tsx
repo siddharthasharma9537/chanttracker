@@ -13,6 +13,9 @@ export default function NewProjectPage() {
   const queryClient = useQueryClient()
 
   const [beneficiary, setBeneficiary] = useState('')
+  const [gotra, setGotra] = useState('')
+  const [nakshatra, setNakshatra] = useState('')
+  const [intention, setIntention] = useState('')
   const [description, setDescription] = useState('')
   // graha_id -> target count; present = selected
   const [selected, setSelected] = useState<Record<number, number>>({})
@@ -24,6 +27,9 @@ export default function NewProjectPage() {
       createProject({
         userId: user!.id,
         beneficiaryName: beneficiary.trim(),
+        beneficiaryGotra: gotra.trim() || undefined,
+        beneficiaryNakshatra: nakshatra.trim() || undefined,
+        intention: intention.trim() || undefined,
         description: description.trim() || undefined,
         grahas: Object.entries(selected).map(([id, t]) => ({
           grahaId: Number(id),
@@ -74,13 +80,43 @@ export default function NewProjectPage() {
         className="mb-4 w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-sacred-500"
       />
 
+      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">
+        Sankalpa <span className="normal-case text-white/30">(optional)</span>
+      </p>
+      <div className="mb-3 grid grid-cols-2 gap-3">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-white">Gotra</label>
+          <input
+            value={gotra}
+            onChange={(e) => setGotra(e.target.value)}
+            placeholder="e.g. Bharadwaja"
+            className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-sacred-500"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-white">Nakshatra</label>
+          <input
+            value={nakshatra}
+            onChange={(e) => setNakshatra(e.target.value)}
+            placeholder="e.g. Rohini"
+            className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-sacred-500"
+          />
+        </div>
+      </div>
+      <input
+        value={intention}
+        onChange={(e) => setIntention(e.target.value)}
+        placeholder="Intention — e.g. for health and wellbeing"
+        className="mb-6 w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-sacred-500"
+      />
+
       <label className="mb-1 block text-sm font-medium text-white">
         Description <span className="text-white/40">(optional)</span>
       </label>
       <input
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder="Purpose, occasion, sankalpa…"
+        placeholder="Occasion or other notes"
         className="mb-6 w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-sacred-500"
       />
 

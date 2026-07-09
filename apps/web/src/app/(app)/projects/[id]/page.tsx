@@ -184,6 +184,17 @@ export default function ProjectPage() {
       {project.description && (
         <p className="mb-4 ml-12 text-white/60">{project.description}</p>
       )}
+      {(project.beneficiary_gotra || project.beneficiary_nakshatra || project.intention) && (
+        <p className="mb-4 ml-12 text-sm text-white/50">
+          {[
+            project.beneficiary_gotra && `Gotra: ${project.beneficiary_gotra}`,
+            project.beneficiary_nakshatra && `Nakshatra: ${project.beneficiary_nakshatra}`,
+            project.intention && `Intention: ${project.intention}`,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
+      )}
 
       {/* Overall progress */}
       <div className="mb-6 ml-12">
@@ -192,7 +203,16 @@ export default function ProjectPage() {
         </div>
         <p className="mt-1 text-sm tabular-nums text-white/60">
           {done.toLocaleString()} / {target.toLocaleString()} japas ({pct}%)
+          {project.status === 'completed' && ' · complete 🙏'}
         </p>
+        <a
+          href={`/view/${project.share_code}/certificate`}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-1 inline-block text-sm text-sacred-400 hover:text-sacred-300"
+        >
+          {project.status === 'completed' ? 'View completion certificate →' : 'View progress statement →'}
+        </a>
       </div>
 
       {/* Organizer: codes */}

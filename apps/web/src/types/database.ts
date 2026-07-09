@@ -56,11 +56,15 @@ export interface ProjectRow {
   id: string
   organizer_id: string
   beneficiary_name: string
+  beneficiary_gotra: string | null
+  beneficiary_nakshatra: string | null
+  intention: string | null
   description: string | null
   status: 'active' | 'completed' | 'archived'
   invite_code: string
   share_code: string
   created_at: string
+  completed_at: string | null
 }
 
 export interface ProjectGrahaRow {

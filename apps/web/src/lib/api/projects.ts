@@ -72,6 +72,9 @@ export async function listGrahas(): Promise<
 export async function createProject(input: {
   userId: string
   beneficiaryName: string
+  beneficiaryGotra?: string
+  beneficiaryNakshatra?: string
+  intention?: string
   description?: string
   grahas: { grahaId: number; targetCount: number }[]
 }): Promise<ProjectRow> {
@@ -81,6 +84,9 @@ export async function createProject(input: {
     .insert({
       organizer_id: input.userId,
       beneficiary_name: input.beneficiaryName,
+      beneficiary_gotra: input.beneficiaryGotra || null,
+      beneficiary_nakshatra: input.beneficiaryNakshatra || null,
+      intention: input.intention || null,
       description: input.description || null,
     })
     .select()
@@ -150,4 +156,29 @@ export async function setMemberAssignment(
     .eq('project_id', projectId)
     .eq('user_id', userId)
   if (error) throw error
+}
+
+export interface ShareCodeRow {
+  beneficiary_name: string
+  beneficiary_gotra: string | null
+  beneficiary_nakshatra: string | null
+  intention: string | null
+  description: string | null
+  status: string
+  created_at: string
+  completed_at: string | null
+  graha_name: string
+  graha_color: string | null
+  target_count: number
+  completed_count: number
+}
+
+/** No-account read used by the beneficiary page and the certificate page. */
+export async function getProjectByShareCode(code: string): Promise<ShareCodeRow[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase.rpc('project_progress_by_share_code', {
+    p_share_code: code,
+  })
+  if (error) throw error
+  return (data ?? []) as ShareCodeRow[]
 }
