@@ -38,14 +38,25 @@ export function MantraPicker({ onSelect }: MantraPickerProps) {
   const grahas = (mantras ?? []).filter((m) => m.category === 'navagraha')
   const others = (mantras ?? []).filter((m) => m.category !== 'navagraha')
 
+  // 0=Mon..6=Sun (project convention) vs JS Date's 0=Sun..6=Sat.
+  const todayIdx = (new Date().getDay() + 6) % 7
+  const todaysCandidates = grahas.filter((m) => m.weekday_tags?.includes(todayIdx))
+  const todaysGraha = todaysCandidates.sort((a, b) => b.default_target - a.default_target)[0]
+  const orderedGrahas = todaysGraha
+    ? [todaysGraha, ...grahas.filter((m) => m.id !== todaysGraha.id)]
+    : grahas
+  const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
   const Section = ({
     title,
     items,
     showProgress,
+    todaysId,
   }: {
     title: string
     items: Mantra[]
     showProgress?: boolean
+    todaysId?: string
   }) =>
     items.length === 0 ? null : (
       <section>
@@ -66,7 +77,14 @@ export function MantraPicker({ onSelect }: MantraPickerProps) {
                 style={{ borderLeftColor: m.accent_color ?? '#f97316', borderLeftWidth: 3 }}
               >
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-semibold text-white">{m.name_en}</span>
+                  <span className="flex items-center gap-1.5 font-semibold text-white">
+                    {m.name_en}
+                    {m.id === todaysId && (
+                      <span className="rounded-full bg-sacred-500/20 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-sacred-400">
+                        Today
+                      </span>
+                    )}
+                  </span>
                   <span className="shrink-0 text-xs tabular-nums text-white/40">
                     {m.default_target.toLocaleString()}
                   </span>
@@ -96,7 +114,18 @@ export function MantraPicker({ onSelect }: MantraPickerProps) {
 
   return (
     <div className="space-y-8">
-      <Section title="Navagraha" items={grahas} showProgress />
+      <div>
+        {todaysGraha && (
+          <p className="mb-3 text-sm text-white/50">
+            🗓️ {WEEKDAY_NAMES[todayIdx]} is{' '}
+            <span className="text-white/80">
+              {todaysGraha.name_en?.replace(/ Graha Mantra$/, '')}
+            </span>
+            &apos;s day
+          </p>
+        )}
+        <Section title="Navagraha" items={orderedGrahas} showProgress todaysId={todaysGraha?.id} />
+      </div>
       <Section title="Devata & Others" items={others} />
     </div>
   )
