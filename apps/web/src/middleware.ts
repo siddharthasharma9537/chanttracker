@@ -29,11 +29,16 @@ export async function middleware(request: NextRequest) {
   if (!data.user && !isPublic) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/signin'
+    // Preserve the original destination (e.g. an invite deep link) so
+    // sign-in/sign-up can send the user back where they meant to go.
+    url.searchParams.set('next', pathname + request.nextUrl.search)
     return NextResponse.redirect(url)
   }
   if (data.user && pathname.startsWith('/auth')) {
     const url = request.nextUrl.clone()
-    url.pathname = '/practice'
+    const next = request.nextUrl.searchParams.get('next')
+    url.pathname = next && next.startsWith('/') ? next : '/practice'
+    url.search = ''
     return NextResponse.redirect(url)
   }
   return response

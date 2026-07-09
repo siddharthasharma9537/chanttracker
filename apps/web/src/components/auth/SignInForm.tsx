@@ -1,7 +1,7 @@
 'use client'
 
 import { useTransition, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -16,6 +16,8 @@ type SignInFormData = z.infer<typeof signInSchema>
 
 export function SignInForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next')
   const { signIn } = useAuth()
   const [isPending, startTransition] = useTransition()
   const [showPassword, setShowPassword] = useState(false)
@@ -33,7 +35,7 @@ export function SignInForm() {
     startTransition(async () => {
       try {
         await signIn(data.email, data.password)
-        router.push('/practice')
+        router.push(next && next.startsWith('/') ? next : '/practice')
       } catch (error) {
         const message =
           error instanceof Error ? error.message : 'Sign in failed'

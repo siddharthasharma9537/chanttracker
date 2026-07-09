@@ -116,3 +116,38 @@ export async function joinProject(inviteCode: string): Promise<string> {
   if (error) throw error
   return data as string
 }
+
+export interface ProjectMember {
+  user_id: string
+  role: 'organizer' | 'chanter'
+  assigned_graha_ids: number[]
+  display_name: string | null
+  email: string | null
+  joined_at: string
+}
+
+/** Members of a project with display names — profiles is locked to
+ *  own-row RLS, so this goes through a scoped RPC instead. */
+export async function listProjectMembers(projectId: string): Promise<ProjectMember[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase.rpc('list_project_members', {
+    p_project_id: projectId,
+  })
+  if (error) throw error
+  return (data ?? []) as ProjectMember[]
+}
+
+/** Organizer restricts a chanter to specific grahas. Empty array = any. */
+export async function setMemberAssignment(
+  projectId: string,
+  userId: string,
+  grahaIds: number[]
+): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('project_members')
+    .update({ assigned_graha_ids: grahaIds })
+    .eq('project_id', projectId)
+    .eq('user_id', userId)
+  if (error) throw error
+}
