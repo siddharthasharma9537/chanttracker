@@ -8,6 +8,7 @@ import {
   getProject,
   listProjectMembers,
   setMemberAssignment,
+  dailyQuota,
   type ProjectGrahaWithGraha,
 } from '@/lib/api/projects'
 import { listMantras } from '@/lib/api/mantras'
@@ -163,6 +164,14 @@ export default function ProjectPage() {
   const target = project.project_grahas.reduce((s, g) => s + g.target_count, 0)
   const done = project.project_grahas.reduce((s, g) => s + g.completed_count, 0)
   const pct = target ? Math.min(100, Math.round((done / target) * 100)) : 0
+  const overallQuota = dailyQuota(target - done, project.deadline)
+  const deadlineLabel = project.deadline
+    ? new Date(project.deadline).toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : null
 
   return (
     <div className="max-w-3xl">
@@ -205,6 +214,17 @@ export default function ProjectPage() {
           {done.toLocaleString()} / {target.toLocaleString()} japas ({pct}%)
           {project.status === 'completed' && ' · complete 🙏'}
         </p>
+        {project.status !== 'completed' && deadlineLabel && (
+          <p className="mt-0.5 text-sm">
+            {overallQuota && overallQuota.daysLeft > 0 ? (
+              <span className="text-amber-300/80">
+                Target {deadlineLabel} — need ~{overallQuota.perDay.toLocaleString()}/day
+              </span>
+            ) : (
+              <span className="text-red-300/80">Target {deadlineLabel} — past deadline</span>
+            )}
+          </p>
+        )}
         <a
           href={`/view/${project.share_code}/certificate`}
           target="_blank"
@@ -300,6 +320,15 @@ export default function ProjectPage() {
                     }}
                   />
                 </div>
+                {(() => {
+                  const q = dailyQuota(g.target_count - g.completed_count, project.deadline)
+                  if (!q) return null
+                  return (
+                    <p className={`mt-1 text-[11px] ${q.daysLeft > 0 ? 'text-white/35' : 'text-red-300/70'}`}>
+                      {q.daysLeft > 0 ? `~${q.perDay.toLocaleString()}/day to finish on time` : 'past deadline'}
+                    </p>
+                  )
+                })()}
               </div>
               {complete ? (
                 <span className="shrink-0 text-xs font-semibold text-green-400">✓ Done</span>

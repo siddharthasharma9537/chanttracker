@@ -65,6 +65,7 @@ export interface ProjectRow {
   share_code: string
   created_at: string
   completed_at: string | null
+  deadline: string | null
 }
 
 export interface ProjectGrahaRow {

@@ -17,6 +17,7 @@ export default function NewProjectPage() {
   const [nakshatra, setNakshatra] = useState('')
   const [intention, setIntention] = useState('')
   const [description, setDescription] = useState('')
+  const [deadline, setDeadline] = useState('')
   // graha_id -> target count; present = selected
   const [selected, setSelected] = useState<Record<number, number>>({})
 
@@ -31,6 +32,7 @@ export default function NewProjectPage() {
         beneficiaryNakshatra: nakshatra.trim() || undefined,
         intention: intention.trim() || undefined,
         description: description.trim() || undefined,
+        deadline: deadline || undefined,
         grahas: Object.entries(selected).map(([id, t]) => ({
           grahaId: Number(id),
           targetCount: t,
@@ -110,15 +112,31 @@ export default function NewProjectPage() {
         className="mb-6 w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-sacred-500"
       />
 
-      <label className="mb-1 block text-sm font-medium text-white">
-        Description <span className="text-white/40">(optional)</span>
-      </label>
-      <input
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Occasion or other notes"
-        className="mb-6 w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-sacred-500"
-      />
+      <div className="mb-6 grid grid-cols-2 gap-3">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-white">
+            Description <span className="text-white/40">(optional)</span>
+          </label>
+          <input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Occasion or other notes"
+            className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-sacred-500"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-white">
+            Target date <span className="text-white/40">(optional)</span>
+          </label>
+          <input
+            type="date"
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+            min={new Date().toLocaleDateString('sv')}
+            className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-sacred-500"
+          />
+        </div>
+      </div>
 
       <div className="mb-2 flex items-center justify-between">
         <label className="text-sm font-medium text-white">Grahas & targets</label>

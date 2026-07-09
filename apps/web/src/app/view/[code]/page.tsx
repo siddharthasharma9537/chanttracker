@@ -61,6 +61,17 @@ export default function BeneficiaryViewPage() {
       <p className="mb-8 text-center text-sm tabular-nums text-white/60">
         {done.toLocaleString()} / {target.toLocaleString()} japas · {pct}%
         {first.status === 'completed' && ' · complete 🙏'}
+        {first.status !== 'completed' && first.deadline && (
+          <>
+            {' '}
+            · target{' '}
+            {new Date(first.deadline).toLocaleDateString('en-IN', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}
+          </>
+        )}
       </p>
 
       <div className="space-y-2">

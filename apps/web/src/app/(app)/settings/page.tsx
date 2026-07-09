@@ -1,14 +1,17 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
-import { LogOut, Flame, Lock } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { LogOut, Flame, Lock, Bell } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { getStreak, listAchievements } from '@/lib/api/progress'
+import { getProfile, setReminderTime } from '@/lib/api/profile'
 
 export default function SettingsPage() {
   const router = useRouter()
   const { user, signOut } = useAuth()
+  const queryClient = useQueryClient()
 
   const { data: streak } = useQuery({
     queryKey: ['streak', user?.id],
@@ -19,6 +22,21 @@ export default function SettingsPage() {
     queryKey: ['achievements', user?.id],
     queryFn: () => listAchievements(user!.id),
     enabled: !!user,
+  })
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: () => getProfile(user!.id),
+    enabled: !!user,
+  })
+
+  const [reminder, setReminder] = useState('')
+  useEffect(() => {
+    setReminder(profile?.reminder_time?.slice(0, 5) ?? '')
+  }, [profile?.reminder_time])
+
+  const saveReminder = useMutation({
+    mutationFn: (time: string | null) => setReminderTime(user!.id, time),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['profile', user?.id] }),
   })
 
   return (
@@ -45,6 +63,43 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+
+      <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.05] p-4">
+        <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-white/40">
+          <Bell className="h-3.5 w-3.5" /> Daily reminder
+        </p>
+        <div className="flex items-center gap-2">
+          <input
+            type="time"
+            value={reminder}
+            onChange={(e) => setReminder(e.target.value)}
+            className="rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-sacred-500"
+          />
+          <button
+            onClick={() => saveReminder.mutate(reminder ? `${reminder}:00` : null)}
+            disabled={saveReminder.isPending}
+            className="rounded-lg bg-sacred-500/80 px-4 py-2 text-sm font-semibold text-white hover:bg-sacred-500 disabled:opacity-40"
+          >
+            {saveReminder.isPending ? 'Saving…' : 'Save'}
+          </button>
+          {profile?.reminder_time && (
+            <button
+              onClick={() => {
+                setReminder('')
+                saveReminder.mutate(null)
+              }}
+              className="text-sm text-white/50 hover:text-white/80"
+            >
+              Turn off
+            </button>
+          )}
+        </div>
+        <p className="mt-2 text-xs text-white/40">
+          {profile?.reminder_time
+            ? `A nudge appears on Practice after ${profile.reminder_time.slice(0, 5)} on days you haven't chanted yet.`
+            : "Set a time and you'll see a gentle nudge on Practice if you haven't chanted by then."}
+        </p>
+      </div>
 
       <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">
         Achievements

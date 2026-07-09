@@ -76,6 +76,7 @@ export async function createProject(input: {
   beneficiaryNakshatra?: string
   intention?: string
   description?: string
+  deadline?: string
   grahas: { grahaId: number; targetCount: number }[]
 }): Promise<ProjectRow> {
   const supabase = createClient()
@@ -88,6 +89,7 @@ export async function createProject(input: {
       beneficiary_nakshatra: input.beneficiaryNakshatra || null,
       intention: input.intention || null,
       description: input.description || null,
+      deadline: input.deadline || null,
     })
     .select()
     .single()
@@ -167,6 +169,7 @@ export interface ShareCodeRow {
   status: string
   created_at: string
   completed_at: string | null
+  deadline: string | null
   graha_name: string
   graha_color: string | null
   target_count: number
@@ -181,4 +184,17 @@ export async function getProjectByShareCode(code: string): Promise<ShareCodeRow[
   })
   if (error) throw error
   return (data ?? []) as ShareCodeRow[]
+}
+
+/** Japas/day needed to finish `remaining` by `deadline`. Null once there's
+ *  no deadline or nothing left. daysLeft <= 0 means the deadline has passed. */
+export function dailyQuota(
+  remaining: number,
+  deadline: string | null
+): { daysLeft: number; perDay: number } | null {
+  if (!deadline || remaining <= 0) return null
+  const today = new Date(new Date().toLocaleDateString('sv'))
+  const due = new Date(deadline)
+  const daysLeft = Math.ceil((due.getTime() - today.getTime()) / 86_400_000)
+  return { daysLeft, perDay: Math.ceil(remaining / Math.max(daysLeft, 1)) }
 }
