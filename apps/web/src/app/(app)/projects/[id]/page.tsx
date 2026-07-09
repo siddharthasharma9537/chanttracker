@@ -8,8 +8,10 @@ import {
   getProject,
   listProjectMembers,
   setMemberAssignment,
+  listProjectContributions,
   dailyQuota,
   type ProjectGrahaWithGraha,
+  type ProjectContribution,
 } from '@/lib/api/projects'
 import { listMantras } from '@/lib/api/mantras'
 import { Counter } from '@/components/practice/Counter'
@@ -138,6 +140,11 @@ export default function ProjectPage() {
     mutationFn: (input: { userId: string; grahaIds: number[] }) =>
       setMemberAssignment(id, input.userId, input.grahaIds),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['project-members', id] }),
+  })
+  const { data: contributions } = useQuery({
+    queryKey: ['project-contributions', id],
+    queryFn: () => listProjectContributions(id),
+    enabled: !!user && !!id,
   })
   const myAssignedGrahaIds =
     members?.find((m) => m.user_id === user?.id)?.assigned_graha_ids ?? []
@@ -344,6 +351,46 @@ export default function ProjectPage() {
           )
         })}
       </div>
+
+      {/* Organizer: audit trail — who chanted how much on each graha */}
+      {project.my_role === 'organizer' && (contributions?.length ?? 0) > 0 && (
+        <div className="mt-6">
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">
+            Contributions
+          </h2>
+          <div className="space-y-2">
+            {Object.values(
+              contributions!.reduce<Record<number, ProjectContribution[]>>((acc, c) => {
+                ;(acc[c.graha_id] ??= []).push(c)
+                return acc
+              }, {})
+            ).map((rows) => (
+              <div
+                key={rows[0].graha_id}
+                className="rounded-xl border border-white/10 bg-white/[0.05] p-3"
+              >
+                <p className="mb-1.5 flex items-center gap-2 font-medium text-white">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: rows[0].graha_color ?? '#f97316' }}
+                  />
+                  {rows[0].graha_name}
+                </p>
+                <div className="space-y-1">
+                  {rows.map((c) => (
+                    <div key={c.user_id} className="flex items-center justify-between text-sm">
+                      <span className="text-white/70">{c.display_name || c.email}</span>
+                      <span className="tabular-nums text-white/50">
+                        {c.total_count.toLocaleString()} japas
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

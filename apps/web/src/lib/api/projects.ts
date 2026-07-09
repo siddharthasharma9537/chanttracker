@@ -160,6 +160,30 @@ export async function setMemberAssignment(
   if (error) throw error
 }
 
+export interface ProjectContribution {
+  graha_id: number
+  graha_name: string
+  graha_color: string | null
+  orbit_order: number | null
+  user_id: string
+  display_name: string | null
+  email: string | null
+  total_count: number
+}
+
+/** Who chanted how much on each graha — the audit trail behind the
+ *  aggregate completed_count shown on the progress bars. */
+export async function listProjectContributions(
+  projectId: string
+): Promise<ProjectContribution[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase.rpc('list_project_contributions', {
+    p_project_id: projectId,
+  })
+  if (error) throw error
+  return (data ?? []) as ProjectContribution[]
+}
+
 export interface ShareCodeRow {
   beneficiary_name: string
   beneficiary_gotra: string | null

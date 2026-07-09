@@ -86,6 +86,9 @@ export function Counter({ mantra, projectId, grahaId, target, onBack }: CounterP
       queryClient.invalidateQueries({ queryKey: ['streak'] })
       queryClient.invalidateQueries({ queryKey: ['achievements'] })
       queryClient.invalidateQueries({ queryKey: ['mantra-progress'] })
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: ['project-contributions', projectId] })
+      }
       setSaved(true)
     },
   })
