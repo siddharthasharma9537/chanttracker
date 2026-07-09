@@ -7,7 +7,12 @@ import { displayText, type Mantra } from '@/lib/api/mantras'
 import { logSession } from '@/lib/api/sessions'
 import { getMantraTotals } from '@/lib/api/progress'
 import { useAuth } from '@/hooks/useAuth'
+import { useWakeLock } from '@/hooks/useWakeLock'
 import { FitText } from './FitText'
+
+const MALA = 108
+/** Short tap pulse vs. a longer 3-pulse buzz on completing a mala. */
+const vibrate = (pattern: number | number[]) => navigator.vibrate?.(pattern)
 
 const TELUGU = '"Noto Sans Telugu", sans-serif'
 const DEVANAGARI = '"Noto Sans Devanagari", serif'
@@ -21,15 +26,6 @@ interface CounterProps {
   onBack: () => void
 }
 
-/** One tappable mantra slot — the graha itself, or one of its deities.
- *  Each has its own lifetime goal (its own default_target) and its own
- *  running tally, independent of the others. */
-interface Slot {
-  mantra: Mantra
-  tapped: number
-  target: number
-}
-
 export function Counter({ mantra, projectId, grahaId, target, onBack }: CounterProps) {
   const { user } = useAuth()
   const queryClient = useQueryClient()
@@ -37,7 +33,10 @@ export function Counter({ mantra, projectId, grahaId, target, onBack }: CounterP
   const [mainCount, setMainCount] = useState(0)
   const [adhiCount, setAdhiCount] = useState(0)
   const [pratyaCount, setPratyaCount] = useState(0)
+  const [malaFlash, setMalaFlash] = useState(false)
   const startedAt = useRef<number | null>(null)
+
+  useWakeLock(!saved)
 
   const mainGoal = target ?? mantra.default_target
   const mainText = displayText(mantra)
@@ -101,10 +100,22 @@ export function Counter({ mantra, projectId, grahaId, target, onBack }: CounterP
   const tapMain = () => {
     if (saved) return
     if (startedAt.current === null) startedAt.current = Date.now()
-    setMainCount((c) => c + 1)
+    setMainCount((c) => {
+      const next = c + 1
+      if (next % MALA === 0) {
+        vibrate([40, 30, 40, 30, 40])
+        setMalaFlash(true)
+        setTimeout(() => setMalaFlash(false), 1500)
+      } else {
+        vibrate(12)
+      }
+      return next
+    })
   }
 
   const totalCount = mainCount + adhiCount + pratyaCount
+  const malaCount = Math.floor(mainCount / MALA)
+  const beadInMala = mainCount % MALA
 
   const lifetimeBar = (mantraId: string, tapped: number, goal: number) => {
     const before = totals?.[mantraId] ?? 0
@@ -188,8 +199,16 @@ export function Counter({ mantra, projectId, grahaId, target, onBack }: CounterP
           />
         </div>
         {!saved && (
-          <span className="mt-1 shrink-0 text-center text-[10px] uppercase tracking-widest text-white/30 group-hover:text-white/50">
-            tap anywhere to count
+          <span
+            className={`mt-1 shrink-0 text-center text-[10px] uppercase tracking-widest transition-colors ${
+              malaFlash ? 'font-semibold text-sacred-400' : 'text-white/30 group-hover:text-white/50'
+            }`}
+          >
+            {malaFlash
+              ? `🪷 mala ${malaCount} complete`
+              : mainCount === 0
+                ? 'tap anywhere to count'
+                : `${malaCount} mala${malaCount === 1 ? '' : 's'} · ${beadInMala} / 108`}
           </span>
         )}
       </button>
