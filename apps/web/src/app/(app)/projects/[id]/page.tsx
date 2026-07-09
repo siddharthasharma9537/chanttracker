@@ -163,6 +163,7 @@ export default function ProjectPage() {
         projectId={project.id}
         grahaId={chanting.graha_id}
         target={chanting.target_count}
+        projectCompletedBefore={chanting.completed_count}
         onBack={() => setChanting(null)}
       />
     )

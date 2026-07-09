@@ -23,10 +23,21 @@ interface CounterProps {
   projectId?: string
   grahaId?: number
   target?: number
+  /** project_grahas.completed_count as of opening this graha — the team's
+   *  baseline before this sitting's taps. Lets a chanter picking up where
+   *  someone else left off see the shared total, not just their own tally. */
+  projectCompletedBefore?: number
   onBack: () => void
 }
 
-export function Counter({ mantra, projectId, grahaId, target, onBack }: CounterProps) {
+export function Counter({
+  mantra,
+  projectId,
+  grahaId,
+  target,
+  projectCompletedBefore,
+  onBack,
+}: CounterProps) {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const [saved, setSaved] = useState(false)
@@ -120,19 +131,26 @@ export function Counter({ mantra, projectId, grahaId, target, onBack }: CounterP
   const malaCount = Math.floor(mainCount / MALA)
   const beadInMala = mainCount % MALA
 
-  const lifetimeBar = (mantraId: string, tapped: number, goal: number) => {
-    const before = totals?.[mantraId] ?? 0
-    const pct = goal ? Math.min(100, Math.round(((before + tapped) / goal) * 100)) : 0
+  /** Visible progress caption — `before` is whatever baseline applies
+   *  (this chanter's personal lifetime total, or the project's shared
+   *  total-so-far), so picking up where someone else left off is never
+   *  a silent hover-only tooltip. */
+  const progressBar = (before: number, tapped: number, goal: number, label: string) => {
+    const total = before + tapped
+    const pct = goal ? Math.min(100, Math.round((total / goal) * 100)) : 0
     return (
-      <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/10">
-        <div
-          className="h-full rounded-full bg-white/40"
-          style={{ width: `${pct}%` }}
-          title={`${(before + tapped).toLocaleString()} / ${goal.toLocaleString()} lifetime`}
-        />
+      <div className="mt-1">
+        <div className="h-1 overflow-hidden rounded-full bg-white/10">
+          <div className="h-full rounded-full bg-white/40" style={{ width: `${pct}%` }} />
+        </div>
+        <p className="mt-0.5 text-[11px] tabular-nums text-white/40">
+          {total.toLocaleString()} / {goal.toLocaleString()} {label} ({pct}%)
+        </p>
       </div>
     )
   }
+  const lifetimeBar = (mantraId: string, tapped: number, goal: number) =>
+    progressBar(totals?.[mantraId] ?? 0, tapped, goal, 'lifetime')
 
   const deityPanel = (label: string, emoji: string, m: Mantra | undefined, tapped: number, onTap: () => void) =>
     m && (
@@ -183,7 +201,9 @@ export function Counter({ mantra, projectId, grahaId, target, onBack }: CounterP
           <span className="text-sm text-white/40"> / {mainGoal.toLocaleString()}</span>
         </span>
       </div>
-      {lifetimeBar(mantra.id, mainCount, mainGoal)}
+      {projectId
+        ? progressBar(projectCompletedBefore ?? 0, mainCount, mainGoal, 'project total')
+        : lifetimeBar(mantra.id, mainCount, mainGoal)}
 
       {/* Main tap area */}
       <button
