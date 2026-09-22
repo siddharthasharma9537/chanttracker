@@ -1,0 +1,46 @@
+{
+  "version": "5",
+  "redirects": {
+    "https://esm.sh/@supabase/supabase-js@2": "https://esm.sh/@supabase/supabase-js@2.117.0"
+  },
+  "remote": {
+    "https://esm.sh/@supabase/supabase-js@2.117.0": "52358cc08fc0a25278a2be371821c2eb1fa5c615ba76dbca43a01b2d122f0201"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:next@^14.2.0",
+        "npm:pnpm@8"
+      ]
+    },
+    "members": {
+      "apps/web": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@hookform/resolvers@^3.3.0",
+            "npm:@supabase/ssr@0.12",
+            "npm:@supabase/supabase-js@^2.42.0",
+            "npm:@tanstack/react-query@^5.42.0",
+            "npm:@types/node@^20.11.0",
+            "npm:@types/react@^18.3.0",
+            "npm:autoprefixer@^10.4.0",
+            "npm:clsx@^2.1.0",
+            "npm:eslint-config-next@^14.2.0",
+            "npm:eslint@^8.56.0",
+            "npm:lucide-react@0.394",
+            "npm:next@^14.2.0",
+            "npm:postcss@^8.4.0",
+            "npm:react-dom@^18.3.0",
+            "npm:react-hook-form@^7.51.0",
+            "npm:react@^18.3.0",
+            "npm:tailwind-merge@^2.4.0",
+            "npm:tailwindcss@^3.4.0",
+            "npm:typescript@^5.3.0",
+            "npm:zod@^3.22.0",
+            "npm:zustand@^4.5.0"
+          ]
+        }
+      }
+    }
+  }
+}
