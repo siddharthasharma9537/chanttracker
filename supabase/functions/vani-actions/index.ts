@@ -1,5 +1,5 @@
 // SoHum/Vani API contract actions for ChantTracker.
-// See docs/SOHUM_VANI_CONTRACT.md in the workspace root.
+// See github.com/SoHum-Digital-Services/sohum-contracts (docs/SOHUM_VANI_CONTRACT.md).
 //
 // ChantTracker has no custom backend by design (AGENTS.md): business
 // logic lives in Postgres, the web app talks to Supabase directly. This
