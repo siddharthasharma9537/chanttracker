@@ -10,6 +10,13 @@
 // Level Security applies exactly as it does in the web app. Only the
 // idempotency ledger (vani_action_confirmations) is service-role, since
 // its own RLS intentionally denies all direct client access.
+//
+// verify_jwt is disabled at the platform level because this function
+// implements its own auth: manifest is deliberately public (no auth --
+// it's a schema, not user data), while every other route requires and
+// validates a forwarded Supabase JWT itself via requireUserId() below.
+// Platform-level verify_jwt would reject the public manifest call before
+// this code ever runs.
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
