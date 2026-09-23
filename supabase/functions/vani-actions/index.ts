@@ -27,41 +27,6 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 }
 
-const MANIFEST = {
-  product: 'chanttracker',
-  version: '1.0',
-  actions: [
-    {
-      name: 'list_mantras',
-      kind: 'read',
-      description: 'List active mantras (navagraha, devata, custom) with display text',
-      method: 'GET',
-      path: '/vani-actions/list_mantras',
-      params: {},
-    },
-    {
-      name: 'get_practice_status',
-      kind: 'read',
-      description: "Get the caller's current streak and today's completed japa count",
-      method: 'GET',
-      path: '/vani-actions/get_practice_status',
-      params: {},
-    },
-    {
-      name: 'log_chant_session',
-      kind: 'write',
-      description: 'Log a completed chanting session (personal practice, not a project)',
-      propose: { method: 'POST', path: '/vani-actions/log_chant_session/propose' },
-      confirm: { method: 'POST', path: '/vani-actions/log_chant_session/confirm' },
-      params: {
-        mantra_id: 'string (uuid, from list_mantras)',
-        count: 'integer (japa count)',
-        duration_secs: 'integer (optional)',
-      },
-    },
-  ],
-}
-
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -124,6 +89,90 @@ async function verifyProposal(token: string): Promise<Record<string, unknown> | 
     return JSON.parse(body)
   } catch {
     return null
+  }
+}
+
+// ---------------------------------------------------------------------
+// Action registry. This is the single source of truth for both routing
+// and the published manifest (see buildManifest below) -- adding the
+// next action (there will be more: projects, achievements, and whatever
+// the other ~10 SoHum verticals eventually need) is one entry here, not
+// a route to wire up separately and a manifest entry to keep in sync by
+// hand.
+// ---------------------------------------------------------------------
+
+interface ActionContext {
+  client: SupabaseClient
+  userId: string
+  req: Request
+}
+
+interface ReadAction {
+  kind: 'read'
+  description: string
+  params: Record<string, string>
+  handler: (ctx: ActionContext) => Promise<Response>
+}
+
+interface WriteAction {
+  kind: 'write'
+  description: string
+  params: Record<string, string>
+  propose: (ctx: ActionContext) => Promise<Response>
+  confirm: (ctx: ActionContext) => Promise<Response>
+}
+
+type ActionDef = ReadAction | WriteAction
+
+const ACTIONS: Record<string, ActionDef> = {
+  list_mantras: {
+    kind: 'read',
+    description: 'List active mantras (navagraha, devata, custom) with display text',
+    params: {},
+    handler: ({ client }) => listMantras(client),
+  },
+  get_practice_status: {
+    kind: 'read',
+    description: "Get the caller's current streak and today's completed japa count",
+    params: {},
+    handler: ({ client, userId }) => getPracticeStatus(client, userId),
+  },
+  log_chant_session: {
+    kind: 'write',
+    description: 'Log a completed chanting session (personal practice, not a project)',
+    params: {
+      mantra_id: 'string (uuid, from list_mantras)',
+      count: 'integer (japa count)',
+      duration_secs: 'integer (optional)',
+    },
+    propose: ({ client, userId, req }) => proposeLogChantSession(client, userId, req),
+    confirm: ({ client, userId, req }) => confirmLogChantSession(client, userId, req),
+  },
+}
+
+function buildManifest() {
+  return {
+    product: 'chanttracker',
+    version: '1.0',
+    actions: Object.entries(ACTIONS).map(([name, action]) =>
+      action.kind === 'read'
+        ? {
+            name,
+            kind: 'read',
+            description: action.description,
+            method: 'GET',
+            path: `/vani-actions/${name}`,
+            params: action.params,
+          }
+        : {
+            name,
+            kind: 'write',
+            description: action.description,
+            propose: { method: 'POST', path: `/vani-actions/${name}/propose` },
+            confirm: { method: 'POST', path: `/vani-actions/${name}/confirm` },
+            params: action.params,
+          },
+    ),
   }
 }
 
@@ -285,27 +334,32 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url)
   const route = url.pathname.replace(/^\/vani-actions\/?/, '')
+  const [actionName, step] = route.split('/')
 
-  if (route === 'manifest' && req.method === 'GET') {
-    return json(MANIFEST)
+  if (actionName === 'manifest' && req.method === 'GET') {
+    return json(buildManifest())
+  }
+
+  const action = ACTIONS[actionName]
+  if (!action) {
+    return errorResponse('NOT_FOUND', `Unknown action: ${actionName}`, 'తెలియని చర్య', 404)
   }
 
   const auth = await requireUserId(req)
   if (auth instanceof Response) return auth
-  const { userId, client } = auth
+  const ctx: ActionContext = { client: auth.client, userId: auth.userId, req }
 
-  if (route === 'list_mantras' && req.method === 'GET') {
-    return listMantras(client)
-  }
-  if (route === 'get_practice_status' && req.method === 'GET') {
-    return getPracticeStatus(client, userId)
-  }
-  if (route === 'log_chant_session/propose' && req.method === 'POST') {
-    return proposeLogChantSession(client, userId, req)
-  }
-  if (route === 'log_chant_session/confirm' && req.method === 'POST') {
-    return confirmLogChantSession(client, userId, req)
+  if (action.kind === 'read') {
+    if (step || req.method !== 'GET') {
+      return errorResponse('NOT_FOUND', `Unknown route: ${route}`, 'తెలియని మార్గం', 404)
+    }
+    return action.handler(ctx)
   }
 
+  if (req.method !== 'POST') {
+    return errorResponse('NOT_FOUND', `Unknown route: ${route}`, 'తెలియని మార్గం', 404)
+  }
+  if (step === 'propose') return action.propose(ctx)
+  if (step === 'confirm') return action.confirm(ctx)
   return errorResponse('NOT_FOUND', `Unknown route: ${route}`, 'తెలియని మార్గం', 404)
 })
