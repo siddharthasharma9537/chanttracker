@@ -4,8 +4,8 @@ const clamp01 = (value: number) => Math.max(0, Math.min(1, value))
 
 /**
  * Conservative local fallback used while Jev is unavailable or not configured.
- * This keeps the current counter usable and gives the future Jev adapter a
- * stable typed contract to implement.
+ * This keeps the current counter usable and gives the Jev adapter a stable
+ * typed contract.
  */
 export function fallbackChantDecision(context: ChantDecisionContext): ChantDecisionResult {
   const pronunciation = clamp01(context.pronunciationScore)
@@ -52,8 +52,16 @@ export function fallbackChantDecision(context: ChantDecisionContext): ChantDecis
 export async function decideChantRepetition(
   context: ChantDecisionContext
 ): Promise<ChantDecisionResult> {
-  // Jev transport is intentionally added behind this function. Until the
-  // official endpoint/auth contract is configured, never expose a secret in
-  // the browser and preserve existing ChantTracker behaviour via fallback.
-  return fallbackChantDecision(context)
+  try {
+    const response = await fetch('/api/jev/decision', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(context),
+    })
+
+    if (!response.ok) return fallbackChantDecision(context)
+    return (await response.json()) as ChantDecisionResult
+  } catch {
+    return fallbackChantDecision(context)
+  }
 }
