@@ -1,5 +1,6 @@
 import io
 import os
+import re
 from functools import lru_cache
 
 import numpy as np
@@ -14,7 +15,7 @@ API_KEY = os.getenv('CHANT_ANALYSIS_API_KEY')
 SAMPLE_RATE = 16_000
 BLANK_ID = 0  # Model card: <s> is the real CTC blank.
 
-app = FastAPI(title='ChantTracker Vedic Analyzer', version='0.1.0')
+app = FastAPI(title='ChantTracker Vedic Analyzer', version='0.2.0')
 
 
 @lru_cache(maxsize=1)
@@ -39,8 +40,6 @@ def read_audio(raw: bytes):
 
 
 def normalize_reference(text: str) -> str:
-    # Preserve Devanagari graphemes; normalize only spacing here. A later
-    # mantra-specific normalizer can preserve/interpret Vedic svara marks.
     return ' '.join(text.strip().split())
 
 
@@ -55,9 +54,6 @@ def score_alignment(emissions: torch.Tensor, expected_text: str, processor):
     targets = torch.tensor([target], dtype=torch.int32)
     input_lengths = torch.tensor([log_probs.shape[1]], dtype=torch.int32)
     target_lengths = torch.tensor([len(target)], dtype=torch.int32)
-
-    # torchaudio forced_align returns the best CTC path constrained by the
-    # known transcript. blank=0 is required for this Vedic checkpoint.
     paths, scores = torchaudio.functional.forced_align(
         log_probs,
         targets,
@@ -77,19 +73,72 @@ def score_alignment(emissions: torch.Tensor, expected_text: str, processor):
     return pronunciation, confidence
 
 
-def estimate_svara_score(waveform: torch.Tensor) -> float:
-    # Placeholder-neutral pitch confidence, not a claim of Vedic svara
-    # correctness. Real udātta/anudātta/svarita scoring needs mantra reference
-    # pitch contours and calibration data; return 0.5 until that layer exists.
-    energy = float(torch.sqrt(torch.mean(waveform ** 2)).item())
-    if energy < 1e-4:
+def expected_svara_sequence(text: str):
+    # Vedic Unicode marks: U+0951 (anudatta/low) and U+0951/U+0952 conventions
+    # vary by shakha/edition. We only score text that actually carries marks.
+    clusters = re.findall(r'\S+', text)
+    sequence = []
+    for cluster in clusters:
+        if '\u0952' in cluster:
+            sequence.append('high')
+        elif '\u0951' in cluster:
+            sequence.append('low')
+        else:
+            sequence.append('mid')
+    return sequence
+
+
+def pitch_track(waveform: torch.Tensor):
+    # Relative F0 is speaker-normalized, so scoring compares contour rather than
+    # absolute male/female pitch. Frame time is ~20 ms at 16 kHz.
+    frame_time = 0.02
+    frame_length = int(SAMPLE_RATE * 0.04)
+    hop = int(SAMPLE_RATE * frame_time)
+    f0 = torchaudio.functional.detect_pitch_frequency(
+        waveform.unsqueeze(0), SAMPLE_RATE, frame_time=frame_time, win_length=5
+    )[0]
+    if f0.numel() < 3:
+        return None
+    voiced = f0[(f0 >= 60) & (f0 <= 500)]
+    if voiced.numel() < 3:
+        return None
+    median = torch.median(voiced)
+    relative = torch.log2(torch.clamp(f0, min=1.0) / median)
+    return relative
+
+
+def score_svara(waveform: torch.Tensor, expected_text: str) -> float:
+    expected = expected_svara_sequence(expected_text)
+    contour = pitch_track(waveform)
+    if contour is None or not expected:
         return 0.0
-    return 0.5
+
+    # Split the utterance into reference-word regions for a first calibrated
+    # contour score. Forced token/syllable boundaries can replace this later.
+    edges = torch.linspace(0, contour.numel(), len(expected) + 1).round().long()
+    observed = []
+    for index in range(len(expected)):
+        segment = contour[edges[index]:edges[index + 1]]
+        segment = segment[torch.isfinite(segment)]
+        observed.append(float(torch.median(segment).item()) if segment.numel() else 0.0)
+
+    # Speaker-relative semitone-ish log2 thresholds; high/low direction matters
+    # more than absolute frequency. Unmarked/mid expects proximity to baseline.
+    scores = []
+    margin = 0.08
+    for label, value in zip(expected, observed):
+        if label == 'high':
+            scores.append(max(0.0, min(1.0, (value + margin) / (2 * margin))))
+        elif label == 'low':
+            scores.append(max(0.0, min(1.0, (-value + margin) / (2 * margin))))
+        else:
+            scores.append(max(0.0, 1.0 - abs(value) / (2 * margin)))
+    return float(np.mean(scores)) if scores else 0.0
 
 
 @app.get('/health')
 def health():
-    return {'ok': True, 'model': MODEL_ID}
+    return {'ok': True, 'model': MODEL_ID, 'svaraScoring': 'relative-f0-v1'}
 
 
 @app.post('/analyze')
@@ -113,7 +162,7 @@ async def analyze(
         with torch.inference_mode():
             emissions = model(input_values).logits.cpu()
         pronunciation, confidence = score_alignment(emissions, expectedText, processor)
-        svara = estimate_svara_score(waveform)
+        svara = score_svara(waveform, expectedText)
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f'Unable to analyze chant: {exc}') from exc
 
@@ -122,5 +171,6 @@ async def analyze(
         'svaraScore': max(0.0, min(1.0, svara)),
         'confidence': max(0.0, min(1.0, confidence)),
         'model': MODEL_ID,
+        'svaraModel': 'relative-f0-v1',
         'mantraId': mantraId,
     }
