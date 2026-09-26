@@ -13,9 +13,11 @@ from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 MODEL_ID = os.getenv('VEDIC_ALIGNER_MODEL', 'chiranjeevisagi/wav2vec2-vedic-aligner')
 API_KEY = os.getenv('CHANT_ANALYSIS_API_KEY')
 SAMPLE_RATE = 16_000
-BLANK_ID = 0  # Model card: <s> is the real CTC blank.
+BLANK_ID = 0
+VEDA = 'krishna-yajurveda'
+SHAKHA = 'taittiriya'
 
-app = FastAPI(title='ChantTracker Vedic Analyzer', version='0.2.0')
+app = FastAPI(title='ChantTracker Krishna Yajurveda Analyzer', version='0.3.0')
 
 
 @lru_cache(maxsize=1)
@@ -49,24 +51,19 @@ def score_alignment(emissions: torch.Tensor, expected_text: str, processor):
     target = [token for token in target if token != BLANK_ID]
     if not target:
         raise ValueError('reference text produced no alignable tokens')
-
     log_probs = torch.log_softmax(emissions, dim=-1).cpu()
     targets = torch.tensor([target], dtype=torch.int32)
     input_lengths = torch.tensor([log_probs.shape[1]], dtype=torch.int32)
     target_lengths = torch.tensor([len(target)], dtype=torch.int32)
     paths, scores = torchaudio.functional.forced_align(
-        log_probs,
-        targets,
-        input_lengths=input_lengths,
-        target_lengths=target_lengths,
-        blank=BLANK_ID,
+        log_probs, targets, input_lengths=input_lengths,
+        target_lengths=target_lengths, blank=BLANK_ID,
     )
     path = paths[0]
     frame_scores = scores[0].exp()
     aligned = path != BLANK_ID
     if not torch.any(aligned):
         raise ValueError('alignment contained no reference tokens')
-
     pronunciation = float(frame_scores[aligned].mean().item())
     coverage = min(1.0, float(aligned.sum().item()) / max(1, len(target)))
     confidence = max(0.0, min(1.0, pronunciation * (0.75 + 0.25 * coverage)))
@@ -74,26 +71,25 @@ def score_alignment(emissions: torch.Tensor, expected_text: str, processor):
 
 
 def expected_svara_sequence(text: str):
-    # Vedic Unicode marks: U+0951 (anudatta/low) and U+0951/U+0952 conventions
-    # vary by shakha/edition. We only score text that actually carries marks.
+    # Krishna Yajurveda / Taittiriya scope. We deliberately preserve the Vedic
+    # Unicode accents in the supplied canonical mantra text. U+0951 is treated
+    # as the lower/anudatta cue and U+0952 as the raised/svarita cue. Unmarked
+    # regions are evaluated relative to the reciter's local baseline. Verified
+    # Taittiriya reference recordings will later calibrate thresholds/mantra maps.
     clusters = re.findall(r'\S+', text)
     sequence = []
     for cluster in clusters:
         if '\u0952' in cluster:
-            sequence.append('high')
+            sequence.append('svarita')
         elif '\u0951' in cluster:
-            sequence.append('low')
+            sequence.append('anudatta')
         else:
-            sequence.append('mid')
+            sequence.append('baseline')
     return sequence
 
 
 def pitch_track(waveform: torch.Tensor):
-    # Relative F0 is speaker-normalized, so scoring compares contour rather than
-    # absolute male/female pitch. Frame time is ~20 ms at 16 kHz.
     frame_time = 0.02
-    frame_length = int(SAMPLE_RATE * 0.04)
-    hop = int(SAMPLE_RATE * frame_time)
     f0 = torchaudio.functional.detect_pitch_frequency(
         waveform.unsqueeze(0), SAMPLE_RATE, frame_time=frame_time, win_length=5
     )[0]
@@ -103,8 +99,7 @@ def pitch_track(waveform: torch.Tensor):
     if voiced.numel() < 3:
         return None
     median = torch.median(voiced)
-    relative = torch.log2(torch.clamp(f0, min=1.0) / median)
-    return relative
+    return torch.log2(torch.clamp(f0, min=1.0) / median)
 
 
 def score_svara(waveform: torch.Tensor, expected_text: str) -> float:
@@ -112,24 +107,18 @@ def score_svara(waveform: torch.Tensor, expected_text: str) -> float:
     contour = pitch_track(waveform)
     if contour is None or not expected:
         return 0.0
-
-    # Split the utterance into reference-word regions for a first calibrated
-    # contour score. Forced token/syllable boundaries can replace this later.
     edges = torch.linspace(0, contour.numel(), len(expected) + 1).round().long()
     observed = []
     for index in range(len(expected)):
         segment = contour[edges[index]:edges[index + 1]]
         segment = segment[torch.isfinite(segment)]
         observed.append(float(torch.median(segment).item()) if segment.numel() else 0.0)
-
-    # Speaker-relative semitone-ish log2 thresholds; high/low direction matters
-    # more than absolute frequency. Unmarked/mid expects proximity to baseline.
     scores = []
     margin = 0.08
     for label, value in zip(expected, observed):
-        if label == 'high':
+        if label == 'svarita':
             scores.append(max(0.0, min(1.0, (value + margin) / (2 * margin))))
-        elif label == 'low':
+        elif label == 'anudatta':
             scores.append(max(0.0, min(1.0, (-value + margin) / (2 * margin))))
         else:
             scores.append(max(0.0, 1.0 - abs(value) / (2 * margin)))
@@ -138,39 +127,43 @@ def score_svara(waveform: torch.Tensor, expected_text: str) -> float:
 
 @app.get('/health')
 def health():
-    return {'ok': True, 'model': MODEL_ID, 'svaraScoring': 'relative-f0-v1'}
+    return {
+        'ok': True,
+        'model': MODEL_ID,
+        'veda': VEDA,
+        'shakha': SHAKHA,
+        'svaraScoring': 'taittiriya-relative-f0-v1',
+        'calibration': 'reference-recordings-required',
+    }
 
 
 @app.post('/analyze')
 async def analyze(
-    audio: UploadFile = File(...),
-    mantraId: str = Form(...),
-    expectedText: str = Form(...),
-    authorization: str | None = Header(default=None),
+    audio: UploadFile = File(...), mantraId: str = Form(...),
+    expectedText: str = Form(...), authorization: str | None = Header(default=None),
 ):
     if API_KEY and authorization != f'Bearer {API_KEY}':
         raise HTTPException(status_code=401, detail='Unauthorized')
     if not mantraId.strip() or not expectedText.strip():
         raise HTTPException(status_code=400, detail='mantraId and expectedText are required')
-
     try:
         waveform = read_audio(await audio.read())
         processor, model = load_model()
         inputs = processor(waveform.numpy(), sampling_rate=SAMPLE_RATE, return_tensors='pt')
         device = next(model.parameters()).device
-        input_values = inputs.input_values.to(device)
         with torch.inference_mode():
-            emissions = model(input_values).logits.cpu()
+            emissions = model(inputs.input_values.to(device)).logits.cpu()
         pronunciation, confidence = score_alignment(emissions, expectedText, processor)
         svara = score_svara(waveform, expectedText)
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f'Unable to analyze chant: {exc}') from exc
-
     return {
         'pronunciationScore': max(0.0, min(1.0, pronunciation)),
         'svaraScore': max(0.0, min(1.0, svara)),
         'confidence': max(0.0, min(1.0, confidence)),
         'model': MODEL_ID,
-        'svaraModel': 'relative-f0-v1',
+        'svaraModel': 'taittiriya-relative-f0-v1',
+        'veda': VEDA,
+        'shakha': SHAKHA,
         'mantraId': mantraId,
     }
