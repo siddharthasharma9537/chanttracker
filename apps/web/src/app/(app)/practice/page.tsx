@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Bell } from 'lucide-react'
 import { MantraPicker } from '@/components/practice/MantraPicker'
 import { Counter } from '@/components/practice/Counter'
+import { PanchangCard } from '@/components/practice/PanchangCard'
 import type { Mantra } from '@/lib/api/mantras'
 import { getStreak } from '@/lib/api/progress'
 import { getProfile } from '@/lib/api/profile'
@@ -38,6 +39,7 @@ export default function PracticePage() {
     <div>
       <h1 className="mb-1 text-2xl font-bold text-white">Practice</h1>
       <p className="mb-4 text-white/60">Select a mantra to begin chanting</p>
+      <PanchangCard />
       {showNudge && (
         <div className="mb-6 flex items-center gap-2 rounded-xl border border-sacred-400/30 bg-sacred-500/10 px-4 py-3 text-sm text-sacred-300">
           <Bell className="h-4 w-4 shrink-0" />
