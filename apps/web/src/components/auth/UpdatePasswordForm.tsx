@@ -1,25 +1,31 @@
 'use client'
 
 import { useTransition, useState } from 'react'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuth } from '@/hooks/useAuth'
 
-const signInSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-})
+const updatePasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .regex(/\d/, 'Password must contain at least one number'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  })
 
-type SignInFormData = z.infer<typeof signInSchema>
+type UpdatePasswordFormData = z.infer<typeof updatePasswordSchema>
 
-export function SignInForm() {
+export function UpdatePasswordForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const next = searchParams.get('next')
-  const { signIn } = useAuth()
+  const { updatePassword } = useAuth()
   const [isPending, startTransition] = useTransition()
   const [showPassword, setShowPassword] = useState(false)
 
@@ -28,21 +34,19 @@ export function SignInForm() {
     handleSubmit,
     formState: { errors },
     setError,
-  } = useForm<SignInFormData>({
-    resolver: zodResolver(signInSchema),
+  } = useForm<UpdatePasswordFormData>({
+    resolver: zodResolver(updatePasswordSchema),
   })
 
-  const onSubmit = async (data: SignInFormData) => {
+  const onSubmit = async (data: UpdatePasswordFormData) => {
     startTransition(async () => {
       try {
-        await signIn(data.email, data.password)
-        router.push(next && next.startsWith('/') ? next : '/practice')
+        await updatePassword(data.password)
+        router.push('/practice')
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : 'Sign in failed'
-        setError('password', {
-          message,
-        })
+          error instanceof Error ? error.message : 'Could not update password'
+        setError('password', { message })
       }
     })
   }
@@ -50,35 +54,9 @@ export function SignInForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium mb-2 text-white" style={{ color: '#ffffff' }}>
-          Email
+        <label htmlFor="password" className="block text-sm font-medium mb-2 text-white" style={{ color: '#ffffff' }}>
+          New password
         </label>
-        <input
-          id="email"
-          type="email"
-          placeholder="your@email.com"
-          {...register('email')}
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white placeholder-gray-500 ${
-            errors.email ? 'border-red-500' : 'border-gray-300'
-          }`}
-        />
-        {errors.email && (
-          <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-        )}
-      </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label htmlFor="password" className="block text-sm font-medium text-white" style={{ color: '#ffffff' }}>
-            Password
-          </label>
-          <Link
-            href="/auth/forgot-password"
-            className="text-sm text-orange-400 hover:text-orange-300 font-medium transition-colors"
-          >
-            Forgot password?
-          </Link>
-        </div>
         <div className="relative">
           <input
             id="password"
@@ -109,9 +87,29 @@ export function SignInForm() {
           </button>
         </div>
         {errors.password && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.password.message}
-          </p>
+          <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+        )}
+        <p className="text-gray-600 text-xs mt-2">
+          At least 8 characters, 1 uppercase, 1 number
+        </p>
+      </div>
+
+      <div>
+        <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2 text-white" style={{ color: '#ffffff' }}>
+          Confirm new password
+        </label>
+        <input
+          id="confirmPassword"
+          type={showPassword ? 'text' : 'password'}
+          placeholder="••••••••"
+          {...register('confirmPassword')}
+          style={{ color: '#111827' }}
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white placeholder-gray-500 ${
+            errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+          }`}
+        />
+        {errors.confirmPassword && (
+          <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
         )}
       </div>
 
@@ -120,7 +118,7 @@ export function SignInForm() {
         disabled={isPending}
         className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-medium py-2 rounded-lg transition"
       >
-        {isPending ? 'Signing in...' : 'Sign In'}
+        {isPending ? 'Updating...' : 'Update password'}
       </button>
     </form>
   )

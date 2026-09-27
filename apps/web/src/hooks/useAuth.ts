@@ -47,6 +47,28 @@ export function useAuth() {
     clearAuth()
   }, [supabase.auth, clearAuth])
 
+  const resetPasswordForEmail = useCallback(
+    async (email: string) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/update-password`,
+      })
+      if (error) throw error
+    },
+    [supabase.auth]
+  )
+
+  const updatePassword = useCallback(
+    async (newPassword: string) => {
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
+      if (error) throw error
+      setUser(data.user)
+      return data.user
+    },
+    [supabase.auth, setUser]
+  )
+
   return {
     user,
     isLoading,
@@ -54,5 +76,7 @@ export function useAuth() {
     signIn,
     signUp,
     signOut,
+    resetPasswordForEmail,
+    updatePassword,
   }
 }
