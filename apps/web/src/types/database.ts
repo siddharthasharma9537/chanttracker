@@ -48,6 +48,7 @@ export interface SessionRow {
   status: SessionStatus
   project_id: string | null
   graha_id: number | null
+  yajna_id: string | null
   started_at: string
   completed_at: string | null
 }

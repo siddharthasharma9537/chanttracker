@@ -16,6 +16,7 @@ export async function logSession(input: {
   durationSecs: number
   projectId?: string
   grahaId?: number
+  yajnaId?: string
 }): Promise<SessionRow> {
   const supabase = createClient()
   const { data, error } = await supabase
@@ -28,6 +29,7 @@ export async function logSession(input: {
       status: 'completed',
       project_id: input.projectId ?? null,
       graha_id: input.grahaId ?? null,
+      yajna_id: input.yajnaId ?? null,
       completed_at: new Date().toISOString(),
     })
     .select()

@@ -47,6 +47,15 @@ export function useAuth() {
     clearAuth()
   }, [supabase.auth, clearAuth])
 
+  /** Revokes every refresh token issued to this user, on every device —
+   *  Supabase Auth's built-in equivalent of a server-side revocable
+   *  refresh-token store, rather than one this app would maintain itself. */
+  const signOutEverywhere = useCallback(async () => {
+    const { error } = await supabase.auth.signOut({ scope: 'global' })
+    if (error) throw error
+    clearAuth()
+  }, [supabase.auth, clearAuth])
+
   return {
     user,
     isLoading,
@@ -54,5 +63,6 @@ export function useAuth() {
     signIn,
     signUp,
     signOut,
+    signOutEverywhere,
   }
 }

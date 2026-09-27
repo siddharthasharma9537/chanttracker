@@ -2,16 +2,26 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { Play, Users, Clock, Settings, Flame } from 'lucide-react'
+import { Play, Users, Clock, Settings, Flame, CalendarCheck, Target, Trophy } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { getStreak } from '@/lib/api/progress'
 import { clsx } from 'clsx'
 
+// Bottom mobile nav — kept to 4 items to fit the fixed-width bar.
 const NAV = [
   { href: '/practice', label: 'Practice', icon: Play },
   { href: '/projects', label: 'Projects', icon: Users },
   { href: '/history', label: 'History', icon: Clock },
   { href: '/settings', label: 'Settings', icon: Settings },
+]
+
+// Desktop sidebar — has room for the secondary sections.
+const SIDEBAR_NAV = [
+  ...NAV.slice(0, 2),
+  { href: '/yajnas', label: 'Yajnas', icon: Trophy },
+  { href: '/sankalpa', label: 'Sankalpa', icon: Target },
+  { href: '/anushthana', label: 'Anushthana', icon: CalendarCheck },
+  ...NAV.slice(2),
 ]
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -68,7 +78,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Desktop sidebar */}
         <aside className="hidden w-56 shrink-0 lg:block">
           <nav className="sticky top-16 space-y-1 p-4">
-            {NAV.map(({ href, label, icon: Icon }) => {
+            {SIDEBAR_NAV.map(({ href, label, icon: Icon }) => {
               const active = pathname.startsWith(href)
               return (
                 <button

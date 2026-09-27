@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { LogOut, Flame, Lock, Bell } from 'lucide-react'
+import { LogOut, ShieldOff, Flame, Lock, Bell } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { getStreak, listAchievements } from '@/lib/api/progress'
 import { getProfile, setReminderTime } from '@/lib/api/profile'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { user, signOut } = useAuth()
+  const { user, signOut, signOutEverywhere } = useAuth()
   const queryClient = useQueryClient()
 
   const { data: streak } = useQuery({
@@ -125,15 +125,27 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      <button
-        onClick={async () => {
-          await signOut()
-          router.push('/auth/signin')
-        }}
-        className="flex items-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 font-medium text-red-300 hover:bg-red-500/20"
-      >
-        <LogOut className="h-4 w-4" /> Sign out
-      </button>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <button
+          onClick={async () => {
+            await signOut()
+            router.push('/auth/signin')
+          }}
+          className="flex items-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 font-medium text-red-300 hover:bg-red-500/20"
+        >
+          <LogOut className="h-4 w-4" /> Sign out
+        </button>
+        <button
+          onClick={async () => {
+            if (!confirm('Sign out on every device? Any other signed-in session will also be logged out.')) return
+            await signOutEverywhere()
+            router.push('/auth/signin')
+          }}
+          className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 font-medium text-white/70 hover:bg-white/[0.12]"
+        >
+          <ShieldOff className="h-4 w-4" /> Sign out everywhere
+        </button>
+      </div>
     </div>
   )
 }

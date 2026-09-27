@@ -22,11 +22,17 @@ interface CounterProps {
   /** Set for project chanting so the session rolls into project progress. */
   projectId?: string
   grahaId?: number
+  /** Set for a global yajna so the session rolls into its collective target
+   *  and the chanter's leaderboard entry. */
+  yajnaId?: string
   target?: number
   /** project_grahas.completed_count as of opening this graha — the team's
    *  baseline before this sitting's taps. Lets a chanter picking up where
    *  someone else left off see the shared total, not just their own tally. */
   projectCompletedBefore?: number
+  /** global_yajnas.completed_count as of opening this yajna — same idea as
+   *  projectCompletedBefore, for the collective yajna target. */
+  yajnaCompletedBefore?: number
   onBack: () => void
 }
 
@@ -34,8 +40,10 @@ export function Counter({
   mantra,
   projectId,
   grahaId,
+  yajnaId,
   target,
   projectCompletedBefore,
+  yajnaCompletedBefore,
   onBack,
 }: CounterProps) {
   const { user } = useAuth()
@@ -87,6 +95,7 @@ export function Counter({
             // rolls into a project's shared target.
             projectId: e.isMain ? projectId : undefined,
             grahaId: e.isMain ? grahaId : undefined,
+            yajnaId: e.isMain ? yajnaId : undefined,
           })
         )
       )
@@ -99,6 +108,10 @@ export function Counter({
       queryClient.invalidateQueries({ queryKey: ['mantra-progress'] })
       if (projectId) {
         queryClient.invalidateQueries({ queryKey: ['project-contributions', projectId] })
+      }
+      if (yajnaId) {
+        queryClient.invalidateQueries({ queryKey: ['yajna', yajnaId] })
+        queryClient.invalidateQueries({ queryKey: ['yajna-leaderboard', yajnaId] })
       }
       setSaved(true)
     },
@@ -203,7 +216,9 @@ export function Counter({
       </div>
       {projectId
         ? progressBar(projectCompletedBefore ?? 0, mainCount, mainGoal, 'project total')
-        : lifetimeBar(mantra.id, mainCount, mainGoal)}
+        : yajnaId
+          ? progressBar(yajnaCompletedBefore ?? 0, mainCount, mainGoal, 'yajna total')
+          : lifetimeBar(mantra.id, mainCount, mainGoal)}
 
       {/* Main tap area */}
       <button
