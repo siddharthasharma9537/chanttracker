@@ -113,7 +113,7 @@ export default function SankalpaPage() {
   })
 
   const logProgress = useMutation({
-    mutationFn: (delta: number) => logSankalpaProgress(user!.id, today!.id, delta),
+    mutationFn: (delta: number) => logSankalpaProgress(today!.id, delta),
     onSuccess: (result) => {
       setFeedback(result.completed ? 'Sankalpa fulfilled! 🙏' : null)
       queryClient.invalidateQueries({ queryKey: ['sankalpa-today'] })

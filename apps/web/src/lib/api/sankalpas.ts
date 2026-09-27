@@ -85,13 +85,11 @@ export interface LogProgressResult {
 }
 
 export async function logSankalpaProgress(
-  userId: string,
   sankalpaId: string,
   delta: number
 ): Promise<LogProgressResult> {
   const supabase = createClient()
   const { data, error } = await supabase.rpc('log_sankalpa_progress', {
-    p_user: userId,
     p_sankalpa: sankalpaId,
     p_delta: delta,
   })

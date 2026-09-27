@@ -102,13 +102,11 @@ export interface MarkDayResult {
  *  completion-tracking RPC (mark_anushthana_day) — one row per calendar day,
  *  auto-completes the anushthana once total_days is reached. */
 export async function markAnushthanaDay(
-  userId: string,
   anushthanaId: string,
   achievedCount: number
 ): Promise<MarkDayResult> {
   const supabase = createClient()
   const { data, error } = await supabase.rpc('mark_anushthana_day', {
-    p_user: userId,
     p_anushthana: anushthanaId,
     p_achieved: achievedCount,
   })

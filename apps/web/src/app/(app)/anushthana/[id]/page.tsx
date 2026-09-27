@@ -5,12 +5,10 @@ import { useParams, useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { getAnushthana, markAnushthanaDay } from '@/lib/api/anushthanas'
-import { useAuth } from '@/hooks/useAuth'
 
 export default function AnushthanaDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
-  const { user } = useAuth()
   const queryClient = useQueryClient()
   const [achieved, setAchieved] = useState<number | ''>('')
   const [feedback, setFeedback] = useState<string | null>(null)
@@ -21,7 +19,7 @@ export default function AnushthanaDetailPage() {
   })
 
   const markDay = useMutation({
-    mutationFn: (count: number) => markAnushthanaDay(user!.id, id, count),
+    mutationFn: (count: number) => markAnushthanaDay(id, count),
     onSuccess: (result) => {
       if (result.error === 'target_not_met') {
         setFeedback(`Not counted — need at least ${result.required?.toLocaleString()} today.`)

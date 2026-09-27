@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { Play, Users, Clock, Settings, Flame, CalendarCheck, Target } from 'lucide-react'
+import { Play, Users, Clock, Settings, Flame, CalendarCheck, Target, Trophy } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { getStreak } from '@/lib/api/progress'
 import { clsx } from 'clsx'
@@ -18,6 +18,7 @@ const NAV = [
 // Desktop sidebar — has room for the secondary sections.
 const SIDEBAR_NAV = [
   ...NAV.slice(0, 2),
+  { href: '/yajnas', label: 'Yajnas', icon: Trophy },
   { href: '/sankalpa', label: 'Sankalpa', icon: Target },
   { href: '/anushthana', label: 'Anushthana', icon: CalendarCheck },
   ...NAV.slice(2),
