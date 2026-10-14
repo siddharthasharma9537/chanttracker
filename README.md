@@ -293,3 +293,19 @@ MIT
 
 - GitHub: [@Siddharthasharma9537](https://github.com/Siddharthasharma9537)
 - Email: P.siddharthasharma@gmail.com
+
+## Deploy (Google Cloud Run)
+
+Vercel paused SoHum's projects on 12 Oct 2026 (the Hobby plan's CPU allowance ran out); sohum-contracts' hosting decision of 2026-10-14 moves this to Google Cloud Run. `Dockerfile` builds a standalone Next.js server that runs as a non-root user on `$PORT`; `cloudbuild.yaml` builds, pushes and deploys it.
+
+| Setting | Value |
+|---|---|
+| Project, region | `sohum-509918`, `asia-south1` (Mumbai) |
+| Service | `chanttracker-web` |
+| Trigger | Cloud Build trigger on pushes to `main`, configuration `cloudbuild.yaml` (a merge is a deploy) |
+| Access | Allow public access. |
+| Instances, size | minimum 0, **maximum 2**; 1 vCPU, 512 MiB; concurrency 80; timeout 60 s (set by `cloudbuild.yaml` on every deploy) |
+
+**Build-time values:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (public values, defaulted from `apps/web/.env.example`; override in the trigger's substitutions).
+
+**Run-time variables:** none.
