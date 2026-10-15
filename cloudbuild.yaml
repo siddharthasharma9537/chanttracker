@@ -1,0 +1,44 @@
+# Builds this site and deploys it to Google Cloud Run (sohum-contracts, decision of 2026-10-14).
+# A Cloud Build trigger on pushes to main runs it, so a merge is a deploy. The NEXT_PUBLIC_ values
+# are public and are fixed into the build; change them in the trigger's substitutions, not here.
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - "${_IMAGE}"
+      - --build-arg
+      - "NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL}"
+      - --build-arg
+      - "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${_NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}"
+      - .
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args: [push, "${_IMAGE}"]
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - "${_SERVICE}"
+      - --image=${_IMAGE}
+      - --region=${_REGION}
+      - --min-instances=0
+      - --max-instances=2
+      - --cpu=1
+      - --memory=512Mi
+      - --concurrency=80
+      - --timeout=60
+      - --quiet
+images: ["${_IMAGE}"]
+substitutions:
+  _SERVICE: chanttracker-web
+  _REGION: asia-south1
+  _IMAGE: ${_REGION}-docker.pkg.dev/${PROJECT_ID}/cloud-run-source-deploy/${_SERVICE}:${COMMIT_SHA}
+  _NEXT_PUBLIC_SUPABASE_URL: "https://ziebgspujtdzkiwyybsa.supabase.co"
+  _NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_cp3vrEcGluNQ6Cv6uXAEeQ_ZAdJ9NRv"
+options:
+  dynamicSubstitutions: true
+  logging: CLOUD_LOGGING_ONLY

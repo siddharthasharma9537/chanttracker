@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Self-contained server for the Cloud Run container (Dockerfile at the repository root).
+  output: 'standalone',
   reactStrictMode: true,
   swcMinify: true,
   images: {
