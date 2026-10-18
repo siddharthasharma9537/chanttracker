@@ -21,6 +21,9 @@ export function useWakeLock(active: boolean) {
           return
         }
         lockRef.current = lock
+        lock.addEventListener('release', () => {
+          if (lockRef.current === lock) lockRef.current = null
+        })
       } catch {
         // Denied or unsupported in this context — chanting still works fine.
       }
