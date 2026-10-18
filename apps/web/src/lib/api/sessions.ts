@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
-import type { SessionRow } from '@/types/database'
+import type { CountMethod, SessionRow } from '@/types/database'
 
 export interface SessionWithMantra extends SessionRow {
   mantras: { name_en: string | null; accent_color: string | null } | null
@@ -16,6 +16,7 @@ export async function logSession(input: {
   durationSecs: number
   projectId?: string
   grahaId?: number
+  method: CountMethod
 }): Promise<SessionRow> {
   const supabase = createClient()
   const { data, error } = await supabase
@@ -28,6 +29,7 @@ export async function logSession(input: {
       status: 'completed',
       project_id: input.projectId ?? null,
       graha_id: input.grahaId ?? null,
+      method: input.method,
       completed_at: new Date().toISOString(),
     })
     .select()

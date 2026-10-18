@@ -39,6 +39,7 @@ export default function HistoryPage() {
                 <p className="text-xs text-white/50">
                   {new Date(s.started_at).toLocaleString()}
                   {s.duration_secs ? ` · ${Math.round(s.duration_secs / 60)} min` : ''}
+                  {s.method === 'tap' ? ' · counted by tap' : s.method === 'voice_count' ? ' · counted by voice' : ''}
                 </p>
               </div>
               <span className="text-lg font-bold tabular-nums text-white">{s.count}</span>

@@ -87,6 +87,7 @@ export function Counter({
             // rolls into a project's shared target.
             projectId: e.isMain ? projectId : undefined,
             grahaId: e.isMain ? grahaId : undefined,
+            method: 'tap',
           })
         )
       )

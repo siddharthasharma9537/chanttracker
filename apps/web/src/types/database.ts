@@ -39,6 +39,9 @@ export interface GrahaRow {
   mantra_id: string | null
 }
 
+/** How a session's count was made (sohum-contracts CHANT_COUNTING_SHAPE.md section 5). */
+export type CountMethod = 'voice_count' | 'tap' | 'manual'
+
 export interface SessionRow {
   id: string
   user_id: string
@@ -48,6 +51,7 @@ export interface SessionRow {
   status: SessionStatus
   project_id: string | null
   graha_id: number | null
+  method: CountMethod
   started_at: string
   completed_at: string | null
 }
