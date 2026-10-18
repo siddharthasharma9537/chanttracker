@@ -152,6 +152,7 @@ const ACTIONS: Record<string, ActionDef> = {
       count: 'integer (japa count)',
       duration_secs: 'integer (optional)',
       yajna_id: "string (uuid, optional, from list_yajnas -- rolls this session into that yajna's collective count)",
+      method: 'string (optional: voice_count | tap | manual; default manual)',
     },
     propose: ({ client, userId, req }) => proposeLogChantSession(client, userId, req),
     confirm: ({ client, userId, req }) => confirmLogChantSession(client, userId, req),
@@ -270,12 +271,25 @@ async function getPracticeStatus(client: SupabaseClient, userId: string): Promis
   })
 }
 
+// How a session's count was made (sohum-contracts CHANT_COUNTING_SHAPE.md section 5).
+const COUNT_METHODS = ['voice_count', 'tap', 'manual']
+
 async function proposeLogChantSession(client: SupabaseClient, userId: string, req: Request): Promise<Response> {
   const body = await req.json().catch(() => null)
   const mantraId = body?.mantra_id
   const count = Number(body?.count)
   const durationSecs = body?.duration_secs != null ? Number(body.duration_secs) : undefined
   const yajnaId = body?.yajna_id ?? null
+  const method = body?.method ?? 'manual'
+
+  if (!COUNT_METHODS.includes(method)) {
+    return errorResponse(
+      'VALIDATION_ERROR',
+      'method must be voice_count, tap or manual',
+      'method voice_count, tap లేదా manual అయి ఉండాలి',
+      400,
+    )
+  }
 
   if (!mantraId || !Number.isFinite(count) || count <= 0) {
     return errorResponse(
@@ -318,6 +332,7 @@ async function proposeLogChantSession(client: SupabaseClient, userId: string, re
     count,
     duration_secs: durationSecs ?? null,
     yajna_id: yajnaId,
+    method,
     expires_at: expiresAt,
   }
   const proposalId = await signProposal(payload)
@@ -380,6 +395,8 @@ async function confirmLogChantSession(client: SupabaseClient, userId: string, re
       count: payload.count,
       duration_secs: payload.duration_secs,
       yajna_id: payload.yajna_id ?? null,
+      // Proposals signed before this field existed carry no method.
+      method: payload.method ?? 'manual',
       status: 'completed',
       completed_at: new Date().toISOString(),
     })
